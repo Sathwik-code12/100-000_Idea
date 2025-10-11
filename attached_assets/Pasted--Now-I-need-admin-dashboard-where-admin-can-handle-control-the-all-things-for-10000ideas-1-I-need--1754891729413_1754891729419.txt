@@ -1,0 +1,17 @@
+>Now I need admin dashboard, where admin can handle/control the all things for 10000ideas
+1.I need admin dashboard where admin can see all the things for the website.
+2.Upload Ideas tab: I need upload ideas tab where admin can upload bulk ideas to the allideas page similar to the existing idea cards,in Json or csv format,
+   > so all these ideas should have detailed idea page as well when user clicks on it.€
+   > So from now onwards create db to store these ideas not directly in frontend/backend code, so make the login optimistic and performance in pagination format to load ideas in "all ideas" page.
+   >So take reference from the existing idea cards and detailed idea page, so when admin uploads ideas in bulk in json from admin panel, these ideas should be stored in db, and showed in all-ideas page, in paginated form.
+3. And also i need "Manage Ideas" tab where i can see all ideas listed and with right side on each idea having:
+   >edit button: when i clicked on it a detailed form like structure page should open to modify each and every detail which is present in idea card/detailed idea page/Json, so when something to be updated for an idea, admin can easily modify/update from admin panel and launch it.
+   >ON/OFF button: jus in some case to remove the a specific idea from all-ideas page, admin can simply make than idea card alon with its detailed idea page hide from all-ideas page.
+   >Delete button: to completely remove the idea card from the all-ideas page.(make a popup before deleting to confirm.), and these deleted ideas should be in history tab and in history section where they stay for 30 days, and finally completely gets deleted.
+4.Upload history tab: When admin uploads bulk ideas i need history of that file to be mentioned in this upload history, and also i need delete button to the side, to deleted the compelte upload with pop up to confirm before deleting.
+  >and once deleted the upoload history these also should be in delete history and stays for 30 days if in case to revoke the delete,and after 30 days it will gets completely deleted.
+
+
+5.And also i need only 2 admin persons to have the access, so create admin login/signup limited to 2 persons. and they should have this admin panel access.
+
+So make enhanced admin panel, with good performace, optimistic and scalable integrations to the existing app with frontend, backend, and db wherever required to store the data very carefully, as data is very imp.

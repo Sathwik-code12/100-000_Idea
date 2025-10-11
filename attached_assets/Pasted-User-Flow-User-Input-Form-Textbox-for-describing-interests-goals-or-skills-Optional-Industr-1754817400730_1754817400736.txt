@@ -1,0 +1,116 @@
+User Flow:
+
+User Input Form:
+
+Textbox for describing interests, goals, or skills.
+
+Optional: Industry dropdown, investment budget slider, location.
+
+Backend Processing:
+
+Send user input to GPT with a custom prompt template for idea generation.
+
+Fetch relevant market data from APIs (Google Search, market research APIs).
+
+Combine AI output with structured market data.
+
+Dashboard Output:
+
+Display a list of 3–5 tailored ideas.
+
+Each idea card shows:
+
+Idea title & short description
+
+Market size & growth trends
+
+Top 3 competitors
+
+Potential moats
+
+Opportunities & risks
+
+Suggested next steps
+
+Allow “Save to Favorites” for logged-in users.
+
+Backend API Endpoints:
+
+POST /api/ideas/generate → Accepts { userId, interests, industry, budget, location } → Returns enriched idea list.
+
+GET /api/ideas/history/{userId} → Fetch previously generated ideas for the user.
+
+POST /api/ideas/favorite → Save idea to favorites.
+
+Prompt Template for GPT (Backend Integration):
+
+sql
+Copy
+Edit
+You are a business idea generation AI for the platform "10000Ideas".  
+A user has described their interest as: "{user_interest}".  
+They are located in: "{location}" and have a budget of "{budget}".  
+  
+Based on this, generate 5 highly relevant and unique business/manufacturing/service ideas.  
+For each idea, include:  
+1. Title (short, catchy)  
+2. Description (why it’s a good fit for the user)  
+3. Estimated Market Size (with region)  
+4. CAGR and key growth trends (last 5 years, next 5 years)  
+5. Top 3 competitors with short descriptions  
+6. Potential moats / competitive advantages  
+7. Opportunities & risks  
+8. Estimated initial investment range & ROI potential  
+  
+Keep tone professional, concise, and actionable.  
+Data Enrichment Logic:
+
+After GPT generates ideas, backend calls external APIs:
+
+Google Custom Search API → Fetch top competitors & their websites.
+
+RapidAPI Market Data → Fetch market size, CAGR, industry insights.
+
+News API → Fetch recent relevant news for opportunities & risks.
+
+Merge GPT output with fetched data into final JSON response.
+
+Performance & Scalability:
+
+Cache market research results in Redis to avoid redundant API calls.
+
+Use async non-blocking calls for LLM + external APIs (Spring WebFlux or parallel CompletableFuture).
+
+Paginate user history for dashboard display.
+
+Security:
+
+Validate all inputs on backend (sanitize user interest text).
+
+Secure API keys for GPT & external APIs using environment variables.
+
+Role-based access — only logged-in users can use AI tool.
+
+Frontend Dashboard UI Components:
+
+Idea Generation Form — interest input + filters.
+
+Idea Cards Grid — dynamic grid displaying enriched AI results.
+
+Saved Ideas List — user’s favorite ideas with export option (PDF/CSV).
+
+Loading Skeletons — for better UX during AI processing.
+
+Error States — graceful messages for API errors.
+
+Deliverables:
+
+Fully functional React + TypeScript dashboard module integrated into 10000Ideas.
+
+Spring Boot service to handle GPT calls + market data enrichment.
+
+PostgreSQL schema for storing user-generated ideas & favorites.
+
+Configurable .env for all API keys & environment settings.
+
+Documented API contract.

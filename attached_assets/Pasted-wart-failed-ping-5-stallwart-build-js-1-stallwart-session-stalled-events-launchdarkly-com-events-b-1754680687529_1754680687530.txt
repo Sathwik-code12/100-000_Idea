@@ -1,0 +1,32 @@
+wart: failed ping 5
+stallwart.build.js:1 stallwart: session stalled
+events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820:1  Failed to load resource: net::ERR_SOCKET_NOT_CONNECTEDUnderstand this error
+9397-bb585374221632cd.js:1 WebSocket connection to 'wss://eval.kirk.platform.replit.com/wsv2/v2.public.Q2dZSTgvSFl4QVlTQmdpU2p0bkVCaUlFYTJseWF6QUFPdlFCQ2lSa1pqZGtOV1E1WVMwek9HSTNMVFJsWXpZdFlqRTFOaTAzWXpobU1XWTFNVGt3WXpRU0EyNXBlQm9XY21Wd2JHbDBMWEpsY0d3dFptbHNaWE10YTJseWF5SUhTV1JsWVVoMVlpb0xkMlZpZEdocGNtUmxlV1ZDVGdvWGNtVndiR2wwTFhKbGNHd3RZbXh2WTJ0ekxXdHBjbXNTRlhKbGNHeHBkQzF5WlhCc0xXMWxkR0V0YTJseWF4b2NjbVZ3YkdsMExXMWhjbWRoY21sdVpTMWliRzlqYTNNdGEybHlhMG9IQ05xNjB4VVFBVkFBV2c5cGJuUmxiblJmWW5WemFXNWxjM05hRW05dVltOWhjbVJwYm1kZmFtOWlYMlZ1WjFvWGIyNWliMkZ5WkdsdVoxOXliMnhsWDIxaGJtRm5aWEo0QUZJakNBRVFnSUNBZ0NBWkFBQUFBQUFBRUVBaEFBQUFBQUFBRUVBb2dJQ0FnTWdCTUFKZ0Eyb1NDTnE2MHhVU0MzZGxZblJvYVhKa1pYbGxnZ0VDS2dDYUFRb0tDREF1TUM0eE5UazRvQUVCXMcnvBIpmmXzK4pfEz0ceiaZjQJK_3MjlliG68g9i5ilimP8lFasiugUIK_IgoHyA_0yoEqNU23qw2MfIXhvDw.Q2dad2NtOWtPak1pQ25KbGNHeHBkQzVqYjIwPQ' failed: 
+(anonymous) @ 9397-bb585374221632cd.js:1Understand this error
+attached_assets/7_Idea%20inner%20pages_1754675259892.png:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+IdeaHub:1 [Intervention] Slow network is detected. See https://www.chromestatus.com/feature/5636954674692096 for more details. Fallback font will be used while loading: https://replit.com/public/fonts/ibm-plex-sans-v8-latin-600.woff2
+_app-c2cd0474545c884d.js:13 onClick is deprecated, please use onPress
+(anonymous) @ _app-c2cd0474545c884d.js:13Understand this warning
+/graphql:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Abeacon%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A1168de08&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=26f149c6-1335-4fc1-96fc-f8a63a21ee20:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A1168de08&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=12f5f20c-ccaf-4175-9aa9-acd2dc68d460:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Axhr%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A1168de08&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=0378fbda-c81d-4dd5-b293-c6b692ba6d85:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'battery'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.Understand this warning
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.Understand this warning
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.Understand this warning
+df7d5d9a-38b7-4ec6-b156-7c8f1f5190c4-00-283avd4k7clkn.kirk.replit.dev/api/user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+Console.js:61 IdeaDetail - URL params: Object
+Console.js:61 IdeaDetail - ideaId: 6
+Console.js:61 IdeaDetail - available keys: Array(4)
+Console.js:61 IdeaDetail - data lookup result: undefined

@@ -1,0 +1,141 @@
+Build an Admin Dashboard for 10000ideas.com that allows only two authorized admin users to log in and manage all content and data across the platform. The dashboard must be highly optimized, scalable, and secure, with proper backend + database integrations.
+
+Core Requirements:
+1. Admin Access
+Admin login/signup restricted to exactly two authorized users (emails predefined in backend config or admin table).
+
+Implement role-based authentication using JWT or session tokens.
+
+If a non-admin user attempts access, show a "No Access" page.
+
+Store admin accounts securely in the DB with hashed passwords.
+
+2. Overview Dashboard
+Single-page summary showing:
+
+Total number of ideas in DB
+
+Recently added ideas
+
+Recently modified ideas
+
+Pending deletions (in 30-day delete history)
+
+3. Upload Ideas Tab
+Functionality:
+
+Admin can bulk upload ideas via JSON or CSV.
+
+On upload:
+
+Parse file and insert records into PostgreSQL (not frontend/backend static code).
+
+Validate schema before inserting.
+
+Each uploaded idea automatically:
+
+Appears in All Ideas page in paginated format.
+
+Has a Detailed Idea Page (mirroring existing design).
+
+Performance:
+
+Use server-side pagination (Spring Boot + PostgreSQL LIMIT/OFFSET or keyset pagination).
+
+Index DB columns for faster querying.
+
+Reference:
+
+Follow styling and structure of existing idea cards and detailed idea pages.
+
+4. Manage Ideas Tab
+For each idea in the list:
+
+Edit Button:
+
+Opens a full detailed form with all fields from the card/detailed idea page/JSON.
+
+Admin can modify and save updates directly to DB.
+
+ON/OFF Toggle:
+
+If OFF → Idea is hidden from All Ideas page and its detail page (soft hide).
+
+If ON → Idea is visible again.
+
+Delete Button:
+
+Confirmation popup before deleting.
+
+Move the idea to Delete History (soft delete).
+
+Stay in delete history for 30 days before permanent removal.
+
+5. Upload History Tab
+Shows:
+
+File name
+
+Upload date/time
+
+Number of ideas uploaded
+
+Uploaded by (admin name)
+
+Delete Button:
+
+Confirmation popup.
+
+Deleted uploads move to Delete History for 30 days.
+
+After 30 days → permanently removed.
+
+6. Delete History Tab
+Stores deleted ideas and deleted uploads for 30 days.
+
+Option to restore within that period.
+
+Automatic background job to permanently delete after 30 days.
+
+Backend Requirements
+Tech Stack: Java + Spring Boot, PostgreSQL.
+
+Endpoints:
+
+/admin/upload-ideas → bulk insert ideas
+
+/admin/manage-ideas → list, edit, toggle, delete
+
+/admin/upload-history → get upload logs, delete logs
+
+/admin/delete-history → restore or purge
+
+Implement transactional DB operations to ensure data integrity.
+
+Use pagination and filtering in API for performance.
+
+Frontend Requirements
+Tech Stack: React (with Context API or Redux for state).
+
+UI Design:
+
+Use table + card hybrid views for manage ideas.
+
+Responsive layout.
+
+Inline validation for uploads.
+
+Smooth animations on toggles and edits.
+
+Integrate loading states and optimistic UI for instant feedback.
+
+Security & Optimization
+JWT-based authentication for admin routes.
+
+API rate limiting for admin operations.
+
+CSRF protection on form submissions.
+
+Minimize frontend re-renders using React memoization.
+
+Use lazy-loading for data-heavy tables.

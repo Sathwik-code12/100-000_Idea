@@ -1,0 +1,131 @@
+Objective:
+Design and build a comprehensive fundraising platform page where startups and businesses can showcase their ventures and raise funds, engage potential investors, and manage contributions transparently.
+
+1. Main Goals
+Allow startups/businesses to submit projects for fundraising.
+
+Enable visitors/investors to browse, learn, and contribute to projects.
+
+Display clear information about each project including goals, team, financial needs, equity/offers, updates, etc.
+
+Facilitate safe, transparent, and trackable funding.
+
+2. Page Layout & Core Sections
+A. Hero Section
+Striking headline (e.g., “Empower Bold Ideas: Invest in Tomorrow’s Startups”)
+
+Short value statement or mission.
+
+Call-to-action (CTA) Button: “Start a Campaign” / “Browse Startups”
+
+Engaging background image or illustration (e.g., diverse entrepreneurs, funding visuals)
+
+B. How it Works (3-4 Steps)
+Submit your startup idea
+
+Share your mission, goals, and funding need
+
+Attract support from the community/investors
+
+Receive funds and keep backers updated!
+
+C. Featured Campaigns/Ideas
+Carousel/grid/list of current fundraising campaigns/cards.
+
+Each card includes: logo/image, title, category, location, target/funded amount bar, days left, brief pitch
+
+Filter/sort (e.g., by most funded, newest, expiring soon, categories)
+
+D. Startup/Business Detail Page
+Large banner image/video
+
+Overview: Name, sector, stage (idea/prototype/growth), target amount, equity/offers (if any)
+
+The Pitch: detailed description, vision, value proposition, why fund them
+
+Team/about section: Founders’ bios, photos, expertise
+
+Funding progress bar (current/goal, %)
+
+Rewards/offers for supporters (if applicable; sponsorship, perks, equity %)
+
+Updates & News tab
+
+Comments/Questions section
+
+Share on social media buttons
+
+E. “Start Your Fundraising” Callout
+Brief text encouraging founders to launch campaigns
+
+Button linking to submission/onboarding form
+
+F. FAQ Section
+How does the platform work?
+
+Who can invest or support?
+
+Is there a minimum/maximum funding cap?
+
+KYC/verification info
+
+Security and refund policies
+
+3. Key Features & Functionality
+Campaign Submission Form:
+Multi-step form for startups to apply, including fields for:
+
+Title, sector, city
+
+Detailed pitch/plan
+
+Target funding & breakdown (use of funds)
+
+Equity offered/other rewards
+
+Team bios
+
+Upload images, pitch video (optional)
+
+Social, website links
+
+Approval & Review:
+(Optional) Admin approval/review workflow before going live.
+
+Search/Filter Functionality:
+By sector, location, funding stage, target amount, status.
+
+Funding System:
+
+Integrate payment gateway for secure donor/investor payments (Stripe/Razorpay/etc.)
+
+Show real-time progress, backer count, etc.
+
+Email notifications for founders and backers.
+
+Project Updates:
+Allow founders to post milestone updates, achievements, stretch goals.
+
+Responsive Design:
+Works across desktop, tablet, mobile.
+
+Trust Elements:
+
+“Verified” badges
+
+Transparent fund disbursal/explainer
+
+Support/help chat or contact
+
+4. Suggested Expansion
+Allow both equity and reward/donation-based fundraising.
+
+Integrate with analytics/dashboard for campaigners.
+
+Highlight “Success Stories” for credibility.
+
+Option for backers to subscribe to project/newsletter updates.
+
+Sample Prompt for an AI Page Builder:
+
+"Create a full-featured fundraising portal page for startups and businesses on 10000ideas.com. The page should welcome founders to submit their funding campaigns and showcase a dynamic grid of live fundraising projects with progress bars, images, company details, and investment goals. Each campaign has a detail view with the startup's pitch, team, milestones, funding needs, and updates. Include a hero banner, FAQs, easy navigation, search/filter, secure funding links, and mobile responsiveness. Add trust signals and a clear call-to-action inviting visitors to support or launch their own campaigns."
