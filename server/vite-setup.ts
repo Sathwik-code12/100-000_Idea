@@ -4,7 +4,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import { type Server } from "http";
 import { nanoid } from "nanoid";
-import viteConfig from "../client/vite.config";
+import viteConfig from "../client/vite.config.js";
 import { createLogger, createServer, UserConfig } from "vite";
 
 const viteLogger = createLogger();

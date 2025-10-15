@@ -41,12 +41,12 @@ import {
 
 // Enhanced business ideas data with authentic web research
 const businessIdeasData = {
-  "1": {
+  1: {
     id: 1,
     title: "Traditional Indian Bakery",
     categories: ["Food & Beverage", "Retail", "Manufacturing"],
     summary: "Traditional Indian bakery offering fresh daily breads, sweets, savory snacks, and modern bakery products serving local communities with authentic recipes and contemporary retail practices.",
-    
+
     // Investment details based on authentic web research
     investment: {
       amount: 1500000,
@@ -54,26 +54,26 @@ const businessIdeasData = {
       display: "₹15.0L",
       description: "Total initial capital for equipment, setup, inventory, and working capital"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "3-6 months",
-    
+
     features: [
       "Fresh daily breads and traditional Indian sweets",
       "Modern retail setup with attractive displays",
       "Festival-specific specialty products",
       "Online ordering and delivery integration"
     ],
-    
+
     tech_stack: "POS systems, inventory management software, basic e-commerce integration for online orders, social media marketing tools.",
-    
+
     developing_your_idea: {
       concept: "Combining traditional Indian baking recipes with modern retail practices to serve growing urban communities.",
       innovation: "Festival-themed product collections and custom celebration cake ordering system with traditional Indian flavors.",
       differentiation: "Authentic traditional recipes, fresh daily production, competitive pricing, and strong community connections.",
       timeline: "Equipment procurement and setup in 2 months, staff training in 3 weeks, trial production in 2 weeks, grand opening in 6 months."
     },
-    
+
     // Market analysis based on web research
     market_analysis: {
       TAM: "₹31,500 Crore (Indian bakery market by 2033)",
@@ -81,7 +81,7 @@ const businessIdeasData = {
       SOM: "₹50 Crore (Realistic capture in urban markets)",
       growth: "9.12% annual CAGR (2025-2033)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Local established bakeries and sweet shops",
@@ -104,7 +104,7 @@ const businessIdeasData = {
         "Export potential for specialty Indian sweets"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Local families for daily bread and occasional sweets",
@@ -117,7 +117,7 @@ const businessIdeasData = {
         "Lack of convenient ordering options"
       ]
     },
-    
+
     product_narrative: {
       problem: "Urban communities lack access to fresh, authentic traditional bakery products with consistent quality and modern convenience.",
       solution: "A traditional bakery combining authentic recipes with modern retail practices, offering fresh daily products and convenient ordering.",
@@ -125,7 +125,7 @@ const businessIdeasData = {
       traction: "Festival season can drive 40% of annual sales with proper product planning.",
       team: "Requires skilled bakers, retail staff, and management with food industry experience."
     },
-    
+
     value_proposition: {
       primary: "Authentic traditional bakery products with consistent quality, fresh daily production, and modern convenience.",
       secondary: [
@@ -135,7 +135,7 @@ const businessIdeasData = {
       ],
       competitive_advantage: "Strong community connections, authentic traditional recipes, and efficient daily production system."
     },
-    
+
     business_model: {
       revenue_streams: [
         "Daily fresh bread and snack sales",
@@ -145,24 +145,24 @@ const businessIdeasData = {
       ],
       pricing_strategy: "Competitive pricing for daily items, premium pricing for specialty and custom products."
     },
-    
+
     scale_path: {
       milestones: [
         "Achieve ₹2L monthly revenue in Year 1",
-        "Establish 5 regular corporate clients in Year 2", 
+        "Establish 5 regular corporate clients in Year 2",
         "Launch online delivery in local area by Year 2",
         "Open second location by Year 3"
       ],
       timeline: "3-year growth plan to established local brand"
     },
-    
+
     business_moats: [
       "Recipe authenticity and taste consistency",
       "Local community relationships and brand loyalty",
       "Operational efficiency in daily production",
       "Strategic location with high foot traffic"
     ],
-    
+
     key_metrics: {
       customer_metrics: [
         "Daily customer count and repeat rate",
@@ -183,11 +183,11 @@ const businessIdeasData = {
         "ROI (22-35% annually)"
       ]
     },
-    
+
     pitch_deck: {
       key_slides: [
         "The Traditional Food Gap",
-        "Our Authentic Solution", 
+        "Our Authentic Solution",
         "₹31,500 Crore Market Opportunity",
         "Our Products & Community Impact",
         "Business Model & Revenue Projections",
@@ -195,7 +195,7 @@ const businessIdeasData = {
         "The Investment Ask"
       ]
     },
-    
+
     funding_options: [
       {
         type: "Self Funding",
@@ -209,7 +209,7 @@ const businessIdeasData = {
         timeline: "1-2 months"
       },
       {
-        type: "Bank Loans", 
+        type: "Bank Loans",
         display_amount: "₹10.0-15.0L",
         options: [
           {
@@ -235,12 +235,12 @@ const businessIdeasData = {
         processing_time: "3-6 months"
       }
     ],
-    
+
     investment_breakdown: {
       total_project_cost: "₹15.0L",
       fixed_capital: {
         land_building: "₹2.0L (Shop rent advance)",
-        plant_machinery: "₹6.0L (Ovens, mixers, refrigeration)", 
+        plant_machinery: "₹6.0L (Ovens, mixers, refrigeration)",
         furniture_fixtures: "₹1.5L (Display counters, seating)",
         office_equipment: "₹0.5L (POS, computer systems)",
         total_fixed_capital: "₹10.0L"
@@ -255,29 +255,29 @@ const businessIdeasData = {
       means_of_finance: {
         promoter_contribution: "₹3.0L (20%)",
         pmegp_subsidy: "₹5.25L (35%)",
-        bank_loan: "₹6.75L (45%)", 
+        bank_loan: "₹6.75L (45%)",
         total: "₹15.0L"
       }
     },
-    
+
     employment_generation: {
       total: 6,
       skilled: 2,
       semi_skilled: 3,
       unskilled: 1
     },
-    
+
     bank_loan_details: {
       loan_amount: "₹6.75L",
       interest_rate: "9.5% p.a.",
       repayment_period: "5 years",
       processing_fee: "₹6,750"
     },
-    
+
     pmegp_summary: {
       project_cost_structure: {
         fixed_capital: "₹10.0L",
-        working_capital: "₹5.0L", 
+        working_capital: "₹5.0L",
         total: "₹15.0L"
       },
       funding_pattern: {
@@ -304,12 +304,12 @@ const businessIdeasData = {
         "Maximum project cost: ₹25.0L for manufacturing units"
       ]
     },
-    
+
     skills_required: {
       technical_skills: [
         "Traditional Baking Techniques",
         "Food Safety & Hygiene",
-        "Inventory Management", 
+        "Inventory Management",
         "Quality Control"
       ],
       business_skills: [
@@ -325,12 +325,12 @@ const businessIdeasData = {
         "Cultural Sensitivity"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.2,
       total_reviews: 234
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=800&h=500&fit=crop"
@@ -344,44 +344,44 @@ const businessIdeasData = {
     title: "Specialty Coffee Shop",
     categories: ["Food & Beverage", "Hospitality", "Services"],
     summary: "Premium coffee experience with locally sourced beans, artisanal preparation methods, and comfortable co-working space targeting India's growing coffee culture.",
-    
+
     investment: {
       amount: 1200000,
-      currency: "INR", 
+      currency: "INR",
       display: "₹12.0L",
       description: "Complete setup for mid-scale specialty coffee shop with equipment and initial operations"
     },
-    
+
     difficulty_level: "Medium-High",
     time_to_market: "4-6 months",
-    
+
     features: [
       "Third-wave specialty coffee brewing techniques",
-      "Co-working friendly environment with WiFi", 
+      "Co-working friendly environment with WiFi",
       "Local coffee roaster partnerships",
       "Artisanal food and beverage menu"
     ],
-    
+
     tech_stack: "Advanced POS systems, WiFi infrastructure, social media management tools, delivery app integration, customer loyalty programs.",
-    
+
     developing_your_idea: {
       concept: "Creating a third-wave coffee culture destination that serves as both premium café and productive workspace.",
       innovation: "Coffee education workshops and cupping sessions to build community of coffee enthusiasts.",
       differentiation: "Focus on locally sourced beans, skilled barista training, and authentic coffee education for customers.",
       timeline: "Location setup and equipment in 3 months, staff training in 1 month, soft opening and marketing in 2 months."
     },
-    
+
     market_analysis: {
       TAM: "₹26,170 Crore (Indian café and bar market by 2029)",
-      SAM: "₹7,850 Crore (Specialty coffee segment)", 
+      SAM: "₹7,850 Crore (Specialty coffee segment)",
       SOM: "₹39 Crore (Metropolitan specialty coffee market capture)",
       growth: "13.2% annual CAGR (2024-2030)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Established coffee chains like Café Coffee Day",
-        "Premium brands like Starbucks and Blue Tokai", 
+        "Premium brands like Starbucks and Blue Tokai",
         "Independent specialty coffee shops"
       ],
       barriers: [
@@ -400,7 +400,7 @@ const businessIdeasData = {
         "Barista training and consulting services"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Working professionals seeking workspace and premium coffee",
@@ -413,7 +413,7 @@ const businessIdeasData = {
         "Inconsistent coffee quality and preparation"
       ]
     },
-    
+
     product_narrative: {
       problem: "India's growing coffee culture lacks accessible specialty coffee experiences with proper brewing techniques and comfortable workspace environments.",
       solution: "A specialty coffee shop combining third-wave coffee culture with co-working space, offering premium coffee education and community building.",
@@ -421,44 +421,44 @@ const businessIdeasData = {
       traction: "Blue Tokai raised $35M Series C showing strong investor confidence in specialty coffee market.",
       team: "Requires experienced baristas, café management, and coffee industry knowledge for sourcing and quality."
     },
-    
+
     value_proposition: {
       primary: "Premium specialty coffee experience with educational component and productive workspace environment.",
       secondary: [
         "Third-wave coffee brewing expertise",
-        "Community building through coffee education", 
+        "Community building through coffee education",
         "Comfortable co-working environment with reliable WiFi"
       ],
       competitive_advantage: "Focus on coffee education, local sourcing partnerships, and authentic third-wave coffee culture."
     },
-    
+
     business_model: {
       revenue_streams: [
         "Premium beverage sales with 60-70% gross margins",
-        "Food and snack offerings", 
+        "Food and snack offerings",
         "Corporate catering and bulk orders",
         "Coffee retail sales and subscriptions"
       ],
       pricing_strategy: "Premium pricing for specialty drinks, competitive pricing for workspace usage, value pricing for corporate orders."
     },
-    
+
     scale_path: {
       milestones: [
         "Achieve 150 daily customers in Year 1",
         "Launch corporate catering services in Year 1.5",
-        "Establish coffee retail line in Year 2", 
+        "Establish coffee retail line in Year 2",
         "Open second location in high-traffic area by Year 3"
       ],
       timeline: "3-year growth plan to recognized local specialty coffee brand"
     },
-    
+
     business_moats: [
       "Skilled barista team and coffee expertise",
-      "Strong relationships with local coffee roasters", 
+      "Strong relationships with local coffee roasters",
       "Community of loyal specialty coffee customers",
       "Prime location with established foot traffic"
     ],
-    
+
     key_metrics: {
       customer_metrics: [
         "Daily customer count and average stay time",
@@ -479,19 +479,19 @@ const businessIdeasData = {
         "Monthly profit (₹40K-1.5L potential)"
       ]
     },
-    
+
     pitch_deck: {
       key_slides: [
         "The Coffee Culture Gap",
         "Our Specialty Coffee Solution",
-        "₹26,170 Crore Market Opportunity", 
+        "₹26,170 Crore Market Opportunity",
         "Our Coffee Experience & Community",
         "Business Model & Financial Projections",
         "The Team & Coffee Vision",
         "The Investment Ask"
       ]
     },
-    
+
     funding_options: [
       {
         type: "Self Funding",
@@ -506,7 +506,7 @@ const businessIdeasData = {
       },
       {
         type: "Bank Loans",
-        display_amount: "₹15.0-25.0L", 
+        display_amount: "₹15.0-25.0L",
         options: [
           {
             label: "Business Term Loan",
@@ -531,13 +531,13 @@ const businessIdeasData = {
         processing_time: "45-60 days"
       }
     ],
-    
+
     investment_breakdown: {
       total_project_cost: "₹18.0L",
       fixed_capital: {
         land_building: "₹3.0L (Premium location rent advance)",
         plant_machinery: "₹8.0L (Espresso machines, grinders, brewing equipment)",
-        furniture_fixtures: "₹4.0L (Seating, work tables, interior design)", 
+        furniture_fixtures: "₹4.0L (Seating, work tables, interior design)",
         office_equipment: "₹1.0L (POS, WiFi, audio systems)",
         total_fixed_capital: "₹16.0L"
       },
@@ -554,26 +554,26 @@ const businessIdeasData = {
         total: "₹18.0L"
       }
     },
-    
+
     employment_generation: {
       total: 8,
       skilled: 3,
       semi_skilled: 4,
       unskilled: 1
     },
-    
+
     bank_loan_details: {
-      loan_amount: "₹12.6L", 
+      loan_amount: "₹12.6L",
       interest_rate: "11.5% p.a.",
       repayment_period: "5 years",
       processing_fee: "₹12,600"
     },
-    
+
     skills_required: {
       technical_skills: [
         "Barista Training & Coffee Preparation",
         "Coffee Bean Knowledge & Sourcing",
-        "Equipment Operation & Maintenance", 
+        "Equipment Operation & Maintenance",
         "Food Safety Certification"
       ],
       business_skills: [
@@ -589,12 +589,12 @@ const businessIdeasData = {
         "Attention to Detail"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.5,
       total_reviews: 189
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&h=500&fit=crop"
@@ -608,40 +608,40 @@ const businessIdeasData = {
     title: "Online Tutoring Platform",
     categories: ["EdTech", "Education", "Technology"],
     summary: "Comprehensive online education platform connecting students with qualified tutors across various subjects and competitive exams, leveraging India's growing digital education market.",
-    
+
     investment: {
       amount: 800000,
       currency: "INR",
-      display: "₹8.0L", 
+      display: "₹8.0L",
       description: "Technology development, content creation, and initial marketing for EdTech platform"
     },
-    
+
     difficulty_level: "High",
     time_to_market: "6-12 months",
-    
+
     features: [
       "Live one-on-one and group tutoring sessions",
       "AI-powered student-tutor matching system",
       "Interactive whiteboards and screen sharing",
       "Progress tracking and performance analytics"
     ],
-    
+
     tech_stack: "React/Node.js web platform, mobile apps (React Native/Flutter), video conferencing APIs (Agora/WebRTC), payment gateways, cloud hosting (AWS/Google Cloud).",
-    
+
     developing_your_idea: {
       concept: "Democratizing quality education through technology by connecting students with expert tutors across India and globally.",
       innovation: "AI-powered personalized learning paths and real-time performance analytics for students and parents.",
       differentiation: "Focus on competitive exam preparation, regional language support, and affordable pricing for Indian market.",
       timeline: "MVP development in 4 months, beta testing in 2 months, content creation parallel, full launch in 8 months."
     },
-    
+
     market_analysis: {
       TAM: "₹2,76,750 Crore (Global online tutoring market by 2029)",
       SAM: "₹1,38,375 Crore (Indian EdTech market projection by 2030)",
       SOM: "₹692 Crore (K-12 online tutoring segment capture)",
       growth: "26.4% annual CAGR (2025-2029)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Established EdTech giants like BYJU'S and Vedantu",
@@ -664,7 +664,7 @@ const businessIdeasData = {
         "International expansion to other developing markets"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "K-12 students needing supplementary education support",
@@ -673,11 +673,11 @@ const businessIdeasData = {
       ],
       pain_points: [
         "Limited access to quality tutors in smaller cities",
-        "High cost of traditional coaching centers", 
+        "High cost of traditional coaching centers",
         "Inflexible timing and location constraints"
       ]
     },
-    
+
     product_narrative: {
       problem: "Millions of Indian students lack access to quality tutoring due to geographic constraints, high costs, and limited availability of expert teachers.",
       solution: "An online platform democratizing access to quality education through technology, connecting students with expert tutors anytime, anywhere.",
@@ -685,7 +685,7 @@ const businessIdeasData = {
       traction: "EdTech sector raised ₹278 million in first 9 months of 2024 showing continued investor confidence.",
       team: "Requires strong technical team, education experts, content creators, and marketing professionals with EdTech experience."
     },
-    
+
     value_proposition: {
       primary: "Affordable, personalized, and accessible quality education through expert tutors and AI-powered learning analytics.",
       secondary: [
@@ -695,7 +695,7 @@ const businessIdeasData = {
       ],
       competitive_advantage: "AI-powered personalization, affordable pricing model, and focus on underserved markets."
     },
-    
+
     business_model: {
       revenue_streams: [
         "Commission from tutors (20-30% of session fees)",
@@ -705,7 +705,7 @@ const businessIdeasData = {
       ],
       pricing_strategy: "Freemium model with basic access, premium subscriptions ₹500-5000/month, competitive commission rates for tutors."
     },
-    
+
     scale_path: {
       milestones: [
         "Onboard 100 qualified tutors in Year 1",
@@ -715,18 +715,18 @@ const businessIdeasData = {
       ],
       timeline: "3-year growth plan to established EdTech platform with regional expansion"
     },
-    
+
     business_moats: [
       "Network effects - more tutors attract more students and vice versa",
       "Data and AI algorithms improving matching and personalization",
       "Brand reputation and trust in education sector",
       "Technology infrastructure and platform stability"
     ],
-    
+
     key_metrics: {
       customer_metrics: [
         "Student acquisition rate and cost (CAC)",
-        "Student retention and course completion rates", 
+        "Student retention and course completion rates",
         "Net Promoter Score (NPS) from students and parents",
         "Average session frequency per student"
       ],
@@ -743,19 +743,19 @@ const businessIdeasData = {
         "Burn rate and path to profitability"
       ]
     },
-    
+
     pitch_deck: {
       key_slides: [
         "The Education Access Crisis",
         "Our Technology-Enabled Solution",
         "₹1,38,375 Crore Market Opportunity",
         "Our Platform & Learning Analytics",
-        "Business Model & Unit Economics", 
+        "Business Model & Unit Economics",
         "The Team & EdTech Vision",
         "The Investment Ask & Growth Plan"
       ]
     },
-    
+
     funding_options: [
       {
         type: "Self Funding",
@@ -795,7 +795,7 @@ const businessIdeasData = {
         processing_time: "6-12 months"
       }
     ],
-    
+
     investment_breakdown: {
       total_project_cost: "₹15.0L",
       fixed_capital: {
@@ -814,23 +814,23 @@ const businessIdeasData = {
       },
       means_of_finance: {
         promoter_contribution: "₹3.0L (20%)",
-        angel_investment: "₹7.5L (50%)", 
+        angel_investment: "₹7.5L (50%)",
         government_grant: "₹4.5L (30%)",
         total: "₹15.0L"
       }
     },
-    
+
     employment_generation: {
       total: 12,
       skilled: 8,
       semi_skilled: 3,
       unskilled: 1
     },
-    
+
     skills_required: {
       technical_skills: [
         "Full-Stack Web Development",
-        "Mobile App Development", 
+        "Mobile App Development",
         "Video Conferencing Integration",
         "AI/ML for Recommendation Systems"
       ],
@@ -847,12 +847,12 @@ const businessIdeasData = {
         "Adaptability & Learning"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.3,
       total_reviews: 156
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=500&fit=crop"
@@ -866,40 +866,40 @@ const businessIdeasData = {
     title: "Organic Food Store & Health Market",
     categories: ["Retail", "Health", "Sustainability"],
     summary: "Premium organic food retail store focusing on health-conscious consumers with certified organic products, fresh produce, and sustainable lifestyle products.",
-    
+
     investment: {
       amount: 1400000,
       currency: "INR",
       display: "₹14.0L",
       description: "Complete organic food store setup with inventory, refrigeration, and certification requirements"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "4-6 months",
-    
+
     features: [
       "Certified organic fruits, vegetables, and grains",
       "Health and wellness product range",
-      "Sustainable packaging and eco-friendly practices", 
+      "Sustainable packaging and eco-friendly practices",
       "Customer education on organic benefits"
     ],
-    
+
     tech_stack: "POS system with inventory tracking, e-commerce platform integration, cold storage management systems, organic certification tracking software.",
-    
+
     developing_your_idea: {
       concept: "Creating a trusted destination for health-conscious consumers seeking authentic organic products with complete transparency in sourcing.",
       innovation: "Customer education programs and organic farming partnerships to build trust and community engagement.",
       differentiation: "Focus on authentic organic certification, local farmer partnerships, and comprehensive health product ecosystem.",
       timeline: "Supplier certification and setup in 3 months, inventory stocking in 1 month, staff training and launch in 2 months."
     },
-    
+
     market_analysis: {
       TAM: "₹1,08,079 Crore (Indian organic food market by 2033)",
-      SAM: "₹32,424 Crore (Organized organic retail segment)", 
+      SAM: "₹32,424 Crore (Organized organic retail segment)",
       SOM: "₹162 Crore (Urban organic food store market capture)",
       growth: "20.13% annual CAGR (2025-2033)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Organic sections in supermarkets like Big Bazaar",
@@ -922,7 +922,7 @@ const businessIdeasData = {
         "Expansion to organic personal care and household products"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Health-conscious millennials and Gen Z consumers",
@@ -935,7 +935,7 @@ const businessIdeasData = {
         "Limited availability and higher prices than conventional products"
       ]
     },
-    
+
     product_narrative: {
       problem: "Growing health-conscious Indian consumers struggle to find authentic, certified organic products with transparent sourcing and fair pricing.",
       solution: "A dedicated organic food store providing certified products with complete transparency, farmer partnerships, and customer education.",
@@ -943,7 +943,7 @@ const businessIdeasData = {
       traction: "Government providing 25% subsidy for organic businesses and India having 4.43 million organic farmers shows strong ecosystem support.",
       team: "Requires expertise in organic certification, retail management, supply chain, and customer education in health and nutrition."
     },
-    
+
     value_proposition: {
       primary: "Authentic certified organic products with complete transparency, fair pricing, and comprehensive customer education on health benefits.",
       secondary: [
@@ -953,7 +953,7 @@ const businessIdeasData = {
       ],
       competitive_advantage: "Deep supplier relationships, customer education focus, and authentic organic certification expertise."
     },
-    
+
     business_model: {
       revenue_streams: [
         "Organic food and produce sales with 15-25% margins",
@@ -963,7 +963,7 @@ const businessIdeasData = {
       ],
       pricing_strategy: "Premium pricing justified by authentic certification, competitive with online organic platforms, bulk discounts for regular customers."
     },
-    
+
     scale_path: {
       milestones: [
         "Establish 20 certified supplier partnerships in Year 1",
@@ -973,14 +973,14 @@ const businessIdeasData = {
       ],
       timeline: "3-year plan to established organic retail brand with online presence"
     },
-    
+
     business_moats: [
       "Trusted relationships with certified organic suppliers",
       "Deep customer relationships and brand loyalty in health segment",
-      "Expertise in organic certification and quality assurance", 
+      "Expertise in organic certification and quality assurance",
       "Strategic location in health-conscious neighborhood"
     ],
-    
+
     key_metrics: {
       customer_metrics: [
         "Customer acquisition rate and repeat purchase frequency",
@@ -996,12 +996,12 @@ const businessIdeasData = {
       ],
       financial_metrics: [
         "Gross profit margin (15-25% target)",
-        "Monthly revenue per square foot", 
+        "Monthly revenue per square foot",
         "Break-even achievement (12-18 months)",
         "Supplier payment terms and cash flow management"
       ]
     },
-    
+
     pitch_deck: {
       key_slides: [
         "The Organic Trust Crisis",
@@ -1013,7 +1013,7 @@ const businessIdeasData = {
         "The Investment Ask"
       ]
     },
-    
+
     funding_options: [
       {
         type: "Self Funding",
@@ -1031,7 +1031,7 @@ const businessIdeasData = {
         display_amount: "₹10.0-25.0L",
         options: [
           {
-            label: "MUDRA Shishu/Kishore Loan", 
+            label: "MUDRA Shishu/Kishore Loan",
             rate: "7-10%"
           },
           {
@@ -1053,7 +1053,7 @@ const businessIdeasData = {
         processing_time: "4-6 months"
       }
     ],
-    
+
     investment_breakdown: {
       total_project_cost: "₹20.0L",
       fixed_capital: {
@@ -1066,7 +1066,7 @@ const businessIdeasData = {
       working_capital: {
         raw_materials: "₹4.0L (Initial organic inventory)",
         packing_materials: "₹0.5L (Sustainable packaging)",
-        utilities_rent: "₹1.0L (Initial months operations)", 
+        utilities_rent: "₹1.0L (Initial months operations)",
         contingencies: "₹0.5L",
         total_working_capital: "₹6.0L"
       },
@@ -1077,21 +1077,21 @@ const businessIdeasData = {
         total: "₹20.0L"
       }
     },
-    
+
     employment_generation: {
       total: 7,
       skilled: 2,
       semi_skilled: 4,
       unskilled: 1
     },
-    
+
     bank_loan_details: {
       loan_amount: "₹9.0L",
       interest_rate: "10.5% p.a.",
-      repayment_period: "5 years", 
+      repayment_period: "5 years",
       processing_fee: "₹9,000"
     },
-    
+
     skills_required: {
       technical_skills: [
         "Organic Certification Knowledge",
@@ -1101,7 +1101,7 @@ const businessIdeasData = {
       ],
       business_skills: [
         "Retail Operations Management",
-        "Customer Education & Consultation", 
+        "Customer Education & Consultation",
         "Supplier Relationship Management",
         "Health & Nutrition Knowledge"
       ],
@@ -1112,19 +1112,19 @@ const businessIdeasData = {
         "Community Engagement"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.1,
       total_reviews: 78
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1594736797933-d0b22d21989d?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&h=600&fit=crop",
     location: "Urban Areas",
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹10 lakh (Manufacturing category)",
@@ -1132,48 +1132,47 @@ const businessIdeasData = {
       documents_required: ["Project report", "Land documents", "Bank NOC", "Caste certificate if applicable"],
       processing_time: "45-60 days"
     }
-    
+
   },
-  
-  "2": {
-    id: 2,
+  5: {
+    id: 5,
     title: "AI-Powered Personal Finance App",
     categories: ["Technology", "FinTech", "Mobile App"],
     summary: "Smart budgeting app that uses machine learning to provide personalized financial advice and automate savings, helping users achieve their financial goals through intelligent insights and automated financial management.",
-    
+
     investment: {
       amount: 12000000,
       currency: "INR",
       display: "₹1.2Cr",
       description: "Total initial capital for development, team, marketing, and regulatory compliance"
     },
-    
+
     difficulty_level: "Hard",
     time_to_market: "8 months",
-    
+
     features: [
       "AI-powered spending analysis and categorization",
       "Automated savings recommendations and goal tracking",
       "Investment portfolio analysis and suggestions",
       "Bill reminders and payment automation integration"
     ],
-    
+
     tech_stack: "React Native, Node.js, Python (ML), TensorFlow, MongoDB, AWS, Banking APIs, OAuth 2.0, Real-time analytics dashboard.",
-    
+
     developing_your_idea: {
       concept: "Leveraging AI and machine learning to democratize personalized financial advisory services for middle-class Indians.",
       innovation: "Contextual AI that understands Indian spending patterns, festivals, and cultural financial behaviors for accurate predictions.",
       differentiation: "Multi-language support, UPI integration, Indian tax planning features, and culturally aware financial advice.",
       timeline: "MVP development in 4 months, beta testing in 2 months, regulatory approvals in 1 month, full launch in 8 months."
     },
-    
+
     market_analysis: {
       TAM: "₹2,45,000 Crore (Indian FinTech market by 2030)",
       SAM: "₹45,000 Crore (Personal finance management segment)",
       SOM: "₹500 Crore (Realistic capture with strong execution)",
       growth: "22.5% annual CAGR (2025-2030)"
     },
-    
+
     industry_structure: {
       competitors: [
         "CRED, ET Money, Paytm Money",
@@ -1196,7 +1195,7 @@ const businessIdeasData = {
         "Corporate employee benefits partnerships"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Young professionals (25-40) with disposable income",
@@ -1209,14 +1208,14 @@ const businessIdeasData = {
         "Complex investment options and decision fatigue"
       ]
     },
-    
+
     product_narrative: {
       problem: "Most Indians struggle with personal financial management due to lack of accessible, personalized, and culturally relevant financial guidance.",
       solution: "An AI-powered app that understands Indian financial behavior and provides personalized, actionable financial advice in multiple languages.",
       market: "₹2.45 trillion FinTech market growing at 22.5% CAGR with 500M+ potential smartphone users.",
       traction: "Pre-launch user surveys show 78% willingness to pay for personalized AI financial advice."
     },
-    
+
     investment_breakdown: {
       development: { amount: 4500000, percentage: 37.5, description: "App development, AI/ML implementation, testing" },
       team: { amount: 3600000, percentage: 30, description: "Technical team, data scientists, financial advisors" },
@@ -1224,7 +1223,7 @@ const businessIdeasData = {
       operations: { amount: 900000, percentage: 7.5, description: "Legal, compliance, office setup, tools" },
       buffer: { amount: 600000, percentage: 5, description: "Contingency and unexpected expenses" }
     },
-    
+
     funding_options: [
       {
         type: "Angel Investment",
@@ -1239,7 +1238,7 @@ const businessIdeasData = {
         requirements: "Proven product-market fit, growth metrics"
       }
     ],
-    
+
     business_model: {
       revenue_streams: [
         "Freemium subscription model (₹199-999/month)",
@@ -1249,7 +1248,7 @@ const businessIdeasData = {
       ],
       pricing_strategy: "Freemium model with basic features free, advanced AI insights and automated features in paid tiers starting at ₹199/month."
     },
-    
+
     value_proposition: {
       primary: "Get personalized financial advice powered by AI that understands your spending patterns, goals, and Indian financial ecosystem.",
       secondary: [
@@ -1260,7 +1259,7 @@ const businessIdeasData = {
       ],
       competitive_advantage: "Only AI-powered personal finance app specifically designed for Indian financial behavior, festivals, and cultural spending patterns."
     },
-    
+
     scale_path: {
       timeline: "Year 1: 100K users, Year 2: 1M users, Year 3: 5M+ users with expansion to financial products marketplace.",
       milestones: [
@@ -1271,14 +1270,14 @@ const businessIdeasData = {
         "Expand to financial products marketplace with investment options"
       ]
     },
-    
+
     business_moats: [
       "Proprietary AI algorithms trained on Indian financial behavior data",
       "Strong network effects as more users improve AI recommendations",
       "Regulatory compliance and banking partnerships",
       "Brand trust and user data advantages over new entrants"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Mobile App Development (React Native/Flutter)",
@@ -1300,19 +1299,19 @@ const businessIdeasData = {
         "Team Leadership & Management"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.7,
       total_reviews: 156
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop",
     location: "Pan India",
-    
+
     key_metrics: {
       customer_metrics: [
         "User acquisition cost and lifetime value",
@@ -1325,7 +1324,7 @@ const businessIdeasData = {
         "Gross margin and operational efficiency"
       ]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector category)",
@@ -1334,46 +1333,46 @@ const businessIdeasData = {
       processing_time: "60-90 days due to technical evaluation"
     }
   },
-  
-  "3": {
-    id: 3,
+
+  6: {
+    id: 6,
     title: "Vertical Urban Farming System",
     categories: ["Agriculture", "Sustainability", "Technology"],
     summary: "Automated indoor farming solution for growing fresh produce in urban environments with minimal space, using advanced hydroponic and LED technology to provide year-round fresh vegetables and herbs.",
-    
+
     investment: {
       amount: 6500000,
       currency: "INR",
       display: "₹65L",
       description: "Total initial capital for equipment, facility setup, technology, and working capital"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "6 months",
-    
+
     features: [
       "Automated hydroponic growing systems with IoT monitoring",
       "LED grow lights optimized for different crop types",
       "Climate control and automated nutrient delivery",
       "Vertical growing towers maximizing space efficiency"
     ],
-    
+
     tech_stack: "IoT sensors, automated irrigation systems, LED technology, climate control systems, mobile monitoring app, data analytics dashboard.",
-    
+
     developing_your_idea: {
       concept: "Bringing fresh, pesticide-free produce production directly into urban areas using space-efficient vertical farming technology.",
       innovation: "AI-optimized growing conditions and crop rotation systems designed specifically for Indian climate and urban constraints.",
       differentiation: "Focus on Indian vegetables and herbs with higher yields per square foot than traditional farming.",
       timeline: "Facility setup in 3 months, equipment installation in 2 months, first harvest trial in 1 month, commercial production in 6 months."
     },
-    
+
     market_analysis: {
       TAM: "₹45,000 Crore (Indian fresh produce market)",
       SAM: "₹8,000 Crore (Urban fresh vegetables segment)",
       SOM: "₹200 Crore (Realistic capture in metro cities)",
       growth: "12.3% annual CAGR (2025-2030)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Traditional vegetable vendors and wholesale markets",
@@ -1396,7 +1395,7 @@ const businessIdeasData = {
         "Export potential for premium organic produce"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Premium restaurants seeking consistent fresh supply",
@@ -1409,21 +1408,21 @@ const businessIdeasData = {
         "High prices for organic produce with limited availability"
       ]
     },
-    
+
     product_narrative: {
       problem: "Urban consumers struggle to access fresh, pesticide-free vegetables due to long supply chains, inconsistent quality, and high prices for organic produce.",
       solution: "Automated vertical farming systems that produce fresh vegetables year-round in urban locations with 95% less water and no pesticides.",
       market: "₹45,000 crore fresh produce market with growing urban premium segment willing to pay 20-30% more for quality.",
       traction: "Pilot installations show 40% higher yields and 60% water savings compared to traditional farming methods."
     },
-    
+
     investment_breakdown: {
       equipment: { amount: 3250000, percentage: 50, description: "Hydroponic systems, LED lights, climate control" },
       facility: { amount: 1625000, percentage: 25, description: "Warehouse rental, setup, utilities" },
       technology: { amount: 975000, percentage: 15, description: "IoT sensors, automation, monitoring systems" },
       working_capital: { amount: 650000, percentage: 10, description: "Seeds, nutrients, initial operations" }
     },
-    
+
     funding_options: [
       {
         type: "Government Grants",
@@ -1438,7 +1437,7 @@ const businessIdeasData = {
         requirements: "Working prototype, market validation"
       }
     ],
-    
+
     business_model: {
       revenue_streams: [
         "Direct sales to restaurants and hotels (B2B)",
@@ -1448,7 +1447,7 @@ const businessIdeasData = {
       ],
       pricing_strategy: "Premium pricing 20-30% above organic produce due to superior freshness, consistency, and year-round availability."
     },
-    
+
     value_proposition: {
       primary: "Fresh, pesticide-free vegetables grown locally in urban environments with guaranteed quality and year-round availability.",
       secondary: [
@@ -1459,7 +1458,7 @@ const businessIdeasData = {
       ],
       competitive_advantage: "Only urban farming solution combining advanced technology with focus on Indian vegetables and local market needs."
     },
-    
+
     scale_path: {
       timeline: "Year 1: 1 facility, Year 2: 5 facilities across metros, Year 3: Franchise model with 20+ locations.",
       milestones: [
@@ -1470,14 +1469,14 @@ const businessIdeasData = {
         "Scale to 20 facilities with combined 10 tons monthly production"
       ]
     },
-    
+
     business_moats: [
       "Proprietary growing recipes optimized for Indian vegetables",
       "Strong supplier relationships and economies of scale",
       "Technology and automation expertise difficult to replicate",
       "Brand reputation and customer loyalty in premium segment"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Agricultural Science and Hydroponics",
@@ -1499,19 +1498,19 @@ const businessIdeasData = {
         "Community and Environmental Advocacy"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.4,
       total_reviews: 89
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=1200&h=600&fit=crop",
     location: "Metro Cities",
-    
+
     key_metrics: {
       customer_metrics: [
         "Crop yield per square foot vs traditional farming",
@@ -1524,7 +1523,7 @@ const businessIdeasData = {
         "Profit margins and break-even timeline"
       ]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹10 lakh (Manufacturing/Service hybrid)",
@@ -1533,46 +1532,46 @@ const businessIdeasData = {
       processing_time: "45-75 days"
     }
   },
-  
-  "4": {
-    id: 4,
+
+  7: {
+    id: 7,
     title: "Sustainable Fashion Marketplace",
     categories: ["Fashion", "E-commerce", "Sustainability"],
     summary: "Online platform connecting eco-conscious consumers with sustainable fashion brands and second-hand clothing, promoting circular fashion economy through curated sustainable brands and verified pre-owned designer items.",
-    
+
     investment: {
       amount: 4000000,
       currency: "INR",
       display: "₹40L",
       description: "Total initial capital for platform development, marketing, and initial inventory"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "4 months",
-    
+
     features: [
       "Curated sustainable fashion brands marketplace",
       "Verified second-hand designer clothing section",
       "Sustainability scoring system for brands and products",
       "Virtual try-on technology and size recommendation"
     ],
-    
+
     tech_stack: "React, Node.js, MongoDB, Stripe payments, AR/VR for virtual try-on, AI for size recommendations, social media integration.",
-    
+
     developing_your_idea: {
       concept: "Creating a trusted marketplace that makes sustainable fashion accessible and desirable for conscious Indian consumers.",
       innovation: "Sustainability scoring algorithm and virtual styling consultations specifically for Indian fashion preferences.",
       differentiation: "Focus on Indian sustainable brands with affordability options through curated second-hand luxury items.",
       timeline: "Platform development in 2 months, brand onboarding in 1 month, beta testing in 2 weeks, full launch in 4 months."
     },
-    
+
     market_analysis: {
       TAM: "₹1,25,000 Crore (Indian fashion and apparel market)",
       SAM: "₹15,000 Crore (Premium and sustainable fashion segment)",
       SOM: "₹300 Crore (Realistic capture with strong brand partnerships)",
       growth: "15.2% annual CAGR (2025-2030)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Myntra, Ajio for mainstream fashion",
@@ -1595,7 +1594,7 @@ const businessIdeasData = {
         "International sustainable brands entering India"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Environmentally conscious women aged 25-45",
@@ -1608,21 +1607,21 @@ const businessIdeasData = {
         "Limited variety in sustainable fashion choices"
       ]
     },
-    
+
     product_narrative: {
       problem: "Fashion-conscious consumers struggle to find affordable, verified sustainable fashion options and quality second-hand designer items in India.",
       solution: "A curated marketplace combining the best sustainable fashion brands with verified pre-owned luxury items, making conscious fashion accessible.",
       market: "₹1.25 trillion fashion market with growing 30% sustainable segment driven by millennial and Gen-Z consumers.",
       traction: "Initial brand partnerships secured with 25+ sustainable fashion brands and 500+ consignment items."
     },
-    
+
     investment_breakdown: {
       development: { amount: 1600000, percentage: 40, description: "Platform development, mobile app, features" },
       marketing: { amount: 1200000, percentage: 30, description: "Digital marketing, influencer partnerships, PR" },
       inventory: { amount: 800000, percentage: 20, description: "Initial consignment inventory, brand partnerships" },
       operations: { amount: 400000, percentage: 10, description: "Team, legal, office setup, tools" }
     },
-    
+
     funding_options: [
       {
         type: "Bootstrapping",
@@ -1637,7 +1636,7 @@ const businessIdeasData = {
         requirements: "User traction, revenue proof of concept"
       }
     ],
-    
+
     business_model: {
       revenue_streams: [
         "Commission on brand sales (15-25%)",
@@ -1647,7 +1646,7 @@ const businessIdeasData = {
       ],
       pricing_strategy: "Commission-based revenue model with competitive rates for brands, premium fees for enhanced visibility and marketing support."
     },
-    
+
     value_proposition: {
       primary: "Discover and shop verified sustainable fashion and authenticated second-hand luxury items in one trusted platform.",
       secondary: [
@@ -1658,7 +1657,7 @@ const businessIdeasData = {
       ],
       competitive_advantage: "Only platform combining new sustainable fashion with verified second-hand luxury, with sustainability scoring and Indian fashion focus."
     },
-    
+
     scale_path: {
       timeline: "Year 1: 50 brands, Year 2: 200 brands across categories, Year 3: International expansion and private label.",
       milestones: [
@@ -1669,14 +1668,14 @@ const businessIdeasData = {
         "Scale to 200+ brands and explore international markets"
       ]
     },
-    
+
     business_moats: [
       "Curated brand relationships and exclusive partnerships",
       "Reputation for authentic sustainability scoring",
       "Advanced virtual try-on technology and fit algorithms",
       "Strong community of conscious fashion consumers"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "E-commerce Platform Development",
@@ -1698,19 +1697,19 @@ const businessIdeasData = {
         "Creative Problem-Solving"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.2,
       total_reviews: 94
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop",
     location: "Metro Cities",
-    
+
     key_metrics: {
       customer_metrics: [
         "Brand partnerships and seller onboarding rate",
@@ -1723,7 +1722,7 @@ const businessIdeasData = {
         "Customer acquisition cost vs lifetime value"
       ]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector - Trading)",
@@ -1733,45 +1732,45 @@ const businessIdeasData = {
     }
   },
 
-  "5": {
-    id: 5,
+  8: {
+    id: 8,
     title: "Cloud Kitchen for Regional Cuisines",
     categories: ["Food & Beverage", "Technology", "Delivery"],
     summary: "Multi-brand cloud kitchen serving authentic regional Indian cuisines with online-only ordering, focusing on home-style cooking and fast delivery to urban consumers seeking authentic flavors.",
-    
+
     investment: {
       amount: 2500000,
       currency: "INR",
       display: "₹25L",
       description: "Complete cloud kitchen setup with equipment, licenses, and initial marketing"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "3 months",
-    
+
     features: [
       "Multi-brand operations under one kitchen",
       "Region-specific authentic recipes and ingredients",
       "Advanced order management and delivery tracking",
       "Data-driven menu optimization and demand forecasting"
     ],
-    
+
     tech_stack: "POS system, order management software, delivery aggregator integrations, inventory management, customer analytics dashboard.",
-    
+
     developing_your_idea: {
       concept: "Bringing authentic regional Indian cuisines to urban areas through optimized cloud kitchen operations with minimal overhead costs.",
       innovation: "AI-powered demand forecasting and dynamic menu optimization based on local preferences and seasonal trends.",
       differentiation: "Focus on authentic regional recipes with home-style cooking approach and premium ingredient sourcing.",
       timeline: "Kitchen setup in 6 weeks, equipment installation in 2 weeks, menu testing in 2 weeks, launch in 3 months."
     },
-    
+
     market_analysis: {
       TAM: "₹4,23,865 Crore (Indian food delivery market by 2028)",
       SAM: "₹63,580 Crore (Cloud kitchen segment)",
       SOM: "₹318 Crore (Regional cuisine cloud kitchen market)",
       growth: "12.8% annual CAGR (2024-2028)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Swiggy Cloud Kitchens, Zomato Kitchen Hub",
@@ -1794,7 +1793,7 @@ const businessIdeasData = {
         "Corporate catering and subscription meals"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Working professionals missing home-style regional food",
@@ -1807,7 +1806,7 @@ const businessIdeasData = {
         "Limited availability of home-style cooking"
       ]
     },
-    
+
     product_narrative: {
       problem: "Urban consumers struggle to find authentic regional Indian cuisines that match home-style cooking quality and taste.",
       solution: "Multi-brand cloud kitchen delivering authentic regional cuisines with traditional recipes and premium ingredients.",
@@ -1815,14 +1814,14 @@ const businessIdeasData = {
       traction: "Cloud kitchen market expected to grow 40% annually with increasing preference for online food ordering.",
       team: "Requires expertise in food operations, regional cuisine knowledge, supply chain, and digital marketing."
     },
-    
+
     business_moats: [
       "Authentic regional recipe database and chef network",
       "Optimized multi-brand operations reducing per-order costs",
       "Strong supplier relationships for regional ingredients",
       "Data-driven menu optimization and demand prediction"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Food Safety & Hygiene Management",
@@ -1843,19 +1842,19 @@ const businessIdeasData = {
         "Customer Service Excellence"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.3,
       total_reviews: 187
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=600&fit=crop",
     location: "Urban Areas",
-    
+
     key_metrics: {
       customer_metrics: [
         "Order frequency and customer retention rate",
@@ -1868,14 +1867,14 @@ const businessIdeasData = {
         "Monthly recurring revenue growth"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "15-20 positions",
       indirect_jobs: "8-12 delivery partner positions",
       job_categories: ["Chefs", "Kitchen Staff", "Operations"],
       skill_levels: ["Skilled culinary staff", "Operations management"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹10 lakh (Manufacturing category)",
@@ -1885,45 +1884,45 @@ const businessIdeasData = {
     }
   },
 
-  "6": {
-    id: 6,
+  9: {
+    id: 9,
     title: "Digital Health & Telemedicine Platform",
     categories: ["Healthcare", "Technology", "Service"],
     summary: "Comprehensive telemedicine platform connecting patients with verified doctors for consultations, health monitoring, and prescription management with AI-powered health assessments.",
-    
+
     investment: {
       amount: 8500000,
       currency: "INR",
       display: "₹85L",
       description: "Platform development, medical partnerships, regulatory compliance, and initial marketing"
     },
-    
+
     difficulty_level: "Hard",
     time_to_market: "8 months",
-    
+
     features: [
       "Video consultations with verified doctors",
       "AI-powered symptom checker and health assessment",
       "Digital prescription and medicine delivery",
       "Health records management and appointment scheduling"
     ],
-    
+
     tech_stack: "React Native, Node.js, MongoDB, WebRTC, AI/ML, Payment gateways, Cloud infrastructure, Security compliance (HIPAA).",
-    
+
     developing_your_idea: {
       concept: "Making healthcare accessible and affordable through technology-enabled medical consultations and health monitoring.",
       innovation: "AI-powered pre-consultation screening and multilingual support for rural and urban healthcare access.",
       differentiation: "Focus on regional languages, affordable pricing, and integration with local healthcare systems.",
       timeline: "Platform development in 4 months, doctor onboarding in 2 months, regulatory approvals in 2 months, launch in 8 months."
     },
-    
+
     market_analysis: {
       TAM: "₹3,72,000 Crore (Indian healthcare market by 2028)",
       SAM: "₹18,600 Crore (Digital health and telemedicine segment)",
       SOM: "₹930 Crore (Telemedicine platform market)",
       growth: "31.2% annual CAGR (2023-2028)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Practo, Apollo 24/7, Tata 1mg",
@@ -1946,7 +1945,7 @@ const businessIdeasData = {
         "Integration with insurance and government schemes"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Urban professionals seeking convenient healthcare",
@@ -1959,7 +1958,7 @@ const businessIdeasData = {
         "High costs of private healthcare"
       ]
     },
-    
+
     product_narrative: {
       problem: "Healthcare accessibility challenges with long waiting times, limited specialist availability, and high costs affecting quality care delivery.",
       solution: "Technology-enabled telemedicine platform providing instant access to qualified doctors with AI-powered health assessments.",
@@ -1967,14 +1966,14 @@ const businessIdeasData = {
       traction: "Government's National Digital Health Mission and post-pandemic acceptance driving rapid market growth.",
       team: "Requires healthcare technology expertise, medical partnerships, regulatory knowledge, and patient acquisition skills."
     },
-    
+
     business_moats: [
       "Verified doctor network and quality assurance",
       "AI-powered health assessment algorithms",
       "Regulatory compliance and medical data security",
       "Integration with healthcare ecosystem and insurance"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Healthcare Technology Development",
@@ -1995,19 +1994,19 @@ const businessIdeasData = {
         "Patient-Centric Approach"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.5,
       total_reviews: 234
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=1200&h=600&fit=crop",
     location: "Pan India",
-    
+
     key_metrics: {
       customer_metrics: [
         "Patient consultation frequency and satisfaction",
@@ -2020,14 +2019,14 @@ const businessIdeasData = {
         "Monthly recurring revenue growth"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "40-60 positions",
       indirect_jobs: "100-200 doctor partnerships",
       job_categories: ["Technology", "Healthcare Operations", "Customer Support"],
       skill_levels: ["High-skilled tech and healthcare professionals"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector category)",
@@ -2037,45 +2036,45 @@ const businessIdeasData = {
     }
   },
 
-  "7": {
-    id: 7,
+  10: {
+    id: 10,
     title: "Solar Energy Installation Service",
     categories: ["Renewable Energy", "Service", "Sustainability"],
     summary: "Solar panel installation and maintenance service for residential and commercial properties, providing end-to-end renewable energy solutions with financing options and government subsidy assistance.",
-    
+
     investment: {
       amount: 3500000,
       currency: "INR",
       display: "₹35L",
       description: "Equipment, vehicles, training, initial inventory, and working capital"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "4 months",
-    
+
     features: [
       "Residential and commercial solar installations",
       "Energy audit and customized system design",
       "Maintenance and monitoring services",
       "Government subsidy assistance and financing options"
     ],
-    
+
     tech_stack: "Solar design software, monitoring systems, CRM software, project management tools, IoT sensors for system monitoring.",
-    
+
     developing_your_idea: {
       concept: "Making solar energy accessible and affordable through professional installation services and comprehensive customer support.",
       innovation: "Smart monitoring systems and predictive maintenance using IoT sensors and data analytics.",
       differentiation: "Complete end-to-end service with financing support and long-term maintenance contracts.",
       timeline: "Team training in 2 months, equipment procurement in 1 month, first installations in 1 month, scale operations in 4 months."
     },
-    
+
     market_analysis: {
       TAM: "₹1,24,000 Crore (Indian solar energy market by 2030)",
       SAM: "₹31,000 Crore (Rooftop solar installation segment)",
       SOM: "₹620 Crore (Regional solar installation market)",
       growth: "20.5% annual CAGR (2023-2030)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Tata Power Solar, Adani Solar",
@@ -2098,7 +2097,7 @@ const businessIdeasData = {
         "Electric vehicle charging station integration"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Homeowners seeking to reduce electricity bills",
@@ -2111,7 +2110,7 @@ const businessIdeasData = {
         "Concerns about installation quality and maintenance"
       ]
     },
-    
+
     product_narrative: {
       problem: "Rising electricity costs and environmental concerns drive demand for solar energy, but installation complexity and high costs create barriers.",
       solution: "Professional solar installation service with financing support, quality assurance, and comprehensive maintenance.",
@@ -2119,14 +2118,14 @@ const businessIdeasData = {
       traction: "Government target of 40GW rooftop solar by 2025 and various subsidies creating strong market opportunity.",
       team: "Requires solar technology expertise, electrical installation skills, business development, and customer service capabilities."
     },
-    
+
     business_moats: [
       "Technical expertise and certified installation teams",
       "Partnerships with financing institutions",
       "Long-term maintenance contracts and customer relationships",
       "Local market knowledge and government policy expertise"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Solar System Design & Engineering",
@@ -2147,19 +2146,19 @@ const businessIdeasData = {
         "Problem-Solving & Troubleshooting"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.4,
       total_reviews: 145
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200&h=600&fit=crop",
     location: "Urban & Rural Areas",
-    
+
     key_metrics: {
       customer_metrics: [
         "Installation completion rate and timeline",
@@ -2172,14 +2171,14 @@ const businessIdeasData = {
         "Recurring maintenance revenue growth"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "20-30 positions",
       indirect_jobs: "15-25 contractor positions",
       job_categories: ["Electrical Technicians", "Sales", "Project Management"],
       skill_levels: ["Skilled technical workers", "Engineering graduates"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector category)",
@@ -2189,45 +2188,45 @@ const businessIdeasData = {
     }
   },
 
-  "8": {
-    id: 8,
+  11: {
+    id: 11,
     title: "Skill Development & Training Institute",
     categories: ["Education", "Skill Development", "Service"],
     summary: "Professional skill development institute offering industry-relevant courses in technology, digital marketing, and vocational skills with placement assistance and certification programs.",
-    
+
     investment: {
       amount: 4500000,
       currency: "INR",
       display: "₹45L",
       description: "Infrastructure setup, equipment, curriculum development, initial marketing"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "5 months",
-    
+
     features: [
       "Industry-relevant courses in high-demand skills",
       "Hands-on training with modern equipment and software",
       "Placement assistance and industry partnerships",
       "Online and offline course delivery options"
     ],
-    
+
     tech_stack: "Learning management system, video conferencing tools, assessment platforms, student information systems, digital content creation tools.",
-    
+
     developing_your_idea: {
       concept: "Bridging the skill gap by providing practical, industry-relevant training programs that enhance employability.",
       innovation: "Hybrid learning model with AI-powered personalized learning paths and real-world project-based training.",
       differentiation: "Strong industry partnerships for placements and curriculum designed by industry experts.",
       timeline: "Curriculum development in 2 months, infrastructure setup in 2 months, faculty recruitment in 1 month, launch in 5 months."
     },
-    
+
     market_analysis: {
       TAM: "₹93,000 Crore (Indian skill development market by 2025)",
       SAM: "₹18,600 Crore (Private skill development segment)",
       SOM: "₹465 Crore (Technology and digital skills training)",
       growth: "15.8% annual CAGR (2023-2025)"
     },
-    
+
     industry_structure: {
       competitors: [
         "NIIT, Aptech, Arena Animation",
@@ -2250,7 +2249,7 @@ const businessIdeasData = {
         "Specialized courses for emerging technologies"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Recent graduates seeking job-ready skills",
@@ -2263,7 +2262,7 @@ const businessIdeasData = {
         "High costs and time commitment for skill development"
       ]
     },
-    
+
     product_narrative: {
       problem: "Significant skill gap in the job market with traditional education not preparing students for industry requirements.",
       solution: "Comprehensive skill development institute providing practical, industry-relevant training with placement support.",
@@ -2271,14 +2270,14 @@ const businessIdeasData = {
       traction: "National Skill Development Mission and industry demand for skilled workers creating strong growth opportunities.",
       team: "Requires educational expertise, industry partnerships, curriculum development skills, and student placement capabilities."
     },
-    
+
     business_moats: [
       "Industry partnerships for curriculum and placements",
       "Experienced faculty and training methodology",
       "Strong placement track record and alumni network",
       "Government recognition and certification partnerships"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Curriculum Development & Design",
@@ -2299,19 +2298,19 @@ const businessIdeasData = {
         "Communication & Mentoring"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.3,
       total_reviews: 298
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop",
     location: "Urban Areas",
-    
+
     key_metrics: {
       customer_metrics: [
         "Student enrollment and course completion rates",
@@ -2324,14 +2323,14 @@ const businessIdeasData = {
         "Monthly recurring revenue from courses"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "25-40 positions",
       indirect_jobs: "Placement support for 200+ students annually",
       job_categories: ["Faculty", "Administration", "Placement Officers"],
       skill_levels: ["Qualified trainers", "Industry experts"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector category)",
@@ -2341,45 +2340,45 @@ const businessIdeasData = {
     }
   },
 
-  "9": {
-    id: 9,
+  12: {
+    id: 12,
     title: "Smart Home Automation Service",
     categories: ["Technology", "IoT", "Service"],
     summary: "Home automation service providing smart lighting, security, climate control, and energy management solutions with installation, maintenance, and customer support.",
-    
+
     investment: {
       amount: 2800000,
       currency: "INR",
       display: "₹28L",
       description: "Equipment inventory, vehicles, training, marketing, and working capital"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "4 months",
-    
+
     features: [
       "Smart lighting and climate control systems",
       "Home security and surveillance integration",
       "Energy monitoring and optimization",
       "Voice control and mobile app integration"
     ],
-    
+
     tech_stack: "IoT devices, mobile apps, cloud platforms, home networking equipment, automation controllers.",
-    
+
     developing_your_idea: {
       concept: "Making homes smarter and more efficient through integrated automation solutions that enhance comfort, security, and energy savings.",
       innovation: "AI-powered learning systems that adapt to homeowner preferences and predictive maintenance alerts.",
       differentiation: "End-to-end service from consultation to installation and ongoing support with local technician network.",
       timeline: "Product sourcing in 1.5 months, team training in 1.5 months, pilot installations in 1 month, full operations in 4 months."
     },
-    
+
     market_analysis: {
       TAM: "₹18,600 Crore (Indian smart home market by 2028)",
       SAM: "₹5,580 Crore (Home automation services segment)",
       SOM: "₹279 Crore (Regional home automation market)",
       growth: "25.3% annual CAGR (2023-2028)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Xiaomi, Amazon Alexa ecosystem",
@@ -2402,7 +2401,7 @@ const businessIdeasData = {
         "Subscription-based monitoring and maintenance"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Tech-savvy homeowners seeking convenience",
@@ -2415,7 +2414,7 @@ const businessIdeasData = {
         "Lack of technical support and maintenance"
       ]
     },
-    
+
     product_narrative: {
       problem: "Homeowners want smart home benefits but face installation complexity and ongoing maintenance challenges.",
       solution: "Professional home automation service providing seamless integration, installation, and ongoing support.",
@@ -2423,18 +2422,18 @@ const businessIdeasData = {
       traction: "Increasing smartphone penetration and IoT device affordability driving rapid market adoption.",
       team: "Requires IoT expertise, electrical installation skills, customer service, and technology integration knowledge."
     },
-    
+
     business_moats: [
       "Technical expertise in multi-brand integration",
       "Local installation and support network",
       "Customer relationships and ongoing service contracts",
       "Partnerships with device manufacturers and suppliers"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "IoT Systems Integration",
-        "Home Networking & Wireless Technologies", 
+        "Home Networking & Wireless Technologies",
         "Smart Device Installation & Configuration",
         "Mobile App Development & Support"
       ],
@@ -2451,19 +2450,19 @@ const businessIdeasData = {
         "Attention to Detail & Quality"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.2,
       total_reviews: 163
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=1200&h=600&fit=crop",
     location: "Urban Areas",
-    
+
     key_metrics: {
       customer_metrics: [
         "Installation completion rate and timeline",
@@ -2476,14 +2475,14 @@ const businessIdeasData = {
         "Monthly recurring revenue from maintenance"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "15-25 positions",
       indirect_jobs: "10-15 contractor positions",
       job_categories: ["Technical Installers", "Sales Consultants", "Customer Support"],
       skill_levels: ["Skilled technical workers", "Customer service professionals"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector category)",
@@ -2493,45 +2492,45 @@ const businessIdeasData = {
     }
   },
 
-  "10": {
-    id: 10,
+  13: {
+    id: 13,
     title: "Eco-Friendly Product Manufacturing",
     categories: ["Manufacturing", "Sustainability", "Consumer Goods"],
     summary: "Manufacturing biodegradable and eco-friendly alternatives to plastic products including bags, containers, cutlery, and packaging materials using sustainable raw materials.",
-    
+
     investment: {
       amount: 5500000,
       currency: "INR",
       display: "₹55L",
       description: "Manufacturing setup, machinery, raw materials, certifications, and initial marketing"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "6 months",
-    
+
     features: [
       "Biodegradable bags and packaging materials",
       "Compostable cutlery and food containers",
       "Eco-friendly cleaning and personal care products",
       "Sustainable raw material sourcing and processing"
     ],
-    
+
     tech_stack: "Manufacturing equipment, quality testing systems, supply chain management software, sustainability tracking tools.",
-    
+
     developing_your_idea: {
       concept: "Creating sustainable alternatives to plastic products while building environmentally responsible manufacturing processes.",
       innovation: "Advanced biodegradable material formulations and innovative production processes reducing environmental impact.",
       differentiation: "Focus on affordability, quality, and complete biodegradability with transparent sustainability metrics.",
       timeline: "Machinery setup in 3 months, certifications in 2 months, production trials in 1 month, full production in 6 months."
     },
-    
+
     market_analysis: {
       TAM: "₹1,86,000 Crore (Indian packaging market by 2030)",
       SAM: "₹37,200 Crore (Eco-friendly packaging segment)",
       SOM: "₹744 Crore (Biodegradable products market)",
       growth: "18.7% annual CAGR (2023-2030)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Enviro-friendly product manufacturers",
@@ -2554,7 +2553,7 @@ const businessIdeasData = {
         "B2B partnerships with eco-conscious brands"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Environmentally conscious consumers and businesses",
@@ -2567,7 +2566,7 @@ const businessIdeasData = {
         "Higher costs compared to traditional plastic products"
       ]
     },
-    
+
     product_narrative: {
       problem: "Plastic pollution crisis requires sustainable alternatives, but existing eco-friendly products are often expensive or low-quality.",
       solution: "High-quality, affordable biodegradable products manufactured using innovative sustainable processes.",
@@ -2575,14 +2574,14 @@ const businessIdeasData = {
       traction: "Government plastic ban policies and corporate sustainability commitments creating strong demand.",
       team: "Requires manufacturing expertise, sustainability knowledge, quality control, and supply chain management skills."
     },
-    
+
     business_moats: [
       "Proprietary biodegradable material formulations",
       "Established sustainable supply chain relationships",
       "Quality certifications and government approvals",
       "Brand reputation in sustainability and environmental responsibility"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Manufacturing Process Engineering",
@@ -2603,19 +2602,19 @@ const businessIdeasData = {
         "Stakeholder Communication & Transparency"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.4,
       total_reviews: 127
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&h=600&fit=crop",
     location: "Industrial Areas",
-    
+
     key_metrics: {
       customer_metrics: [
         "Product quality ratings and customer satisfaction",
@@ -2628,14 +2627,14 @@ const businessIdeasData = {
         "Revenue growth and market share"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "30-50 positions",
       indirect_jobs: "20-30 supplier/vendor positions",
       job_categories: ["Production Workers", "Quality Control", "Management"],
       skill_levels: ["Skilled manufacturing workers", "Technical supervisors"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Manufacturing category)",
@@ -2645,45 +2644,45 @@ const businessIdeasData = {
     }
   },
 
-  "11": {
-    id: 11,
+  14: {
+    id: 14,
     title: "Fitness & Wellness Center",
     categories: ["Health & Fitness", "Service", "Wellness"],
     summary: "Modern fitness center offering gym equipment, group classes, personal training, nutrition counseling, and wellness programs with state-of-the-art facilities and expert guidance.",
-    
+
     investment: {
       amount: 6000000,
       currency: "INR",
       display: "₹60L",
       description: "Equipment, facility setup, interior design, initial marketing, and working capital"
     },
-    
+
     difficulty_level: "Medium",
     time_to_market: "4 months",
-    
+
     features: [
       "Modern gym equipment and strength training area",
       "Group fitness classes and yoga studio",
       "Personal training and nutrition counseling",
       "Wellness programs and health assessments"
     ],
-    
+
     tech_stack: "Gym management software, fitness tracking apps, payment systems, member check-in systems, nutritional analysis tools.",
-    
+
     developing_your_idea: {
       concept: "Creating a comprehensive fitness ecosystem that promotes physical and mental wellness through expert guidance and modern facilities.",
       innovation: "AI-powered personalized workout plans and nutrition tracking with wearable device integration.",
       differentiation: "Holistic wellness approach combining fitness, nutrition, mental health, and community building.",
       timeline: "Space setup in 2 months, equipment installation in 1 month, staff training in 2 weeks, soft opening in 1 month, grand opening in 4 months."
     },
-    
+
     market_analysis: {
       TAM: "₹87,200 Crore (Indian fitness industry by 2026)",
       SAM: "₹13,080 Crore (Fitness centers and gyms segment)",
       SOM: "₹327 Crore (Regional fitness center market)",
       growth: "8.7% annual CAGR (2023-2026)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Cult.fit, Gold's Gym, Anytime Fitness",
@@ -2706,7 +2705,7 @@ const businessIdeasData = {
         "Online fitness programs and virtual training"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Health-conscious professionals seeking fitness",
@@ -2719,7 +2718,7 @@ const businessIdeasData = {
         "High membership costs without desired results"
       ]
     },
-    
+
     product_narrative: {
       problem: "Rising health issues and sedentary lifestyles require accessible fitness solutions, but many gyms lack personalization and holistic wellness approach.",
       solution: "Comprehensive fitness center providing personalized training, nutrition guidance, and supportive community environment.",
@@ -2727,14 +2726,14 @@ const businessIdeasData = {
       traction: "Increasing health consciousness and corporate wellness initiatives creating strong demand for quality fitness services.",
       team: "Requires fitness expertise, business management, customer service, and wellness program development skills."
     },
-    
+
     business_moats: [
       "Qualified trainer team and personalized programs",
       "Modern equipment and attractive facility design",
       "Community building and member retention programs",
       "Partnerships with healthcare providers and nutritionists"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Fitness Program Design & Training",
@@ -2755,19 +2754,19 @@ const businessIdeasData = {
         "Health & Wellness Advocacy"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.3,
       total_reviews: 312
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&h=600&fit=crop",
     location: "Urban Areas",
-    
+
     key_metrics: {
       customer_metrics: [
         "Member retention rate and attendance",
@@ -2780,14 +2779,14 @@ const businessIdeasData = {
         "Operating costs and profit margins"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "20-30 positions",
       indirect_jobs: "5-10 contractor positions",
       job_categories: ["Fitness Trainers", "Nutritionists", "Front Desk Staff"],
       skill_levels: ["Certified fitness professionals", "Customer service staff"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector category)",
@@ -2797,45 +2796,45 @@ const businessIdeasData = {
     }
   },
 
-  "12": {
-    id: 12,
+  15: {
+    id: 15,
     title: "Digital Marketing Agency",
     categories: ["Marketing", "Technology", "Service"],
     summary: "Full-service digital marketing agency providing social media marketing, SEO, content creation, paid advertising, and analytics services for businesses looking to grow their online presence.",
-    
+
     investment: {
       amount: 1800000,
       currency: "INR",
       display: "₹18L",
       description: "Office setup, software tools, initial team, marketing, and working capital"
     },
-    
+
     difficulty_level: "Easy",
     time_to_market: "2 months",
-    
+
     features: [
       "Social media management and content creation",
       "Search engine optimization and Google Ads",
       "Website design and development services",
       "Analytics and performance reporting"
     ],
-    
+
     tech_stack: "Marketing automation tools, analytics platforms, design software, CRM systems, social media management tools.",
-    
+
     developing_your_idea: {
       concept: "Helping businesses establish and grow their digital presence through comprehensive online marketing strategies.",
       innovation: "AI-powered content optimization and predictive analytics for campaign performance.",
       differentiation: "Focus on data-driven strategies with transparent reporting and measurable ROI.",
       timeline: "Team building in 3 weeks, tool setup in 2 weeks, first client onboarding in 2 weeks, scale operations in 2 months."
     },
-    
+
     market_analysis: {
       TAM: "₹58,000 Crore (Indian digital advertising market by 2025)",
       SAM: "₹17,400 Crore (Digital marketing services segment)",
       SOM: "₹435 Crore (SME digital marketing services)",
       growth: "27.2% annual CAGR (2023-2025)"
     },
-    
+
     industry_structure: {
       competitors: [
         "WATConsult, iProspect, Social Beat",
@@ -2858,7 +2857,7 @@ const businessIdeasData = {
         "Specialized services for specific industries"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Small and medium businesses seeking online growth",
@@ -2871,7 +2870,7 @@ const businessIdeasData = {
         "Keeping up with changing digital trends"
       ]
     },
-    
+
     product_narrative: {
       problem: "Businesses struggle with digital marketing complexity and lack expertise to effectively reach online audiences.",
       solution: "Comprehensive digital marketing services providing strategy, execution, and measurable results for business growth.",
@@ -2879,14 +2878,14 @@ const businessIdeasData = {
       traction: "Small business digitization and e-commerce growth creating strong demand for marketing services.",
       team: "Requires digital marketing expertise, creative skills, analytics knowledge, and client management capabilities."
     },
-    
+
     business_moats: [
       "Proven track record and case studies",
       "Specialized industry knowledge and expertise",
       "Strong client relationships and retention",
       "Proprietary tools and data-driven methodologies"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Digital Marketing Strategy & Planning",
@@ -2907,19 +2906,19 @@ const businessIdeasData = {
         "Trend Awareness & Adaptability"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.4,
       total_reviews: 189
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop",
     location: "Urban Areas",
-    
+
     key_metrics: {
       customer_metrics: [
         "Client retention rate and satisfaction",
@@ -2932,14 +2931,14 @@ const businessIdeasData = {
         "Revenue growth and market share"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "10-20 positions",
       indirect_jobs: "5-10 freelancer positions",
       job_categories: ["Digital Marketers", "Content Creators", "Analysts"],
       skill_levels: ["Digital marketing professionals", "Creative specialists"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector category)",
@@ -2949,45 +2948,45 @@ const businessIdeasData = {
     }
   },
 
-  "13": {
-    id: 13,
+  16: {
+    id: 16,
     title: "Mobile Food Truck Business",
     categories: ["Food & Beverage", "Mobile Service", "Retail"],
     summary: "Mobile food truck serving specialty cuisines and innovative food concepts with flexible location strategy targeting office complexes, events, and high-traffic areas.",
-    
+
     investment: {
       amount: 1200000,
       currency: "INR",
       display: "₹12L",
       description: "Food truck vehicle, kitchen equipment, permits, initial inventory, and marketing"
     },
-    
+
     difficulty_level: "Easy",
     time_to_market: "3 months",
-    
+
     features: [
       "Specialty cuisine with unique menu offerings",
       "Mobile POS system and digital payments",
       "Social media integration for location updates",
       "Catering services for events and corporate offices"
     ],
-    
+
     tech_stack: "Mobile POS system, GPS tracking, social media management, food safety monitoring, mobile payment solutions.",
-    
+
     developing_your_idea: {
       concept: "Bringing gourmet food experiences directly to customers through strategic mobile operations and innovative menu concepts.",
       innovation: "Data-driven location optimization and customer preference tracking for menu development.",
       differentiation: "Focus on high-quality, Instagram-worthy food with strong social media presence and customer engagement.",
       timeline: "Truck procurement and setup in 6 weeks, permits and licenses in 4 weeks, menu testing in 2 weeks, launch in 3 months."
     },
-    
+
     market_analysis: {
       TAM: "₹4,23,865 Crore (Indian food service market by 2028)",
       SAM: "₹21,193 Crore (Street food and quick service segment)",
       SOM: "₹106 Crore (Mobile food service market)",
       growth: "9.8% annual CAGR (2023-2028)"
     },
-    
+
     industry_structure: {
       competitors: [
         "Local street food vendors",
@@ -3010,7 +3009,7 @@ const businessIdeasData = {
         "Multiple truck fleet expansion"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Office workers seeking convenient lunch options",
@@ -3023,7 +3022,7 @@ const businessIdeasData = {
         "Expensive food options in business districts"
       ]
     },
-    
+
     product_narrative: {
       problem: "Urban workers struggle to find convenient, affordable, and quality food options during busy work schedules.",
       solution: "Mobile food truck delivering gourmet food experiences directly to customers at convenient locations and times.",
@@ -3031,14 +3030,14 @@ const businessIdeasData = {
       traction: "Growing acceptance of street food culture and social media-driven food discovery creating opportunities.",
       team: "Requires culinary skills, food safety knowledge, business operations, and customer service expertise."
     },
-    
+
     business_moats: [
       "Unique menu and food preparation expertise",
       "Strategic location knowledge and customer base",
       "Strong social media presence and brand recognition",
       "Efficient operations and cost management"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "Culinary Arts & Food Preparation",
@@ -3059,19 +3058,19 @@ const businessIdeasData = {
         "Community Engagement & Networking"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.2,
       total_reviews: 256
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1558618042-c8d2893df4ac?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=1200&h=600&fit=crop",
     location: "Urban Areas",
-    
+
     key_metrics: {
       customer_metrics: [
         "Daily customer count and repeat visits",
@@ -3084,14 +3083,14 @@ const businessIdeasData = {
         "Monthly growth and seasonal performance"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "3-6 positions",
       indirect_jobs: "2-4 supplier relationships",
       job_categories: ["Chef/Cook", "Service Staff", "Driver"],
       skill_levels: ["Skilled culinary staff", "Customer service workers"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹10 lakh (Manufacturing/Service category)",
@@ -3101,45 +3100,45 @@ const businessIdeasData = {
     }
   },
 
-  "14": {
-    id: 14,
+  17: {
+    id: 17,
     title: "E-Learning Platform for Kids",
     categories: ["Education", "Technology", "Children"],
     summary: "Interactive e-learning platform for children aged 5-15 with gamified lessons, personalized learning paths, and parental monitoring for core academic subjects and skill development.",
-    
+
     investment: {
       amount: 7500000,
       currency: "INR",
       display: "₹75L",
       description: "Platform development, content creation, marketing, team, and technology infrastructure"
     },
-    
+
     difficulty_level: "Hard",
     time_to_market: "8 months",
-    
+
     features: [
       "Interactive lessons with games and animations",
       "Personalized learning paths based on child's pace",
       "Progress tracking and parental dashboards",
       "Live tutoring sessions and doubt clearing"
     ],
-    
+
     tech_stack: "React, Node.js, MongoDB, video streaming, gamification engine, learning analytics, payment gateways, mobile apps.",
-    
+
     developing_your_idea: {
       concept: "Making learning fun and effective for children through technology-enabled interactive education with personalized approach.",
       innovation: "AI-powered adaptive learning that adjusts content difficulty and teaching style based on child's learning patterns.",
       differentiation: "Focus on Indian curriculum alignment with multilingual support and culturally relevant content.",
       timeline: "Content development in 4 months, platform development in 3 months, testing in 1 month, launch in 8 months."
     },
-    
+
     market_analysis: {
       TAM: "₹1,33,000 Crore (Indian EdTech market by 2025)",
       SAM: "₹39,900 Crore (K-12 online education segment)",
       SOM: "₹1,995 Crore (Interactive learning platform market)",
       growth: "39.7% annual CAGR (2023-2025)"
     },
-    
+
     industry_structure: {
       competitors: [
         "BYJU'S, Vedantu, Unacademy",
@@ -3162,7 +3161,7 @@ const businessIdeasData = {
         "International market expansion with localized content"
       ]
     },
-    
+
     user_personas: {
       target_users: [
         "Parents seeking supplementary education for children",
@@ -3175,7 +3174,7 @@ const businessIdeasData = {
         "Lack of engaging and interactive learning materials"
       ]
     },
-    
+
     product_narrative: {
       problem: "Traditional education methods don't cater to individual learning styles, and parents struggle to provide quality supplementary education.",
       solution: "Interactive e-learning platform with personalized content, gamification, and comprehensive progress tracking.",
@@ -3183,14 +3182,14 @@ const businessIdeasData = {
       traction: "Post-pandemic shift to online learning and increasing parental focus on child education creating strong demand.",
       team: "Requires EdTech expertise, content development, child psychology, technology development, and education marketing skills."
     },
-    
+
     business_moats: [
       "Proprietary adaptive learning algorithms",
       "High-quality, curriculum-aligned content library",
       "Strong user engagement and retention rates",
       "Partnerships with schools and educational institutions"
     ],
-    
+
     skills_required: {
       technical_skills: [
         "EdTech Platform Development",
@@ -3211,19 +3210,19 @@ const businessIdeasData = {
         "Family Communication & Trust Building"
       ]
     },
-    
+
     ratings_reviews: {
       average_rating: 4.6,
       total_reviews: 278
     },
-    
+
     images: [
       "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=500&fit=crop",
       "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=800&h=500&fit=crop"
     ],
     heroImage: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop",
     location: "Pan India",
-    
+
     key_metrics: {
       customer_metrics: [
         "Student engagement time and learning progress",
@@ -3236,14 +3235,14 @@ const businessIdeasData = {
         "Content development ROI and platform scalability"
       ]
     },
-    
+
     employment_generation: {
       direct_jobs: "35-50 positions",
       indirect_jobs: "20-30 content creator positions",
       job_categories: ["Developers", "Content Creators", "Education Specialists"],
       skill_levels: ["High-skilled technology and education professionals"]
     },
-    
+
     pmegp_summary: {
       eligible: true,
       max_loan: "₹25 lakh (Service sector category)",
@@ -3254,14 +3253,18 @@ const businessIdeasData = {
   }
 };
 
+interface heroProps {
+   idea: any,
+    onhandleShare: (summary:string) => void 
+}
 // Enhanced components for better UI
-const HeroSection = memo(({ idea }: { idea: any }) => (
+const HeroSection = memo(({ idea,onhandleShare }: heroProps) => (
   <div className="bg-white border-b">
     <div className="container mx-auto px-4 py-8">
       <div className="grid lg:grid-cols-2 gap-8 items-center">
         {/* Left Half - Image */}
         <div className="relative">
-          <img 
+          <img
             src={idea.heroImage || idea.images[0]}
             alt={idea.title}
             className="w-full h-80 lg:h-96 object-cover rounded-lg shadow-lg"
@@ -3274,7 +3277,7 @@ const HeroSection = memo(({ idea }: { idea: any }) => (
             ))}
           </div>
         </div>
-        
+
         {/* Right Half - Key Information */}
         <div className="space-y-6">
           <div>
@@ -3286,7 +3289,7 @@ const HeroSection = memo(({ idea }: { idea: any }) => (
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{idea.title}</h1>
             <p className="text-lg text-gray-600 leading-relaxed">{idea.summary}</p>
           </div>
-          
+
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-blue-50 p-4 rounded-lg text-center">
@@ -3309,7 +3312,7 @@ const HeroSection = memo(({ idea }: { idea: any }) => (
               <div className="text-sm text-gray-600">{idea.ratings_reviews.total_reviews} Reviews</div>
             </div>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3">
             <Link href="/auth">
@@ -3324,7 +3327,7 @@ const HeroSection = memo(({ idea }: { idea: any }) => (
                 Ask Expert
               </Button>
             </Link>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => onhandleShare(idea.summary || [])}>
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>
@@ -3340,15 +3343,31 @@ export default function IdeaDetail() {
   const [, params] = useRoute("/idea/:id");
   const ideaId = params?.id || "1";
 
-  
-  const idea = businessIdeasData[ideaId as keyof typeof businessIdeasData] || businessIdeasData["1"];
-  
-  const [activeTab, setActiveTab] = useState("overview");
 
+  const idea = businessIdeasData[ideaId as keyof typeof businessIdeasData] || businessIdeasData["1"];
+
+  const [activeTab, setActiveTab] = useState("overview");
+  const handleShare = async (summary: string) => {
+    console.log("Sharing summary:", summary);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+           text:summary
+        });
+        console.log('Successfully shared');
+      } catch (error) {
+        console.log('Error sharing:', error);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-3">
@@ -3363,7 +3382,7 @@ export default function IdeaDetail() {
       </div>
 
       {/* Hero Section */}
-      <HeroSection idea={idea} />
+      <HeroSection idea={idea} onhandleShare={handleShare} />
 
       {/* Tab Navigation */}
       <div className="bg-white border-b sticky top-16 z-40">
@@ -3382,11 +3401,10 @@ export default function IdeaDetail() {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-2 py-4 px-2 border-b-2 whitespace-nowrap text-sm font-medium transition-colors ${
-                    activeTab === tab.key
+                  className={`flex items-center gap-2 py-4 px-2 border-b-2 whitespace-nowrap text-sm font-medium transition-colors ${activeTab === tab.key
                       ? "border-blue-600 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
+                    }`}
                 >
                   <Icon className="h-4 w-4" />
                   {tab.label}
@@ -3401,10 +3419,10 @@ export default function IdeaDetail() {
       <div className="py-8">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-4 gap-8">
-            
+
             {/* Main Content - 3 columns */}
             <div className="lg:col-span-3 space-y-8">
-              
+
               {activeTab === "overview" && (
                 <div className="space-y-6">
                   {/* Product Narrative */}
@@ -3545,9 +3563,9 @@ export default function IdeaDetail() {
                           </ul>
                         </div>
                       </div>
-                      
+
                       <Separator className="my-6" />
-                      
+
                       <div className="grid md:grid-cols-2 gap-6">
                         <div>
                           <h4 className="font-semibold mb-3 text-green-700">Market Trends</h4>
@@ -3628,12 +3646,12 @@ export default function IdeaDetail() {
                         <div className="text-4xl font-bold text-green-600 mb-2">{idea.investment.display}</div>
                         <p className="text-gray-600">{idea.investment.description}</p>
                       </div>
-                      
+
                       <div className="grid md:grid-cols-2 gap-6">
                         <div>
-                          <h4 className="font-semibold mb-4 text-blue-700">Fixed Capital (₹{idea.investment_breakdown.fixed_capital.total_fixed_capital})</h4>
+                          <h4 className="font-semibold mb-4 text-blue-700">Fixed Capital (₹{idea?.investment_breakdown?.fixed_capital?.total_fixed_capital})</h4>
                           <div className="space-y-3">
-                            {Object.entries(idea.investment_breakdown.fixed_capital).filter(([key]) => key !== 'total_fixed_capital').map(([item, amount]) => (
+                            {Object.entries(idea?.investment_breakdown?.fixed_capital).filter(([key]) => key !== 'total_fixed_capital').map(([item, amount]) => (
                               <div key={item} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                                 <span className="text-sm font-medium">{item.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
                                 <span className="text-sm font-bold text-blue-600">{amount as string}</span>
@@ -3641,7 +3659,7 @@ export default function IdeaDetail() {
                             ))}
                           </div>
                         </div>
-                        
+
                         <div>
                           <h4 className="font-semibold mb-4 text-purple-700">Working Capital (₹{idea.investment_breakdown.working_capital.total_working_capital})</h4>
                           <div className="space-y-3">
@@ -3727,7 +3745,7 @@ export default function IdeaDetail() {
                               <h4 className="text-lg font-semibold text-gray-900">{option.type}</h4>
                               <Badge className="bg-green-100 text-green-800 text-lg px-3 py-1">{option.display_amount}</Badge>
                             </div>
-                            
+
                             {option.sources && (
                               <div className="mb-3">
                                 <span className="text-sm font-medium text-gray-700">Sources:</span>
@@ -3738,7 +3756,7 @@ export default function IdeaDetail() {
                                 ))}
                               </div>
                             )}
-                            
+
                             {option.options && (
                               <div className="mb-3">
                                 <span className="text-sm font-medium text-gray-700">Options:</span>
@@ -3749,7 +3767,7 @@ export default function IdeaDetail() {
                                 ))}
                               </div>
                             )}
-                            
+
                             {option.schemes && (
                               <div className="mb-3">
                                 <span className="text-sm font-medium text-gray-700">Government Schemes:</span>
@@ -3760,7 +3778,7 @@ export default function IdeaDetail() {
                                 ))}
                               </div>
                             )}
-                            
+
                             <div className="flex justify-between text-sm text-gray-500 mt-4">
                               <span>Timeline: {option.timeline}</span>
                               {option.repayment_period && <span>Repayment: {option.repayment_period}</span>}
@@ -3794,7 +3812,7 @@ export default function IdeaDetail() {
                               ))}
                             </div>
                           </div>
-                          
+
                           <div>
                             <h4 className="font-semibold mb-3 text-green-700">Benefits</h4>
                             <ul className="space-y-1">
@@ -3807,7 +3825,7 @@ export default function IdeaDetail() {
                             </ul>
                           </div>
                         </div>
-                        
+
                         <div>
                           <h4 className="font-semibold mb-3 text-purple-700">Eligibility Criteria</h4>
                           <ul className="grid md:grid-cols-2 gap-2">
@@ -3988,7 +4006,7 @@ export default function IdeaDetail() {
 
             {/* Sidebar - 1 column */}
             <div className="space-y-6">
-              
+
               {/* Quick Actions */}
               <Card>
                 <CardHeader>

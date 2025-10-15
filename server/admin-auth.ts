@@ -3,8 +3,8 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 import { eq, and } from 'drizzle-orm';
-import { db } from './db';
-import { adminUsers, adminSessions, adminActivityLogs } from '@shared/schema';
+import { db } from './db.js';
+import { adminUsers, adminSessions, adminActivityLogs } from '../shared/schema.js';
 
 const JWT_SECRET = process.env.ADMIN_JWT_SECRET || crypto.randomBytes(64).toString('hex');
 console.log('JWT_SECRET used:', JWT_SECRET);

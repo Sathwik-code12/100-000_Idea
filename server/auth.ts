@@ -4,12 +4,12 @@ import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { storage } from "./storage";
-import { User as SchemaUser } from "@shared/schema";
+import { storage } from "./storage.js";
+import { User as SchemaUser } from "../shared/schema.js";
 
 declare global {
   namespace Express {
-    interface User extends SchemaUser {}
+    interface User extends SchemaUser { }
   }
 }
 
@@ -79,7 +79,7 @@ export function setupAuth(app: Express) {
   app.post("/api/register", async (req, res, next) => {
     try {
       const { name, email, password } = req.body;
-      
+
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
@@ -115,7 +115,7 @@ export function setupAuth(app: Express) {
       if (!user) {
         // Handle user not found case specifically - new user needs to sign up
         if (info?.message === "USER_NOT_FOUND") {
-          return res.status(404).json({ 
+          return res.status(404).json({
             message: "Account not found. Please sign up first to create your account.",
             code: "USER_NOT_FOUND",
             type: "NO_ACCOUNT",
@@ -124,14 +124,14 @@ export function setupAuth(app: Express) {
         }
         // Handle wrong password case - existing user with wrong password
         if (info?.message === "INVALID_PASSWORD") {
-          return res.status(401).json({ 
+          return res.status(401).json({
             message: "Invalid email or password. Please try again.",
             code: "INVALID_PASSWORD",
             type: "WRONG_CREDENTIALS"
           });
         }
         // Handle other authentication failures
-        return res.status(401).json({ 
+        return res.status(401).json({
           message: "Authentication failed. Please try again.",
           code: "AUTH_FAILED",
           type: "GENERAL_ERROR"
@@ -158,9 +158,9 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    /* if (!req.isAuthenticated()) {
+    if (!req.isAuthenticated()) {
       return res.sendStatus(401);
-    } */
+    }
     const user = req.user as SchemaUser;
     res.json({
       id: user.id,
@@ -170,4 +170,65 @@ export function setupAuth(app: Express) {
       updatedAt: user.updatedAt,
     });
   });
+  // Express route
+  app.put("/api/user/update", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    const {
+      id, // user id must come from request (or session)
+      name,
+      last_name,
+      phone,
+      gender,
+      age,
+      aadhar_id,
+      annual_income,
+      caste,
+      area,
+      address,
+      email,
+      password
+    } = req.body;
+
+    try {
+      // Check if email is changing
+      if (email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== id) {
+          return res.status(400).json({ message: "Email already registered" });
+        }
+      }
+
+      // Hash password if provided
+      let hashedPassword = password;
+      if (password) {
+        const bcrypt = await import("bcrypt");
+        hashedPassword = await bcrypt.hash(password, 10);
+      }
+
+      const updatedUser = await storage.updateUser({
+        id,
+        name,
+        last_name,
+        phone,
+        gender,
+        age,
+        aadhar_id,
+        annual_income,
+        caste,
+        area,
+        address,
+        email,
+        password: hashedPassword,
+      });
+
+      return res.json({ message: "User updated successfully", user: updatedUser });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
+
 }

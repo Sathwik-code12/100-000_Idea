@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite-setup";
-import { AdminAuthService } from "./admin-auth";
+import { registerRoutes } from "./routes.js";
+import { setupVite, serveStatic, log } from "./vite-setup.js";
+import { AdminAuthService } from "./admin-auth.js";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 

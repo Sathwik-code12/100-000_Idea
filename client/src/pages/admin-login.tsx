@@ -9,7 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Shield, Lock } from "lucide-react";
 
 export default function AdminLogin() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [credentials, setCredentials] = useState({
     email: "",
     password: ""
@@ -18,6 +18,7 @@ export default function AdminLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
+      console.log('==Admin login data://', data);
       const response = await fetch("/api/admin/login", {
         method: "POST",
         body: JSON.stringify(data),
@@ -25,7 +26,7 @@ export default function AdminLogin() {
           "Content-Type": "application/json"
         }
       });
-      
+      console.log('==Admin login response://', response.ok);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: "Login failed" }));
         throw new Error(errorData.error || "Login failed");

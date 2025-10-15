@@ -1,13 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { insertSubmittedIdeaSchema } from "@shared/schema";
+import { storage } from "./storage.js";
+import { insertemailSubscribers, insertSubmittedIdeaSchema } from "../shared/schema.js";
 import { fromZodError } from "zod-validation-error";
-import { setupAuth } from "./auth";
-import { setupCampaignRoutes } from "./campaign-api";
-import { registerAiRoutes } from "./ai-routes";
-import adminRoutes from "./admin-routes";
-import { AdminAuthService } from "./admin-auth";
+import { setupAuth } from "./auth.js";
+import { setupCampaignRoutes } from "./campaign-api.js";
+import { registerAiRoutes } from "./ai-routes.js";
+import adminRoutes from "./admin-routes.js";
+import { AdminAuthService } from "./admin-auth.js";
 
 // Simple in-memory cache for better performance
 const cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
@@ -15,12 +15,12 @@ const cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
 function getFromCache(key: string): any | null {
   const cached = cache.get(key);
   if (!cached) return null;
-  
+
   if (Date.now() - cached.timestamp > cached.ttl) {
     cache.delete(key);
     return null;
   }
-  
+
   return cached.data;
 }
 
@@ -36,16 +36,16 @@ const RATE_LIMIT_MAX = 60; // 60 requests per minute per IP
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
-  
+
   if (!entry || now > entry.resetTime) {
     rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
     return false;
   }
-  
+
   if (entry.count >= RATE_LIMIT_MAX) {
     return true;
   }
-  
+
   entry.count++;
   return false;
 }
@@ -53,12 +53,12 @@ function isRateLimited(ip: string): boolean {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize admin system
   await AdminAuthService.initializeAdminUsers();
-  
+
   // Setup authentication routes and middleware
   setupAuth(app);
   setupCampaignRoutes(app);
   registerAiRoutes(app);
-  
+
   // Setup admin routes
   // Admin routes
   app.use("/api/admin", adminRoutes);
@@ -66,36 +66,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rate limiting middleware
   app.use("/api", (req, res, next) => {
     const clientIp = req.ip || req.connection.remoteAddress || "unknown";
-    
+
     if (isRateLimited(clientIp)) {
       return res.status(429).json({
         success: false,
         message: "Too many requests, please try again later"
       });
     }
-    
+
     next();
   });
 
-  app.post("/api/search",async (req, res) => {
-    try { 
-      const { query } = req.body;
-      if (!query || typeof query !== "string" || query.trim().length === 0) {
+  app.get("/api/search", async (req, res) => {
+    try {
+      const { search = "", category = "", location = "" } = req.query;
+
+      console.log("Search query received:", { search, category, location });
+
+      // Validate inputs
+      if (typeof search !== "string" || typeof category !== "string" || typeof location !== "string") {
         return res.status(400).json({
           success: false,
-          message: "Invalid search query"
+          message: "Search, category, and location must be strings",
         });
       }
-      const results = await storage.search(query);
-      res.json({
+
+      // Trim inputs safely
+      const cleanSearch = search.trim();
+      const cleanCategory = category.trim();
+      const cleanLocation = location.trim();
+
+      // Optional: check for empty search term
+      if (!cleanSearch && !cleanCategory && !cleanLocation) {
+        return res.status(400).json({
+          success: false,
+          message: "At least one search parameter is required",
+        });
+      }
+
+      // Call your storage search function
+      const results = await storage.search(cleanSearch, cleanCategory, cleanLocation);
+
+      return res.json({
         success: true,
-        results
+        results,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error performing search:", error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
-        message: "Internal server error"
+        message: "Internal server error",
       });
     }
   });
@@ -108,20 +128,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request body and ensure tags is an array
       const validatedData = insertSubmittedIdeaSchema.parse(req.body);
       const { tags = [], ...ideaData } = req.body;
-      
+
       // Create the idea in storage
       const submittedIdea = await storage.createSubmittedIdea({
         ...validatedData,
         tags: Array.isArray(tags) ? tags : []
       });
-      
+
       // Invalidate ideas cache since we added a new one
       cache.delete("submitted-ideas");
-      
+
       // Set security headers
       res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("X-Frame-Options", "DENY");
-      
+
       res.status(201).json({
         success: true,
         message: "Idea submitted successfully",
@@ -154,11 +174,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/email-subscribers", async (req, res) => {
+    const startTime = Date.now();
+    try {
+      // Validate the request body and ensure tags is an array
+      const validatedData = insertemailSubscribers.parse(req.body);
+      const { tags = [], ...ema } = req.body;
+
+      // Create the idea in storage
+      const submittedIdea = await storage.createEmailSubscribers({
+        ...validatedData,
+        //tags: Array.isArray(tags) ? tags : []
+      });
+
+      // Invalidate ideas cache since we added a new one
+      cache.delete("submitted-ideas");
+
+      // Set security headers
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("X-Frame-Options", "DENY");
+
+      res.status(201).json({
+        success: true,
+        message: "email subscribed successfully",
+        idea: submittedIdea,
+        _meta: {
+          processTime: Date.now() - startTime
+        }
+      });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        const validationError = fromZodError(error);
+        res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: validationError.details,
+          _meta: {
+            processTime: Date.now() - startTime
+          }
+        });
+      } else {
+        console.error("Error submitting idea:", error);
+        res.status(500).json({
+          success: false,
+          message: "Internal server error",
+          _meta: {
+            processTime: Date.now() - startTime
+          }
+        });
+      }
+    }
+  });
   // Get all submitted ideas with caching
   app.get("/api/submitted-ideas", async (req, res) => {
     const startTime = Date.now();
     const cacheKey = "submitted-ideas";
-    
+
     try {
       // Check cache first
       const cachedIdeas = getFromCache(cacheKey);
@@ -175,13 +246,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const ideas = await storage.getSubmittedIdeas();
-      
+
       // Cache the result for 5 minutes
       setCache(cacheKey, ideas, 300000);
-      
+
       res.setHeader("X-Cache", "MISS");
       res.setHeader("Cache-Control", "public, max-age=300"); // Client-side cache for 5 minutes
-      
+
       res.json({
         success: true,
         ideas,
@@ -201,6 +272,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Get all submitted ideas with caching
+  app.get("/api/platformideas", async (req, res) => {
+    const startTime = Date.now();
+    const cacheKey = "platformideas";
+
+    try {
+      // Check cache first
+      const cachedIdeas = getFromCache(cacheKey);
+      if (cachedIdeas) {
+        res.setHeader("X-Cache", "HIT");
+        return res.json({
+          success: true,
+          ideas: cachedIdeas,
+          _meta: {
+            processTime: Date.now() - startTime,
+            cached: true
+          }
+        });
+      }
+
+      const ideas = await storage.getPlatformIdeas();
+
+      // Cache the result for 5 minutes
+      setCache(cacheKey, ideas, 300000);
+
+      res.setHeader("X-Cache", "MISS");
+      res.setHeader("Cache-Control", "public, max-age=300"); // Client-side cache for 5 minutes
+
+      res.json({
+        success: true,
+        ideas,
+        _meta: {
+          processTime: Date.now() - startTime,
+          cached: false
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching ideas:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        _meta: {
+          processTime: Date.now() - startTime
+        }
+      });
+    }
+  });
+
 
   // Get submitted idea by ID
   app.get("/api/submitted-ideas/:id", async (req, res) => {
@@ -257,54 +377,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Internal server error"
-      });
-    }
-  });
-
-// Get all Plateform ideas with caching
-  app.get("/api/plateform-ideas", async (req, res) => {
-    const startTime = Date.now();
-    const cacheKey = "submitted-ideas";
-    
-    try {
-      // Check cache first
-      const cachedIdeas = getFromCache(cacheKey);
-      if (cachedIdeas) {
-        res.setHeader("X-Cache", "HIT");
-        return res.json({
-          success: true,
-          ideas: cachedIdeas,
-          _meta: {
-            processTime: Date.now() - startTime,
-            cached: true
-          }
-        });
-      }
-
-      const ideas = await storage.getPlateFormIdeas();
-      
-      // Cache the result for 5 minutes
-      setCache(cacheKey, ideas, 300000);
-      
-      res.setHeader("X-Cache", "MISS");
-      res.setHeader("Cache-Control", "public, max-age=300"); // Client-side cache for 5 minutes
-      
-      res.json({
-        success: true,
-        ideas,
-        _meta: {
-          processTime: Date.now() - startTime,
-          cached: false
-        }
-      });
-    } catch (error: any) {
-      console.error("Error fetching ideas:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-        _meta: {
-          processTime: Date.now() - startTime
-        }
       });
     }
   });

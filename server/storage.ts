@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { CompetitorSchema } from "../shared/schema";
+import { CompetitorSchema } from "../shared/schema.js";
 import { 
   type User, 
   type InsertUser, 
   type SubmittedIdea, 
+  type PlatformIdea,
   type InsertSubmittedIdea,
   type Campaign,
   type InsertCampaign,
@@ -17,17 +18,18 @@ import {
   type InsertAiGenerationSession,
   users,
   submittedIdeas,
-  platformIdeas
+  platformIdeas,
   campaigns,
   investments,
   paymentTransactions,
   aiGeneratedIdeas,
-  aiGenerationSessions
-} from "@shared/schema";
+  aiGenerationSessions,
+  emailSubscribers,
+} from "../shared/schema.js";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { db } from "./db.js";
+import { eq,and,ilike } from "drizzle-orm";
 
 function parseStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -113,7 +115,24 @@ export class DatabaseStorage implements IStorage {
     const [newUser] = await db.insert(users).values(user).returning();
     return newUser;
   }
+  // Storage function
+async updateUser(user: any): Promise<User> {
+  if (!user.id) throw new Error("User ID is required");
 
+  const [updatedUser] = await db
+    .update(users)
+    .set(user)
+    .where(eq(users.id, user.id))
+    .returning();
+
+  return updatedUser;
+}
+
+
+  async createEmailSubscribers(email_id:emailSubscribers ): Promise<emailSubscribers> {
+    const [subscribed] = await db.insert(emailSubscribers).values(email_id).returning();
+    return subscribed;
+  }
   // Submitted Ideas methods
   async createSubmittedIdea(idea: InsertSubmittedIdea & { tags: string[] }): Promise<SubmittedIdea> {
     const [newIdea] = await db.insert(submittedIdeas).values({
@@ -122,7 +141,9 @@ export class DatabaseStorage implements IStorage {
     }).returning();
     return newIdea;
   }
-
+  async getPlatformIdeas(): Promise<PlatformIdea[]> {
+    return await db.select().from(platformIdeas);
+  }
   async getSubmittedIdeas(): Promise<SubmittedIdea[]> {
     return await db.select().from(submittedIdeas);
   }
@@ -282,6 +303,27 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(aiGeneratedIdeas).where(eq(aiGeneratedIdeas.userId, userId));
   }
 
+   async search(search: string, category?: string, location?: string): Promise<PlatformIdea[]> {
+    const conditions = [];
+  
+  // Always search in title
+  conditions.push(ilike(platformIdeas.title, `%${search}%`));
+  
+  // Add category if provided
+  if (category && category.length > 0) {
+    conditions.push(eq(platformIdeas.category, category));
+  }
+  
+  // Add location if provided
+  if (location && location.length > 0) {
+    conditions.push(eq(platformIdeas.location, location));
+  }
+  
+  return await db.select()
+    .from(platformIdeas)
+    .where(conditions.length > 0 ? and(...conditions) : undefined);
+  }
+
   async getUserAiSessions(userId: string): Promise<AiGenerationSession[]> {
     return await db.select().from(aiGenerationSessions).where(eq(aiGenerationSessions.userId, userId));
   }
@@ -301,10 +343,6 @@ export class DatabaseStorage implements IStorage {
   async getUserFavoriteAiIdeas(userId: string): Promise<AiGeneratedIdea[]> {
     return await db.select().from(aiGeneratedIdeas)
       .where(eq(aiGeneratedIdeas.userId, userId));
-  }
-
-   async getPlateFormIdeas(): Promise<SubmittedIdea[]> {
-    return await db.select().from(platformIdeas);
   }
 }
 

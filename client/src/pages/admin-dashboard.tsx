@@ -31,8 +31,10 @@ import {
   Download,
   UserCheck,
   BookmarkCheck,
-  Loader2
+  Loader2,
+  X
 } from "lucide-react";
+
 
 interface User {
   id: string;
@@ -96,7 +98,11 @@ export default function AdminDashboard() {
   const [uploadProgress, setUploadProgress] = useState<any>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
-
+  const [isSlidePanelOpen, setIsSlidePanelOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItemType, setSelectedItemType] = useState<string>("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: string; name: string } | null>(null);
   const [submittedIdeas, setSubmittedIdeas] = useState<SubmittedIdea[]>([]);
   const [submittedIdeasLoading, setSubmittedIdeasLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -126,13 +132,13 @@ export default function AdminDashboard() {
     totalPages: 0,
   });
   const [platformIdeasSearch, setPlatformIdeasSearch] = useState('');
-  const [subscribersList, setSubscribersList] = useState<any>([]);
-  const [subscribersListPagination, setSubscribersListPagination] = useState({
-    page: 1,
-    pageSize: 10,
-    total: 0,
-    totalPages: 0,
-  });
+  //const [subscribersList, setSubscribersList] = useState<any>([]);
+  //const [subscribersListPagination, setSubscribersListPagination] = useState({
+  //   page: 1,
+  //   pageSize: 10,
+  //   total: 0,
+  //   totalPages: 0,
+  // });
   const [bookmarksList, setBookmarksList] = useState<any>([]);
   const [bookmarksListPagination, setBookmarksListPagination] = useState({
     page: 1,
@@ -140,6 +146,205 @@ export default function AdminDashboard() {
     total: 0,
     totalPages: 0,
   });
+  // Function to open slide panel with item details
+  const openSlidePanel = (item: any, type: string) => {
+    setSelectedItem(item);
+    setSelectedItemType(type);
+    setIsSlidePanelOpen(true);
+  };
+  const closeSlidePanel = () => {
+    setIsSlidePanelOpen(false);
+    setSelectedItem(null);
+    setSelectedItemType("");
+  };
+  // Function to open delete confirmation dialog
+  const openDeleteDialog = (id: string, type: string, name: string) => {
+    setItemToDelete({ id, type, name });
+    console.log('Item to delete:', { id, type, name });
+    setDeleteDialogOpen(true);
+  };
+  // Function to close delete dialog
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setItemToDelete(null);
+  };
+
+  const deleteSubscriberMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/subscriber-list/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      console.log('==Delete subscriber response:==//', response);
+      if (!response.ok) {
+        throw new Error("Failed to delete subscriber");
+      }
+      console.log('==Delete subscriber response:json//==', response.json);
+      return response;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subscriber-list"] });
+      toast({
+        title: "Success",
+        description: "Subscriber deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/users/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete user");
+      }
+
+      return response.json();
+    },
+    onSuccess: (_, variables) => { // Use variables to get the ID
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== variables));
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deletePlatformIdeaMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/platform-ideas/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete idea");
+      }
+
+      return response;
+    },
+    onSuccess: (_, variables) => {
+      // Update local state
+      console.log("deleted")
+      setPlatformIdeas(prev => prev.filter(idea => idea.id !== variables));
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["platformIdeas"] });
+      toast({
+        title: "Success",
+        description: "Idea deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteSubmittedIdeaMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/submitted-ideas/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete submitted idea");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["submittedIdeas"] });
+      toast({
+        title: "Success",
+        description: "Submitted idea deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteBookmarkMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/bookmarks/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete bookmark");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      toast({
+        title: "Success",
+        description: "Bookmark deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const handleDelete = () => {
+    if (!itemToDelete) return;
+    console.log('Deleting item:', itemToDelete);
+    switch (itemToDelete.type) {
+      case "subscriber":
+        deleteSubscriberMutation.mutate(itemToDelete.id);
+        break;
+      case "user":
+        deleteUserMutation.mutate(itemToDelete.id);
+        break;
+      case "platform-idea":
+        deletePlatformIdeaMutation.mutate(itemToDelete.id);
+        break;
+      case "submitted-idea":
+        deleteSubmittedIdeaMutation.mutate(itemToDelete.id);
+        break;
+      case "bookmark":
+        deleteBookmarkMutation.mutate(itemToDelete.id);
+        break;
+      default:
+        break;
+    }
+  };
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -164,8 +369,12 @@ export default function AdminDashboard() {
 
   // Fetch activity logs
   const { data: activities, isLoading: activitiesLoading } = useQuery({
-    queryKey: ["/api/admin/activities"],
+    queryKey: ["/api/admin/activity-logs"],
     enabled: !!adminUser,
+  });
+  const { data: subscribersList, isLoading: subscribersListLoading } = useQuery({
+    queryKey: ["/api/admin/subscriber-list"],
+    retry: false,
   });
 
   // Fetch users
@@ -175,7 +384,7 @@ export default function AdminDashboard() {
       setUsersLoading(true);
       setUsersError(null);
       try {
-      
+
         const response: any = await apiRequestWithPage("GET", "/api/admin/all-users", {
           params: {
             page: usersPagination.page,
@@ -205,7 +414,7 @@ export default function AdminDashboard() {
       setSubmittedIdeasLoading(true);
       setSubmittedIdeasError(null);
       try {
-        const response:any = await apiRequestWithPage("GET", "/api/admin/submitted-ideas", {
+        const response: any = await apiRequestWithPage("GET", "/api/admin/submitted-ideas", {
           params: {
             page: submittedIdeasPagination.page,
             pageSize: submittedIdeasPagination.pageSize,
@@ -486,10 +695,10 @@ export default function AdminDashboard() {
               <UserCheck className="h-4 w-4 mr-2" />
               Subscribers
             </TabsTrigger>
-            <TabsTrigger value="bookmarks" className="data-[state=active]:bg-slate-700">
+            {/* <TabsTrigger value="bookmarks" className="data-[state=active]:bg-slate-700">
               <BookmarkCheck className="h-4 w-4 mr-2" />
               Bookmarks
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="activities" className="data-[state=active]:bg-slate-700">
               <Activity className="h-4 w-4 mr-2" />
               Activity Logs
@@ -639,8 +848,21 @@ export default function AdminDashboard() {
                             <TableCell className="text-slate-300">{idea.likes}</TableCell>
                             <TableCell className="text-slate-300">{new Date(idea.createdAt).toLocaleDateString()}</TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
-                                View
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-400 hover:text-blue-300"
+                                onClick={() => openSlidePanel(idea, "platform-idea")}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-400 hover:text-red-300"
+                                onClick={() => openDeleteDialog(idea.id, "platform-idea", idea.title)}
+                              >
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -734,8 +956,21 @@ export default function AdminDashboard() {
                               <TableCell className="text-slate-300">{idea.status}</TableCell>
                               <TableCell className="text-slate-300">{new Date(idea.createdAt).toLocaleDateString()}</TableCell>
                               <TableCell>
-                                <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
-                                  View
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-blue-400 hover:text-blue-300"
+                                  onClick={() => openSlidePanel(idea, "user")}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-400 hover:text-red-300"
+                                  onClick={() => openDeleteDialog(idea.id, "submitted-idea", idea.ideaTitle)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </TableCell>
                             </TableRow>
@@ -982,8 +1217,21 @@ export default function AdminDashboard() {
                               <TableCell className="text-slate-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                               <TableCell className="text-slate-300">{new Date(user.updatedAt).toLocaleDateString()}</TableCell>
                               <TableCell>
-                                <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
-                                  View
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-blue-400 hover:text-blue-300"
+                                  onClick={() => openSlidePanel(user, "user")}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-400 hover:text-red-300"
+                                  onClick={() => openDeleteDialog(user.id, "user", user.name)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </TableCell>
                             </TableRow>
@@ -1036,7 +1284,7 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {usersQueryLoading ? (
+                  {subscribersListLoading ? (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
                       <div className="text-center py-8">Loading subscribers...</div>
@@ -1050,26 +1298,41 @@ export default function AdminDashboard() {
                       <Table>
                         <TableHeader className="bg-slate-700">
                           <TableRow>
-                            <TableHead className="text-white">Name</TableHead>
-                            <TableHead className="text-white">Email</TableHead>                          
-                            <TableHead className="text-white">Created At</TableHead>                           
+                            {/* <TableHead className="text-white">Name</TableHead> */}
+                            <TableHead className="text-white">Email</TableHead>
+                            <TableHead className="text-white">Created At</TableHead>
                             <TableHead className="text-white">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {subscribersList.map((user: any) => (
-                            <TableRow key={user.id} className="border-slate-700">
-                              <TableCell className="text-slate-300">{user.name}</TableCell>
-                              <TableCell className="font-medium text-white">{user.email}</TableCell>                              
-                              <TableCell className="text-slate-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>                           
+                          {subscribersList.map((subscriber: any) => (
+                            <TableRow key={subscriber.id} className="border-slate-700">
+                              {/* <TableCell className="text-slate-300">{user.name}</TableCell> */}
+                              <TableCell className="font-medium text-white">{subscriber.email_id}</TableCell>
+                              <TableCell className="text-slate-300">{new Date(subscriber.createdAt).toLocaleDateString()}</TableCell>
                               <TableCell>
-                                <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
-                                  View
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-blue-400 hover:text-blue-300"
+                                  onClick={() => openSlidePanel(subscriber, "subscriber")}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-400 hover:text-red-300"
+                                  onClick={() => openDeleteDialog(subscriber.id, "subscriber", subscriber.email_id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </TableCell>
                             </TableRow>
                           ))}
+
                         </TableBody>
+
                       </Table>
                     </div>
                   ) : (
@@ -1079,10 +1342,10 @@ export default function AdminDashboard() {
                   )}
                   {subscribersList?.length > 0 && (
                     <div className="flex items-center justify-between px-2 py-3">
-                      <div className="text-sm text-slate-400">
+                      {/* <div className="text-sm text-slate-400">
                         Page {subscribersListPagination.page} of {subscribersListPagination.totalPages} ({subscribersListPagination.total} records)
-                      </div>
-                      <div className="space-x-2">
+                      </div> */}
+                      {/* <div className="space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -1101,7 +1364,7 @@ export default function AdminDashboard() {
                         >
                           Next
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   )}
                 </div>
@@ -1132,8 +1395,8 @@ export default function AdminDashboard() {
                         <TableHeader className="bg-slate-700">
                           <TableRow>
                             <TableHead className="text-white">Name</TableHead>
-                            <TableHead className="text-white">Email</TableHead>                          
-                            <TableHead className="text-white">Created At</TableHead>                        
+                            <TableHead className="text-white">Email</TableHead>
+                            <TableHead className="text-white">Created At</TableHead>
                             <TableHead className="text-white">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -1141,11 +1404,24 @@ export default function AdminDashboard() {
                           {bookmarksList.map((user: any) => (
                             <TableRow key={user.id} className="border-slate-700">
                               <TableCell className="text-slate-300">{user.name}</TableCell>
-                              <TableCell className="font-medium text-white">{user.email}</TableCell>                              
-                              <TableCell className="text-slate-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>                             
+                              <TableCell className="font-medium text-white">{user.email}</TableCell>
+                              <TableCell className="text-slate-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                               <TableCell>
-                                <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
-                                  View
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-blue-400 hover:text-blue-300"
+                                  onClick={() => openSlidePanel(user, "bookmark")}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-400 hover:text-red-300"
+                                  onClick={() => openDeletePanel(user.id, "bookmark", user.name)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </TableCell>
                             </TableRow>
@@ -1201,7 +1477,7 @@ export default function AdminDashboard() {
                   <div className="text-center py-8">Loading activities...</div>
                 ) : (
                   <div className="space-y-3">
-                    {(activities as any[])?.map((activity: any) => (
+                    {(activities?.logs as any[])?.map((activity: any) => (
                       <div key={activity.id} className="flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg">
                         <Activity className="h-4 w-4 text-blue-400" />
                         <div className="flex-1">
@@ -1267,6 +1543,259 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Right Slide Panel */}
+      <div className={`fixed top-0 right-0 h-full w-full md:w-1/2 lg:w-1/3 bg-slate-800 shadow-xl transform transition-transform duration-300 ease-in-out z-50 ${isSlidePanelOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}>
+        <div className="flex flex-col h-full">
+          {/* Panel Header */}
+          <div className="flex items-center justify-between p-4 border-b border-slate-700">
+            <h2 className="text-xl font-semibold text-white">
+              {selectedItemType === "user" && "User Details"}
+              {selectedItemType === "platform-idea" && "Idea Details"}
+              {selectedItemType === "submitted-idea" && "Submitted Idea Details"}
+              {selectedItemType === "subscriber" && "Subscriber Details"}
+              {selectedItemType === "bookmark" && "Bookmark Details"}
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={closeSlidePanel}
+              className="text-slate-400 hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Panel Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {selectedItem && selectedItemType === "user" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">User ID</h3>
+                  <p className="text-white">{selectedItem.id}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Name</h3>
+                  <p className="text-white">{selectedItem.name}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Email</h3>
+                  <p className="text-white">{selectedItem.email}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Status</h3>
+                  <Badge className={selectedItem.isActive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}>
+                    {selectedItem.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Created At</h3>
+                  <p className="text-white">{new Date(selectedItem.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Updated At</h3>
+                  <p className="text-white">{new Date(selectedItem.updatedAt).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+
+            {selectedItem && selectedItemType === "platform-idea" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Idea ID</h3>
+                  <p className="text-white">{selectedItem.id}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Title</h3>
+                  <p className="text-white">{selectedItem.title}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Category</h3>
+                  <p className="text-white">{selectedItem.category}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Timeframe</h3>
+                  <p className="text-white">{selectedItem.timeframe}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Market Size</h3>
+                  <p className="text-white">{selectedItem.marketSize}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Views</h3>
+                  <p className="text-white">{selectedItem.views}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Likes</h3>
+                  <p className="text-white">{selectedItem.likes}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Created At</h3>
+                  <p className="text-white">{new Date(selectedItem.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+
+            {selectedItem && selectedItemType === "submitted-idea" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Submission ID</h3>
+                  <p className="text-white">{selectedItem.id}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Name</h3>
+                  <p className="text-white">{selectedItem.name}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Email</h3>
+                  <p className="text-white">{selectedItem.email}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Phone</h3>
+                  <p className="text-white">{selectedItem.phone}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Idea Title</h3>
+                  <p className="text-white">{selectedItem.ideaTitle}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Category</h3>
+                  <p className="text-white">{selectedItem.category}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Status</h3>
+                  <Badge className={
+                    selectedItem.status === 'approved' ? "bg-green-500/20 text-green-400" :
+                      selectedItem.status === 'rejected' ? "bg-red-500/20 text-red-400" :
+                        "bg-yellow-500/20 text-yellow-400"
+                  }>
+                    {selectedItem.status}
+                  </Badge>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Created At</h3>
+                  <p className="text-white">{new Date(selectedItem.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+
+            {selectedItem && selectedItemType === "subscriber" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Subscriber ID</h3>
+                  <p className="text-white">{selectedItem.id}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Email</h3>
+                  <p className="text-white">{selectedItem.email_id}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Created At</h3>
+                  <p className="text-white">{new Date(selectedItem.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+
+            {selectedItem && selectedItemType === "bookmark" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Bookmark ID</h3>
+                  <p className="text-white">{selectedItem.id}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Name</h3>
+                  <p className="text-white">{selectedItem.name}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Email</h3>
+                  <p className="text-white">{selectedItem.email}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400">Created At</h3>
+                  <p className="text-white">{new Date(selectedItem.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Panel Footer */}
+          <div className="p-4 border-t border-slate-700">
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={closeSlidePanel}
+                className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Delete Confirmation Dialog */}
+      {deleteDialogOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-slate-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <Trash2 className="h-5 w-5 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Confirm Delete</h3>
+                <p className="text-sm text-slate-400">
+                  Are you sure you want to delete "{itemToDelete?.name}"? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={closeDeleteDialog}
+                className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={
+                  deleteSubscriberMutation.isPending ||
+                  deleteUserMutation.isPending ||
+                  deletePlatformIdeaMutation.isPending ||
+                  deleteSubmittedIdeaMutation.isPending ||
+                  deleteBookmarkMutation.isPending
+                }
+              >
+                {deleteSubscriberMutation.isPending ||
+                  deleteUserMutation.isPending ||
+                  deletePlatformIdeaMutation.isPending ||
+                  deleteSubmittedIdeaMutation.isPending ||
+                  deleteBookmarkMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay for the slide panel */}
+      {isSlidePanelOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={closeSlidePanel}
+        />
+      )}
     </div>
+
   );
 }

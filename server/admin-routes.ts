@@ -5,8 +5,8 @@ import Papa from 'papaparse';
 import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
-import { AdminAuthService, requireAdminAuth, requireSuperAdmin } from './admin-auth';
-import { adminStorage, parseStringArray } from './admin-storage';
+import { AdminAuthService, requireAdminAuth, requireSuperAdmin } from './admin-auth.js';
+import { adminStorage, parseStringArray } from './admin-storage.js';
 import { 
   insertPlatformIdeaSchema, 
   InsertPlatformIdea, 
@@ -17,8 +17,8 @@ import {
   AdminUser,
   aiGeneratedIdeas,
   type AiGeneratedIdea
-} from '@shared/schema';
-import { db } from './db';
+} from '../shared/schema.js';
+import { db } from './db.js';
 import { eq, and, desc, asc, or, like, count, AnyColumn } from 'drizzle-orm';
 
 const router = express.Router();
@@ -249,6 +249,41 @@ router.post('/upload-ideas', requireAdminAuth, upload.single('file'), async (req
  * GET /api/admin/submitted-ideas
  * Get submitted ideas with pagination and search
  */
+router.get('/platform-ideas', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { page = 1, limit = 10, search } = paginationSchema.parse(req.query);
+    
+    const whereConditions: any[] = [];
+
+    if (search) {
+      whereConditions.push(
+        or(
+          like(platformIdeas.title, `%${search}%`),
+          like(platformIdeas.description, `%${search}%`)
+        )
+      );
+    }
+
+    const options = {
+      page,
+      limit,
+      query: search,
+      whereConditions,
+    };
+
+    const result = await adminStorage.getPlatformIdeas(options);
+    // console.log('Platform ideas result:', result);
+    res.json(result);
+  } catch (error) {
+    console.error('Get submitted ideas error:', error);
+    res.status(500).json({ error: 'Failed to fetch submitted ideas' });
+  }
+});
+
+/**
+ * GET /api/admin/submitted-ideas
+ * Get submitted ideas with pagination and search
+ */
 router.get('/submitted-ideas', requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 10, search } = paginationSchema.parse(req.query);
@@ -278,7 +313,39 @@ router.get('/submitted-ideas', requireAdminAuth, async (req: Request, res: Respo
     res.status(500).json({ error: 'Failed to fetch submitted ideas' });
   }
 });
-
+router.delete('/submitted-ideas/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    // const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.deleteSubmittedIdeas(id);
+    res.json(result);
+  } catch (error) {
+    console.error('Delete Submitted Ideas :', error);
+    res.status(500).json({ error: 'Failed to Delete Submitted Ideas :' });
+  }
+});
+router.delete('/platform-ideas/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    // const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.deletePlatformIdeas(id);
+    res.json(result);
+  } catch (error) {
+    console.error('Delete Submitted Ideas :', error);
+    res.status(500).json({ error: 'Failed to Delete Submitted Ideas :' });
+  }
+});
+router.delete('/users/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    // const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.deleteUser(id);
+    res.json(result);
+  } catch (error) {
+    console.error('Delete Submitted Ideas :', error);
+    res.status(500).json({ error: 'Failed to Delete Submitted Ideas :' });
+  }
+});
 /**
  * GET /api/admin/upload-history
  * Get upload history with pagination
@@ -293,7 +360,27 @@ router.get('/upload-history', requireAdminAuth, async (req: Request, res: Respon
     res.status(500).json({ error: 'Failed to fetch upload history' });
   }
 });
-
+router.get('/subscriber-list', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    // const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getSubscriberList();
+    res.json(result);
+  } catch (error) {
+    console.error('Get Subscibers-list:', error);
+    res.status(500).json({ error: 'Failed to fetch Subscribers-List' });
+  }
+});
+router.delete('/subscriber-list/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    // const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.deleteSubscriberList(id);
+    res.json(result);
+  } catch (error) {
+    console.error('Get Subscibers-list:', error);
+    res.status(500).json({ error: 'Failed to fetch Subscribers-List' });
+  }
+});
 /**
  * DELETE /api/admin/upload-history/:id
  * Soft delete upload history
