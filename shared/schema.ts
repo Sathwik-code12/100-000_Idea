@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, json, index, boolean, integer } from "drizzle-orm/pg-core";
+import { int } from "drizzle-orm/mysql-core";
+import { pgTable, text, varchar, timestamp, json, index, boolean, integer, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -9,6 +10,15 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  last_name: varchar("last_name", { length: 100 }),
+  phone: varchar("phone", { length: 15 }).notNull(),
+  gender: varchar("gender", { length: 10 }),
+  age: integer("age"),
+  aadhar_id: varchar("aadhar_id", { length: 12 }),
+  annual_income: numeric("annual_income", { precision: 12, scale: 2 }),
+  caste: varchar("caste", { length: 50 }),
+  area: varchar("area", { length: 100 }),
+  address: text("address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
@@ -340,6 +350,7 @@ export const platformIdeas = pgTable("platform_ideas", {
   isFeatured: text("is_featured").default("false"),
   views: text("views").default("0"),
   likes: text("likes").default("0"),
+  location:text("location").default(""),
   uploadBatchId: varchar("upload_batch_id"), // Reference to upload history
   createdBy: varchar("created_by").references(() => adminUsers.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -397,6 +408,16 @@ export const deleteHistory = pgTable("delete_history", {
   deletedAtIdx: index("delete_history_deleted_at_idx").on(table.deletedAt),
 }));
 
+export const emailSubscribers = pgTable("email_subscribers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email_id: varchar("email_id").notNull(),
+  status: integer("status").default(1), // 1 - subscribed, 0 - unsubscribed
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  emailIdx: index("email_subscribers_email_idx").on(table.email_id),
+  //statusIdx: index("email_subscribers_status_idx").on(table.status),
+  createdAtIdx: index("email_subscribers_created_at_idx").on(table.createdAt),
+}));  
 // Admin Sessions table for JWT/session management
 export const adminSessions = pgTable("admin_sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -473,6 +494,8 @@ export const insertDeleteHistorySchema = createInsertSchema(deleteHistory, {
   itemData: z.any(),
 }).omit({ id: true, deletedBy: true, deletedAt: true, permanentDeleteAt: true, restoredAt: true, restoredBy: true });
 
+
+
 export const insertAdminSessionSchema = createInsertSchema(adminSessions, {
   token: z.string().min(1, "Token is required"),
   expiresAt: z.date(),
@@ -481,6 +504,10 @@ export const insertAdminSessionSchema = createInsertSchema(adminSessions, {
 export const insertAdminActivityLogSchema = createInsertSchema(adminActivityLogs, {
   action: z.string().min(1, "Action is required"),
 }).omit({ id: true, adminId: true, createdAt: true });
+
+export const insertemailSubscribers = createInsertSchema(emailSubscribers, {
+  email_id: z.string().min(1, "Email is required"),
+}).omit({ id: true, createdAt: true });
 
 // Types for admin tables
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
@@ -495,3 +522,4 @@ export type InsertAdminSession = z.infer<typeof insertAdminSessionSchema>;
 export type AdminSession = typeof adminSessions.$inferSelect;
 export type InsertAdminActivityLog = z.infer<typeof insertAdminActivityLogSchema>;
 export type AdminActivityLog = typeof adminActivityLogs.$inferSelect;
+export type emailSubscribers= z.infer<typeof insertemailSubscribers>;

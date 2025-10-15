@@ -1,8 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Lightbulb } from "lucide-react";
+import { useState } from "react";
 
 export default function SubscribeSection() {
+  const [email, setEmail] = useState("");
+  const handlesubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    //const fetchDefaultIdeas = async () => {
+      try {
+        const response = await fetch('/api/email-subscribers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email_id: email }),
+        });
+        console.log('==Subscription response:==', response.ok);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Subscription successful:', data);
+          //setIdeas(data.ideas || []);
+          //setDisplayedIdeas(data.ideas || []);
+        }
+      } catch (error) {
+        console.error('Failed to update email sections:', error);
+      }
+    //};
+    alert("Subscribed!");
+  }
   return (
     <section className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 py-8">
       <div className="max-w-4xl mx-auto px-4 text-center">
@@ -31,10 +57,11 @@ export default function SubscribeSection() {
             <Input
               type="email"
               placeholder="Enter your email address"
+              onChange={(e)=>setEmail(e.target.value)}
               className="w-full py-3 px-4 rounded-lg border-0 bg-white/20 text-white placeholder:text-blue-200 focus:bg-white/30 focus:ring-2 focus:ring-yellow-400"
             />
             
-            <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-lg transition-colors">
+            <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-lg transition-colors" onClick={handlesubscribe}>
               Subscribe Now ⚡
             </Button>
             

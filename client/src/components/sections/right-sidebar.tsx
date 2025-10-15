@@ -1,30 +1,34 @@
 import { Clock, TrendingUp, FileText, Users, Target, BarChart3, Scale, UserCheck, Trophy, BookOpen, ChevronRight } from "lucide-react";
-
+import { Link, useLocation } from "wouter";
 export default function RightSidebar() {
   const classifieds = [
     {
       title: "New Business Opportunity",
       description: "Local restaurant looking for delivery partners",
       timeAgo: "2 hours ago",
-      icon: <Target className="w-4 h-4 text-orange-500" />
+      icon: <Target className="w-4 h-4 text-orange-500" />,
+      link: "/business-opportunities"
     },
     {
       title: "Investment Opportunity",
       description: "Tech startup seeking angel investors",
       timeAgo: "5 hours ago",
-      icon: <TrendingUp className="w-4 h-4 text-green-500" />
+      icon: <TrendingUp className="w-4 h-4 text-green-500" />,
+      link: "/fundraising"
     },
     {
       title: "Partnership Available",
       description: "E-commerce platform seeking suppliers",
       timeAgo: "1 day ago",
-      icon: <Users className="w-4 h-4 text-blue-500" />
+      icon: <Users className="w-4 h-4 text-blue-500" />,
+      link: "/partnership-available"
     },
     {
       title: "Franchise Opportunity",
       description: "Popular coffee chain expanding",
       timeAgo: "2 days ago",
-      icon: <Trophy className="w-4 h-4 text-purple-500" />
+      icon: <Trophy className="w-4 h-4 text-purple-500" />,
+      link: "/franchise-opportunity"
     }
   ];
 
@@ -32,32 +36,38 @@ export default function RightSidebar() {
     {
       title: "Business Plan Template",
       description: "Free downloadable templates",
-      icon: <FileText className="w-4 h-4 text-blue-600" />
+      icon: <FileText className="w-4 h-4 text-blue-600" />,
+      link: "/business-plan-template"
     },
     {
       title: "Funding Guide",
       description: "Complete guide to business funding",
-      icon: <TrendingUp className="w-4 h-4 text-green-600" />
+      icon: <TrendingUp className="w-4 h-4 text-green-600" />,
+      link: "/fundraising"
     },
     {
       title: "Market Research Tools",
       description: "Tools for market analysis",
-      icon: <BarChart3 className="w-4 h-4 text-orange-600" />
+      icon: <BarChart3 className="w-4 h-4 text-orange-600" />,
+      link:"/market-research-tools"
     },
     {
       title: "Legal Resources",
       description: "Business registration & compliance",
-      icon: <Scale className="w-4 h-4 text-red-600" />
+      icon: <Scale className="w-4 h-4 text-red-600" />,
+      link: "/legal-resources"
     },
     {
       title: "Mentorship Program",
       description: "Connect with experienced entrepreneurs",
-      icon: <UserCheck className="w-4 h-4 text-purple-600" />
+      icon: <UserCheck className="w-4 h-4 text-purple-600" />,
+      link: "/mentorship-program"
     },
     {
       title: "Success Stories",
       description: "Real entrepreneur success stories",
-      icon: <BookOpen className="w-4 h-4 text-indigo-600" />
+      icon: <BookOpen className="w-4 h-4 text-indigo-600" />,
+      link: "/success-stories"
     }
   ];
 
@@ -83,7 +93,8 @@ export default function RightSidebar() {
                     <span className="text-gray-400 text-xs">{item.timeAgo}</span>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <Link href={item.link}>
+                <ChevronRight className="w-4 h-4 text-gray-400" /></Link>
               </div>
             </div>
           ))}
@@ -106,7 +117,8 @@ export default function RightSidebar() {
                   <h4 className="font-medium text-gray-900 text-sm">{item.title}</h4>
                   <p className="text-gray-600 text-xs mt-1">{item.description}</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <Link href={item.link}>
+                <ChevronRight className="w-4 h-4 text-gray-400" /></Link>
               </div>
             </div>
           ))}

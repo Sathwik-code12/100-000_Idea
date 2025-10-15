@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { aiIdeaService } from './ai-service';
-import { storage } from './storage';
-import { Competitor, insertAiGenerationSessionSchema, insertAiGeneratedIdeaSchema } from '../shared/schema';
+import { aiIdeaService } from './ai-service.js';
+import { storage } from './storage.js';
+import { Competitor, insertAiGenerationSessionSchema, insertAiGeneratedIdeaSchema } from '../shared/schema.js';
 import type { Express } from "express";
 
 export function registerAiRoutes(app: Express) {
@@ -18,7 +18,7 @@ export function registerAiRoutes(app: Express) {
     try {
       console.log("AI generate-ideas request received from user:", req.user?.id);
       console.log("Request body:", req.body);
-      
+      req.body.userId = req.user?.id; // Attach userId to request body for session tracking
       const userId = req.user.id;
       
       // Validate input

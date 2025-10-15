@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 // AI service for generating business ideas using Gemini
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: "AIzaSyBhpscXe3TnvutXSOst75K2QtoempR1jnI"   });
 
 export interface IdeaGenerationInput {
   userInput: string;

@@ -1,5 +1,5 @@
 import { eq, and, desc, count, sql, gte, lte, ilike, or, asc, getTableColumns } from 'drizzle-orm';
-import { db } from './db';
+import { db } from './db.js';
 import {
   platformIdeas,
   uploadHistory,
@@ -14,8 +14,10 @@ import {
   InsertPlatformIdea,
   InsertUploadHistory,
   InsertDeleteHistory,
-  InsertAdminActivityLog
-} from '@shared/schema';
+  InsertAdminActivityLog,
+  emailSubscribers,
+  users
+} from '../shared/schema.js';
 
 export interface PaginationOptions {
   page: number;
@@ -471,6 +473,18 @@ export class AdminStorage {
       },
     };  
   }
+  async deleteSubmittedIdeas(id: string): Promise<boolean> {
+    const result = await db.delete(submittedIdeas).where(eq(submittedIdeas.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+  async deletePlatformIdeas(id: string): Promise<boolean> {
+    const result = await db.delete(platformIdeas).where(eq(platformIdeas.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+  async deleteUser(id: string): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
 
   // Admin Users Management
   async getUsers(options: PaginationOptions) {
@@ -491,28 +505,28 @@ export class AdminStorage {
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
     const [totalCountResult, usersData] = await Promise.all([
-      db.select({ count: count() }).from(adminUsers).where(whereClause),
+      db.select({ count: count() }).from(users).where(whereClause),
       db
         .select({
-          id: adminUsers.id,
-          name: adminUsers.name,
-          email: adminUsers.email,
-          createdAt: adminUsers.createdAt,
-          isActive: adminUsers.isActive,
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          createdAt: users.createdAt,
+          //isActive: users.isActive,
         })
-        .from(adminUsers)
+        .from(users)
         .where(whereClause)
         .orderBy(
           sortOrder === 'asc'
             ? asc(
-                sortBy === 'name' ? adminUsers.name :
-                sortBy === 'email' ? adminUsers.email :
-                adminUsers.createdAt // Default or fallback
+                sortBy === 'name' ? users.name :
+                sortBy === 'email' ? users.email :
+                users.createdAt // Default or fallback
               )
             : desc(
-                sortBy === 'name' ? adminUsers.name :
-                sortBy === 'email' ? adminUsers.email :
-                adminUsers.createdAt // Default or fallback
+                sortBy === 'name' ? users.name :
+                sortBy === 'email' ? users.email :
+                users.createdAt // Default or fallback
               )
         )
         .limit(limit)
@@ -532,6 +546,15 @@ export class AdminStorage {
       },
     };
   }
+  async getSubscriberList() {
+    const subscribers = await db.select().from(emailSubscribers);
+    return subscribers; 
+  }
+  async deleteSubscriberList(id: string) {
+    const subscribers = await db.delete(emailSubscribers).where(eq(emailSubscribers.id, id));
+    return subscribers; 
+  }
+
 }
 
 export const adminStorage = new AdminStorage();

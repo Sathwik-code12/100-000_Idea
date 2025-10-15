@@ -14,7 +14,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { 
+import { jsonrepair } from "jsonrepair";
+import {
   LayoutDashboard,
   User,
   Gift,
@@ -79,19 +80,19 @@ function AIBusinessIdeasGenerator() {
   });
 
   const industries = [
-    "Technology & Software", "Healthcare & Medical", "Education & Training", "Food & Beverage", 
+    "Technology & Software", "Healthcare & Medical", "Education & Training", "Food & Beverage",
     "Retail & E-commerce", "Finance & FinTech", "Real Estate & Construction", "Entertainment & Media",
     "Travel & Tourism", "Fitness & Wellness", "Beauty & Personal Care", "Environmental & Green Tech",
     "Agriculture & Farming", "Manufacturing & Industrial", "Transportation & Logistics", "Consulting & Services"
   ];
 
   const budgetRanges = [
-    "₹10K - ₹1L (Bootstrap)", "₹1L - ₹5L (Small Scale)", "₹5L - ₹25L (Medium Scale)", 
+    "₹10K - ₹1L (Bootstrap)", "₹1L - ₹5L (Small Scale)", "₹5L - ₹25L (Medium Scale)",
     "₹25L - ₹1Cr (Large Scale)", "₹1Cr+ (Enterprise)"
   ];
 
   const experienceLevels = [
-    "Fresh Graduate", "1-3 Years Experience", "3-7 Years Experience", 
+    "Fresh Graduate", "1-3 Years Experience", "3-7 Years Experience",
     "7+ Years Experience", "Serial Entrepreneur"
   ];
 
@@ -101,7 +102,7 @@ function AIBusinessIdeasGenerator() {
       const response = await apiRequest("POST", "/api/ai/generate-ideas", data);
       const result = await response.json();
       setGeneratedIdeas(result.ideas || []);
-      
+
       // Add to session history
       const session = {
         id: Date.now(),
@@ -111,7 +112,7 @@ function AIBusinessIdeasGenerator() {
         filters: { industry: data.industry, budget: data.budget, location: data.location }
       };
       setSessionHistory(prev => [session, ...prev.slice(0, 9)]); // Keep last 10 sessions
-      
+
       toast({
         title: "AI Ideas Generated Successfully!",
         description: `Generated ${result.ideas?.length || 0} personalized business ideas with market analysis`,
@@ -129,8 +130,8 @@ function AIBusinessIdeasGenerator() {
   };
 
   const toggleFavorite = (ideaId: string) => {
-    setFavoriteIdeas(prev => 
-      prev.includes(ideaId) 
+    setFavoriteIdeas(prev =>
+      prev.includes(ideaId)
         ? prev.filter(id => id !== ideaId)
         : [...prev, ideaId]
     );
@@ -155,16 +156,15 @@ function AIBusinessIdeasGenerator() {
             <span>{generatedIdeas.length} Ideas Generated</span>
           </div>
         </div>
-        
+
         {/* Navigation Tabs */}
         <div className="flex gap-2">
           <button
             onClick={() => setActiveView('generator')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeView === 'generator' 
-                ? 'bg-white/20 backdrop-blur-sm text-white' 
-                : 'text-purple-200 hover:text-white hover:bg-white/10'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeView === 'generator'
+              ? 'bg-white/20 backdrop-blur-sm text-white'
+              : 'text-purple-200 hover:text-white hover:bg-white/10'
+              }`}
           >
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4" />
@@ -173,11 +173,10 @@ function AIBusinessIdeasGenerator() {
           </button>
           <button
             onClick={() => setActiveView('history')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeView === 'history' 
-                ? 'bg-white/20 backdrop-blur-sm text-white' 
-                : 'text-purple-200 hover:text-white hover:bg-white/10'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeView === 'history'
+              ? 'bg-white/20 backdrop-blur-sm text-white'
+              : 'text-purple-200 hover:text-white hover:bg-white/10'
+              }`}
           >
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -186,11 +185,10 @@ function AIBusinessIdeasGenerator() {
           </button>
           <button
             onClick={() => setActiveView('favorites')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeView === 'favorites' 
-                ? 'bg-white/20 backdrop-blur-sm text-white' 
-                : 'text-purple-200 hover:text-white hover:bg-white/10'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeView === 'favorites'
+              ? 'bg-white/20 backdrop-blur-sm text-white'
+              : 'text-purple-200 hover:text-white hover:bg-white/10'
+              }`}
           >
             <div className="flex items-center gap-2">
               <Heart className="h-4 w-4" />
@@ -226,7 +224,7 @@ function AIBusinessIdeasGenerator() {
                             Your Background & Business Vision
                           </FormLabel>
                           <FormControl>
-                            <Textarea 
+                            <Textarea
                               placeholder="Describe your professional background and business interests. Include:&#10;• Your skills, expertise, and work experience&#10;• Industry knowledge and domain expertise&#10;• Target market or customer segment you want to serve&#10;• Investment capacity and timeline&#10;• Specific business problems you want to solve&#10;• Geographic focus or market reach&#10;&#10;Example: 'MBA with 7 years in retail management, expertise in supply chain optimization. Want to serve tier-2 city retailers with tech solutions. Have ₹15L investment capacity, looking for B2B SaaS opportunities with 18-month breakeven timeline...'"
                               className="h-40 resize-none border-purple-200 focus:border-purple-500 bg-white/80 text-sm"
                               {...field}
@@ -304,7 +302,7 @@ function AIBusinessIdeasGenerator() {
                           <FormItem>
                             <FormLabel className="text-sm font-semibold">Target Location</FormLabel>
                             <FormControl>
-                              <Input 
+                              <Input
                                 placeholder="e.g., Mumbai, India"
                                 className="border-purple-200 focus:border-purple-500"
                                 {...field}
@@ -315,15 +313,18 @@ function AIBusinessIdeasGenerator() {
                       />
                     </div>
 
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       disabled={isGenerating}
                       className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-800 text-white py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
                     >
                       {isGenerating ? (
                         <div className="flex items-center gap-3">
-                          <div className="h-5 w-5 animate-spin rounded-full border-3 border-white border-t-transparent" />
-                          <span>Generating AI-Powered Ideas...</span>
+                          <div className="flex items-center gap-3 text-white">
+                            <div className="h-6 w-6 animate-spin rounded-full border-[3px] border-white/70 border-t-transparent" />
+                            <span className="text-sm font-medium">Generating AI-Powered Ideas...</span>
+                          </div>
+
                         </div>
                       ) : (
                         <div className="flex items-center gap-3">
@@ -411,8 +412,8 @@ function AIBusinessIdeasGenerator() {
 
           <div className="grid grid-cols-1 gap-8">
             {generatedIdeas.map((idea, index) => (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className="group hover:shadow-2xl transition-all duration-300 border-l-4 border-l-purple-500 bg-gradient-to-br from-white to-purple-50/30"
               >
                 <CardHeader className="pb-4">
@@ -430,11 +431,10 @@ function AIBusinessIdeasGenerator() {
                     </div>
                     <button
                       onClick={() => toggleFavorite(idea.title)}
-                      className={`p-2 rounded-full transition-colors ${
-                        favoriteIdeas.includes(idea.title)
-                          ? 'text-red-500 hover:text-red-600'
-                          : 'text-gray-400 hover:text-red-500'
-                      }`}
+                      className={`p-2 rounded-full transition-colors ${favoriteIdeas.includes(idea.title)
+                        ? 'text-red-500 hover:text-red-600'
+                        : 'text-gray-400 hover:text-red-500'
+                        }`}
                     >
                       <Heart className={`h-5 w-5 ${favoriteIdeas.includes(idea.title) ? 'fill-current' : ''}`} />
                     </button>
@@ -565,14 +565,14 @@ function AIBusinessIdeasGenerator() {
                       </div>
                     )}
 
-                    {idea.risks && idea.risks.length > 0 && (
+                    {/* {idea.risks && idea.risks.length > 0 && (
                       <div className="p-5 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
                         <div className="flex items-center gap-2 mb-3">
                           <AlertCircle className="h-5 w-5 text-orange-600" />
                           <div className="text-base font-bold text-orange-800">Risk Assessment & Mitigation</div>
                         </div>
                         <div className="space-y-3">
-                          {idea.risks.slice(0, 5).map((risk: string, idx: number) => (
+                          {idea?.risks?.slice(0, 5).map((risk: string, idx: number) => (
                             <div key={idx} className="bg-white p-3 rounded-md border border-orange-100">
                               <div className="text-sm text-orange-700">
                                 <div className="font-medium text-orange-800 mb-1">
@@ -584,6 +584,62 @@ function AIBusinessIdeasGenerator() {
                               </div>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )} */}
+                    {idea.risks && (
+                      <div className="p-5 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <AlertCircle className="h-5 w-5 text-orange-600" />
+                          <div className="text-base font-bold text-orange-800">Risk Assessment & Mitigation</div>
+                        </div>
+                        <div className="space-y-3">
+                          {(() => {
+                            try {
+                              // Parse the risks JSON string
+                              let risksData = [];
+
+                              try {
+                                // try parsing as JSON
+                                const repaired = jsonrepair(idea.risks);
+                                risksData = JSON.parse(repaired);
+                              } catch (err) {
+                                console.warn("Invalid JSON. Falling back to text split parsing.");
+                                risksData = idea.risks
+                                  .replace(/[{}]/g, "")
+                                  .split('","')
+                                  .map((s) => s.replace(/^"|"$/g, "").trim());
+                              }
+
+                              console.log("riskdata", risksData);
+
+                              // Convert the risks object to an array of objects
+                              const riskArray = Object.entries(risksData).map(([type, description]) => ({
+                                type,
+                                description: description as string
+                              }));
+
+                              return riskArray.slice(0, 5).map((risk, idx) => (
+                                <div key={idx} className="bg-white p-3 rounded-md border border-orange-100">
+                                  <div className="text-sm text-orange-700">
+                                    <div className="font-medium text-orange-800 mb-1">
+                                      {risk.type}
+                                    </div>
+                                    <div className="text-orange-600">
+                                      {risk.description}
+                                    </div>
+                                  </div>
+                                </div>
+                              ));
+                            } catch (error) {
+                              console.error("Error parsing risks data:", error);
+                              return (
+                                <div className="text-sm text-orange-700 bg-white p-3 rounded-md border border-orange-100">
+                                  Unable to display risk information. The data format is invalid.
+                                </div>
+                              );
+                            }
+                          })()}
                         </div>
                       </div>
                     )}
@@ -641,8 +697,8 @@ function AIBusinessIdeasGenerator() {
                   )}
 
                   <div className="flex gap-2 pt-4 border-t border-gray-200">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => setSelectedIdea(idea)}
                       className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50"
@@ -650,7 +706,7 @@ function AIBusinessIdeasGenerator() {
                       <FileText className="h-4 w-4 mr-2" />
                       Export Business Plan
                     </Button>
-                    <Button 
+                    <Button
                       size="sm"
                       className="flex-1 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white"
                     >
@@ -688,8 +744,8 @@ function AIBusinessIdeasGenerator() {
                         </div>
                         <div className="text-xs text-gray-600 mt-1">{session.ideas.length} ideas generated</div>
                       </div>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => setGeneratedIdeas(session.ideas)}
                         className="text-purple-600 border-purple-200 hover:bg-purple-50"
@@ -846,7 +902,7 @@ export default function Dashboard() {
               <span className="text-blue-600">IDEAS</span>
             </div>
           </Link>
-          
+
           <div className="flex items-center gap-4">
             <button className="p-2 rounded-full hover:bg-gray-100">
               🔍
@@ -875,49 +931,45 @@ export default function Dashboard() {
             <nav className="space-y-2">
               <button
                 onClick={() => setActiveTab("dashboard")}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                  activeTab === "dashboard" 
-                    ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600" 
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === "dashboard"
+                  ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
               </button>
 
 
-              
+
               <button
                 onClick={() => setActiveTab("profile")}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                  activeTab === "profile" 
-                    ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600" 
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === "profile"
+                  ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <User className="h-4 w-4" />
                 Profile
               </button>
-              
+
               <button
                 onClick={() => setActiveTab("rewards")}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                  activeTab === "rewards" 
-                    ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600" 
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === "rewards"
+                  ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <Gift className="h-4 w-4" />
                 Reward Shelf
               </button>
-              
+
               <button
                 onClick={() => setActiveTab("saved")}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                  activeTab === "saved" 
-                    ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600" 
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === "saved"
+                  ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <Heart className="h-4 w-4" />
                 Saved Ideas
@@ -925,11 +977,10 @@ export default function Dashboard() {
 
               <button
                 onClick={() => setActiveTab("campaigns")}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                  activeTab === "campaigns" 
-                    ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600" 
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === "campaigns"
+                  ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                  : "text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <Calendar className="h-4 w-4" />
                 My Campaigns
@@ -937,11 +988,10 @@ export default function Dashboard() {
 
               <button
                 onClick={() => setActiveTab("ai-ideas")}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                  activeTab === "ai-ideas" 
-                    ? "bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 border-r-2 border-purple-600" 
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === "ai-ideas"
+                  ? "bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 border-r-2 border-purple-600"
+                  : "text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <Sparkles className="h-4 w-4" />
                 <span className="flex items-center gap-2">
@@ -954,15 +1004,15 @@ export default function Dashboard() {
             </nav>
 
             <Separator className="my-6" />
-            
+
             <div className="space-y-2">
               <div className="text-sm text-gray-500 px-3 mb-2">SUPPORT</div>
-              
+
               <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-50">
                 <Settings className="h-4 w-4" />
                 Settings
               </button>
-              
+
               <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-50">
                 <HelpCircle className="h-4 w-4" />
                 Help Centre
@@ -970,7 +1020,7 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-12">
-              <button 
+              <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-50"
               >
@@ -1048,7 +1098,7 @@ export default function Dashboard() {
                       AI Ideas Generator
                     </h3>
                     <p className="text-gray-600 text-sm mb-6 flex-1">Get personalized business ideas powered by AI with market analysis</p>
-                    <Button 
+                    <Button
                       onClick={() => setActiveTab("ai-ideas")}
                       className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold py-3 px-3 text-sm shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 leading-tight min-h-[48px] mt-auto"
                     >
@@ -1066,7 +1116,7 @@ export default function Dashboard() {
                       Start a Campaign
                     </h3>
                     <p className="text-gray-600 text-sm mb-6 flex-1">Launch your detailed fundraising campaign and connect with investors</p>
-                    <Button 
+                    <Button
                       onClick={() => setLocation("/create-campaign")}
                       className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-3 px-3 text-sm shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 leading-tight min-h-[48px] mt-auto"
                     >
@@ -1089,9 +1139,9 @@ export default function Dashboard() {
                       <div className="text-sm text-gray-500">
                         {campaigns.length} Active Campaign{campaigns.length !== 1 ? 's' : ''}
                       </div>
-                      <Button 
+                      <Button
                         onClick={() => setActiveTab("campaigns")}
-                        variant="outline" 
+                        variant="outline"
                         className="w-full border-blue-500 text-blue-600 hover:bg-blue-50 px-3 text-sm leading-tight min-h-[48px]"
                       >
                         <span className="break-words text-center">View Campaigns</span>
@@ -1110,7 +1160,7 @@ export default function Dashboard() {
                       Invest Now
                     </h3>
                     <p className="text-gray-600 text-sm mb-6 flex-1">Discover and invest in promising startup campaigns</p>
-                    <Button 
+                    <Button
                       onClick={() => setLocation("/fundraising")}
                       className="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold py-3 px-3 text-sm shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 leading-tight min-h-[48px] mt-auto"
                     >
@@ -1299,7 +1349,7 @@ export default function Dashboard() {
                       <AvatarFallback className="text-2xl">{user.name?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                     <h3 className="text-lg font-semibold">{user.name || 'User'}</h3>
-                    
+
                     <div className="space-y-3 mt-6 text-left">
                       <Button variant="outline" className="w-full justify-start">
                         Account
@@ -1327,17 +1377,17 @@ export default function Dashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="firstName">First name</Label>
-                          <Input 
-                            id="firstName" 
-                            defaultValue={user.name?.split(' ')[0] || 'Neha'} 
+                          <Input
+                            id="firstName"
+                            defaultValue={user.name?.split(' ')[0] || 'Neha'}
                             className="mt-1"
                           />
                         </div>
                         <div>
                           <Label htmlFor="lastName">Last name</Label>
-                          <Input 
-                            id="lastName" 
-                            defaultValue={user.name?.split(' ')[1] || 'Kumar'} 
+                          <Input
+                            id="lastName"
+                            defaultValue={user.name?.split(' ')[1] || 'Kumar'}
                             className="mt-1"
                           />
                         </div>
@@ -1346,18 +1396,18 @@ export default function Dashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="email">Email</Label>
-                          <Input 
-                            id="email" 
+                          <Input
+                            id="email"
                             type="email"
-                            defaultValue={user.email || 'neha1897@gmail.com'} 
+                            defaultValue={user.email || 'neha1897@gmail.com'}
                             className="mt-1"
                           />
                         </div>
                         <div>
                           <Label htmlFor="phone">Phone</Label>
-                          <Input 
-                            id="phone" 
-                            defaultValue="+91 9876543210" 
+                          <Input
+                            id="phone"
+                            defaultValue="+91 9876543210"
                             className="mt-1"
                           />
                         </div>
@@ -1379,10 +1429,10 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <Label htmlFor="age">Age</Label>
-                          <Input 
-                            id="age" 
+                          <Input
+                            id="age"
                             type="number"
-                            defaultValue="25" 
+                            defaultValue="25"
                             className="mt-1"
                           />
                         </div>
@@ -1391,17 +1441,17 @@ export default function Dashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="aadhar">Aadhar ID</Label>
-                          <Input 
-                            id="aadhar" 
-                            defaultValue="25486 651651" 
+                          <Input
+                            id="aadhar"
+                            defaultValue="25486 651651"
                             className="mt-1"
                           />
                         </div>
                         <div>
                           <Label htmlFor="income">Annual Income</Label>
-                          <Input 
-                            id="income" 
-                            defaultValue="800000" 
+                          <Input
+                            id="income"
+                            defaultValue="800000"
                             className="mt-1"
                           />
                         </div>
@@ -1410,17 +1460,17 @@ export default function Dashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="caste">Caste</Label>
-                          <Input 
-                            id="caste" 
-                            defaultValue="OBC non creamy" 
+                          <Input
+                            id="caste"
+                            defaultValue="OBC non creamy"
                             className="mt-1"
                           />
                         </div>
                         <div>
                           <Label htmlFor="area">Area</Label>
-                          <Input 
-                            id="area" 
-                            defaultValue="Urban" 
+                          <Input
+                            id="area"
+                            defaultValue="Urban"
                             className="mt-1"
                           />
                         </div>
@@ -1428,8 +1478,8 @@ export default function Dashboard() {
 
                       <div>
                         <Label htmlFor="address">Address</Label>
-                        <Textarea 
-                          id="address" 
+                        <Textarea
+                          id="address"
                           className="mt-1"
                           placeholder="Enter your full address"
                         />
@@ -1489,7 +1539,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              
+
               {/* AI Ideas Generator Component - Full Width */}
               <div className="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6">
                 <AIBusinessIdeasGenerator />
