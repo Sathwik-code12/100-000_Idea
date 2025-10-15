@@ -6,7 +6,7 @@ import { z } from "zod";
 
 // Users table
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
@@ -21,12 +21,13 @@ export const users = pgTable("users", {
   address: text("address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
 }, (table) => ({
   emailIdx: index("users_email_idx").on(table.email),
 }));
 
 export const submittedIdeas = pgTable("submitted_ideas", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone").notNull(),
@@ -51,7 +52,7 @@ export const submittedIdeas = pgTable("submitted_ideas", {
 
 // Campaigns table for fundraising
 export const campaigns = pgTable("campaigns", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   category: text("category").notNull(),
@@ -63,17 +64,17 @@ export const campaigns = pgTable("campaigns", {
   equityOffered: text("equity_offered"), // percentage as string
   stage: text("stage").notNull(), // idea, prototype, growth, expansion
   location: text("location").notNull(),
-  teamInfo: json("team_info").$type<{name: string, role: string, bio: string, image?: string}[]>().default([]),
+  teamInfo: json("team_info").$type<{ name: string, role: string, bio: string, image?: string }[]>().default([]),
   businessPlan: text("business_plan"),
-  financials: json("financials").$type<{revenue?: string, expenses?: string, projections?: string}>(),
+  financials: json("financials").$type<{ revenue?: string, expenses?: string, projections?: string }>(),
   useOfFunds: text("use_of_funds").notNull(),
   risks: json("risks").$type<string[]>().default([]),
   opportunities: json("opportunities").$type<string[]>().default([]),
-  rewards: json("rewards").$type<{amount: string, reward: string}[]>().default([]),
+  rewards: json("rewards").$type<{ amount: string, reward: string }[]>().default([]),
   tags: json("tags").$type<string[]>().default([]),
   images: json("images").$type<string[]>().default([]),
-  documents: json("documents").$type<{name: string, url: string}[]>().default([]),
-  socialLinks: json("social_links").$type<{platform: string, url: string}[]>().default([]),
+  documents: json("documents").$type<{ name: string, url: string }[]>().default([]),
+  socialLinks: json("social_links").$type<{ platform: string, url: string }[]>().default([]),
   campaignDuration: text("campaign_duration").notNull(), // in days
   status: text("status").default("draft"), // draft, payment_pending, active, paused, completed, cancelled
   isVerified: text("is_verified").default("false"),
@@ -99,7 +100,7 @@ export const campaigns = pgTable("campaigns", {
 
 // Investments table
 export const investments = pgTable("investments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   campaignId: varchar("campaign_id").notNull().references(() => campaigns.id, { onDelete: "cascade" }),
   investorId: varchar("investor_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   amount: text("amount").notNull(),
@@ -122,7 +123,7 @@ export const investments = pgTable("investments", {
 
 // Campaign updates table
 export const campaignUpdates = pgTable("campaign_updates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   campaignId: varchar("campaign_id").notNull().references(() => campaigns.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   content: text("content").notNull(),
@@ -136,7 +137,7 @@ export const campaignUpdates = pgTable("campaign_updates", {
 
 // Payment transactions table
 export const paymentTransactions = pgTable("payment_transactions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   campaignId: varchar("campaign_id").references(() => campaigns.id, { onDelete: "cascade" }),
   investmentId: varchar("investment_id").references(() => investments.id, { onDelete: "cascade" }),
@@ -176,6 +177,7 @@ export const insertSubmittedIdeaSchema = createInsertSchema(submittedIdeas, {
 }).omit({ id: true, createdAt: true, updatedAt: true, status: true, tags: true });
 
 export const insertCampaignSchema = createInsertSchema(campaigns, {
+  id: z.string(),
   userId: z.string(),
   title: z.string().min(1, "Campaign title is required"),
   category: z.string().min(1, "Please select a category"),
@@ -196,12 +198,13 @@ export const insertCampaignSchema = createInsertSchema(campaigns, {
   documents: z.array(z.object({ name: z.string(), url: z.string() })).optional(),
   socialLinks: z.array(z.object({ platform: z.string(), url: z.string() })).optional(),
   status: z.string().optional(),
-}).omit({ id: true, createdAt: true, updatedAt: true, setupPaymentId: true, withdrawalPaymentId: true, setupFeePaid: true, withdrawalFeePaid: true, raisedAmount: true, backerCount: true, startDate: true, endDate: true });
+}).omit({ createdAt: true, updatedAt: true, setupPaymentId: true, withdrawalPaymentId: true, setupFeePaid: true, withdrawalFeePaid: true, raisedAmount: true, backerCount: true, startDate: true, endDate: true });
 
 export const insertInvestmentSchema = createInsertSchema(investments, {
+  id: z.string(),
   amount: z.string().min(1, "Investment amount is required"),
   investmentType: z.string().min(1, "Please select investment type"),
-}).omit({ id: true, paymentId: true, paymentStatus: true, status: true, createdAt: true, updatedAt: true });
+}).omit({ paymentId: true, paymentStatus: true, status: true, createdAt: true, updatedAt: true });
 
 export const insertCampaignUpdateSchema = createInsertSchema(campaignUpdates, {
   title: z.string().min(1, "Update title is required"),
@@ -209,9 +212,10 @@ export const insertCampaignUpdateSchema = createInsertSchema(campaignUpdates, {
 }).omit({ id: true, campaignId: true, createdAt: true });
 
 export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions, {
+  id: z.string(),
   amount: z.string().min(1, "Amount is required"),
   type: z.string().min(1, "Payment type is required"),
-}).omit({ id: true, campaignId: true, investmentId: true, status: true, paymentGateway: true, gatewayTransactionId: true, gatewayResponse: true, createdAt: true, updatedAt: true });
+}).omit({ campaignId: true, investmentId: true, status: true, paymentGateway: true, gatewayTransactionId: true, gatewayResponse: true, createdAt: true, updatedAt: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -237,7 +241,7 @@ export type Competitor = z.infer<typeof CompetitorSchema>;
 
 // AI Generated Ideas table
 export const aiGeneratedIdeas = pgTable("ai_generated_ideas", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   sessionId: varchar("session_id").notNull(), // Groups ideas from same generation request
   title: text("title").notNull(),
@@ -264,7 +268,7 @@ export const aiGeneratedIdeas = pgTable("ai_generated_ideas", {
 }));
 // AI Generation Sessions table for tracking requests
 export const aiGenerationSessions = pgTable("ai_generation_sessions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   userInput: text("user_input").notNull(),
   industry: text("industry"),
@@ -282,6 +286,7 @@ export const aiGenerationSessions = pgTable("ai_generation_sessions", {
 }));
 
 export const insertAiGeneratedIdeaSchema = createInsertSchema(aiGeneratedIdeas, {
+  id: z.string(),
   title: z.string().min(1, "Idea title is required"),
   description: z.string().min(1, "Description is required"),
   userInput: z.string().min(1, "User input is required"),
@@ -290,15 +295,16 @@ export const insertAiGeneratedIdeaSchema = createInsertSchema(aiGeneratedIdeas, 
   opportunities: z.array(z.string()).optional(),
   risks: z.string().optional(),
   nextSteps: z.array(z.string()).optional(),
-}).omit({ id: true, createdAt: true, updatedAt: true });
+}).omit({ createdAt: true, updatedAt: true });
 
 export const insertAiGenerationSessionSchema = createInsertSchema(aiGenerationSessions, {
+  id: z.string(),
   userId: z.string(),
   userInput: z.string().min(10, "Please describe your interests, skills, or goals (minimum 10 characters)"),
   industry: z.string().optional(),
   budget: z.string().optional(),
   location: z.string().optional(),
-}).omit({ id: true, ideasCount: true, processingTime: true, errorMessage: true, createdAt: true });
+}).omit({ ideasCount: true, processingTime: true, errorMessage: true, createdAt: true });
 
 export type InsertAiGeneratedIdea = z.infer<typeof insertAiGeneratedIdeaSchema>;
 export type AiGeneratedIdea = typeof aiGeneratedIdeas.$inferSelect;
@@ -309,7 +315,7 @@ export type AiGenerationSession = typeof aiGenerationSessions.$inferSelect;
 
 // Admin Users table - restricted to exactly two authorized admin users
 export const adminUsers = pgTable("admin_users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   name: text("name").notNull(),
@@ -324,7 +330,7 @@ export const adminUsers = pgTable("admin_users", {
 
 // Platform Ideas table - for admin-managed business ideas displayed on the platform
 export const platformIdeas = pgTable("platform_ideas", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
   fullDescription: text("full_description"), // Detailed description for idea pages
@@ -334,7 +340,7 @@ export const platformIdeas = pgTable("platform_ideas", {
   investment: text("investment"), // low, medium, high
   timeframe: text("timeframe"), // short, medium, long
   marketSize: text("market_size"),
-  competitors: json("competitors").$type<{name: string, description: string, website?: string, revenue?: string}[]>().default([]),
+  competitors: json("competitors").$type<{ name: string, description: string, website?: string, revenue?: string }[]>().default([]),
   targetAudience: text("target_audience"),
   revenueModel: text("revenue_model"),
   investmentRequired: text("investment_required"),
@@ -343,14 +349,14 @@ export const platformIdeas = pgTable("platform_ideas", {
   risks: json("risks").$type<string[]>().default([]),
   opportunities: json("opportunities").$type<string[]>().default([]),
   keyFeatures: json("key_features").$type<string[]>().default([]),
-  implementationSteps: json("implementation_steps").$type<{step: number, title: string, description: string, timeline: string}[]>().default([]),
+  implementationSteps: json("implementation_steps").$type<{ step: number, title: string, description: string, timeline: string }[]>().default([]),
   tags: json("tags").$type<string[]>().default([]),
   images: json("images").$type<string[]>().default([]),
   isVisible: text("is_visible").default("true"), // soft hide/show toggle
   isFeatured: text("is_featured").default("false"),
   views: text("views").default("0"),
   likes: text("likes").default("0"),
-  location:text("location").default(""),
+  location: text("location").default(""),
   uploadBatchId: varchar("upload_batch_id"), // Reference to upload history
   createdBy: varchar("created_by").references(() => adminUsers.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -366,7 +372,7 @@ export const platformIdeas = pgTable("platform_ideas", {
 
 // Upload History table - tracks bulk uploads by admins
 export const uploadHistory = pgTable("upload_history", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   filename: text("filename").notNull(),
   fileType: text("file_type").notNull(), // csv, json
   fileSize: text("file_size").notNull(),
@@ -375,7 +381,7 @@ export const uploadHistory = pgTable("upload_history", {
   errorCount: text("error_count").default("0"),
   uploadedBy: varchar("uploaded_by").notNull().references(() => adminUsers.id),
   processingStatus: text("processing_status").default("pending"), // pending, processing, completed, failed
-  errors: json("errors").$type<{row: number, error: string}[]>().default([]),
+  errors: json("errors").$type<{ row: number, error: string }[]>().default([]),
   isDeleted: text("is_deleted").default("false"),
   deletedAt: timestamp("deleted_at"),
   deletedBy: varchar("deleted_by").references(() => adminUsers.id),
@@ -389,7 +395,7 @@ export const uploadHistory = pgTable("upload_history", {
 
 // Delete History table - tracks soft-deleted items with 30-day retention
 export const deleteHistory = pgTable("delete_history", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   itemType: text("item_type").notNull(), // platform_idea, upload_batch
   itemId: varchar("item_id").notNull(),
   itemData: json("item_data").notNull(), // Full backup of deleted item
@@ -409,7 +415,7 @@ export const deleteHistory = pgTable("delete_history", {
 }));
 
 export const emailSubscribers = pgTable("email_subscribers", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   email_id: varchar("email_id").notNull(),
   status: integer("status").default(1), // 1 - subscribed, 0 - unsubscribed
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -417,10 +423,10 @@ export const emailSubscribers = pgTable("email_subscribers", {
   emailIdx: index("email_subscribers_email_idx").on(table.email_id),
   //statusIdx: index("email_subscribers_status_idx").on(table.status),
   createdAtIdx: index("email_subscribers_created_at_idx").on(table.createdAt),
-}));  
+}));
 // Admin Sessions table for JWT/session management
 export const adminSessions = pgTable("admin_sessions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   adminId: varchar("admin_id").notNull().references(() => adminUsers.id, { onDelete: "cascade" }),
   token: text("token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
@@ -437,7 +443,7 @@ export const adminSessions = pgTable("admin_sessions", {
 
 // Admin Activity Logs table for audit trail
 export const adminActivityLogs = pgTable("admin_activity_logs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id").primaryKey(),
   adminId: varchar("admin_id").notNull().references(() => adminUsers.id, { onDelete: "cascade" }),
   action: text("action").notNull(), // login, logout, create_idea, edit_idea, delete_idea, upload_ideas, etc.
   resourceType: text("resource_type"), // idea, upload, user, etc.
@@ -522,4 +528,4 @@ export type InsertAdminSession = z.infer<typeof insertAdminSessionSchema>;
 export type AdminSession = typeof adminSessions.$inferSelect;
 export type InsertAdminActivityLog = z.infer<typeof insertAdminActivityLogSchema>;
 export type AdminActivityLog = typeof adminActivityLogs.$inferSelect;
-export type emailSubscribers= z.infer<typeof insertemailSubscribers>;
+export type emailSubscribers = z.infer<typeof insertemailSubscribers>;

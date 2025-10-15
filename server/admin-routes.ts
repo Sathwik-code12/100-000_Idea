@@ -370,6 +370,31 @@ router.get('/subscriber-list', requireAdminAuth, async (req: Request, res: Respo
     res.status(500).json({ error: 'Failed to fetch Subscribers-List' });
   }
 });
+router.get("/stats", requireAdminAuth, async (req, res) => {
+  try {
+    const stats = await adminStorage.getDashboardStats();
+    res.json(stats);
+  } catch (error) {
+    console.error("Dashboard stats error:", error);
+    res.status(500).json({ error: "Failed to fetch dashboard stats" });
+  }
+});
+
+/**
+ * GET /api/admin/activity-logs
+ * Get admin activity logs
+ */
+router.get('/activities', requireAdminAuth, async (req, res) => {
+    try {
+        const options = paginationSchema.parse(req.query);
+        const result = await adminStorage.getAdminActivityLogs(options);
+        res.json(result);
+    }
+    catch (error) {
+        console.error('Get activity logs error:', error);
+        res.status(500).json({ error: 'Failed to fetch activity logs' });
+    }
+});
 router.delete('/subscriber-list/:id', requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

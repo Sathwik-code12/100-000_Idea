@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { v4 as uuidv4 } from "uuid";
 import { Request, Response, NextFunction } from 'express';
 import { eq, and } from 'drizzle-orm';
 import { db } from './db.js';
@@ -32,11 +33,13 @@ export class AdminAuthService {
         
         await db.insert(adminUsers).values([
           {
+            id:uuidv4() as string,
             email: AUTHORIZED_ADMIN_EMAILS[0],
             name: 'Admin One',
             password: hashedPassword,
           },
           {
+            id:uuidv4() as string,
             email: AUTHORIZED_ADMIN_EMAILS[1],
             name: 'Admin Two',
             password: hashedPassword,
@@ -196,6 +199,7 @@ export class AdminAuthService {
   ) {
     try {
       const logEntry: any = {
+        id:uuidv4() as string,
         action,
         resource: resourceType || 'admin',
         resourceId,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Campaign, Investment } from "@shared/schema";
+import ProfileTab from "@/components/sections/profileTab";
 
 type DashboardTab = "dashboard" | "profile" | "rewards" | "saved" | "campaigns" | "ai-ideas";
 
@@ -64,10 +65,53 @@ function AIBusinessIdeasGenerator() {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedIdeas, setGeneratedIdeas] = useState<any[]>([]);
-  const [sessionHistory, setSessionHistory] = useState<any[]>([]);
   const [selectedIdea, setSelectedIdea] = useState<any>(null);
-  const [favoriteIdeas, setFavoriteIdeas] = useState<string[]>([]);
   const [activeView, setActiveView] = useState<'generator' | 'history' | 'favorites'>('generator');
+
+  // Fetch history data from API
+  const { data: historyData = [], isLoading: historyLoading, refetch: refetchHistory } = useQuery({
+    queryKey: ['/api/ideas/history'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/ideas/history');
+      return response.json();
+    }
+  });
+
+  // Fetch favorites data from API
+  const { data: favorites = [], isLoading: favoritesLoading, refetch: refetchFavorites } = useQuery({
+    queryKey: ['/api/ideas/favorites'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/ideas/favorites');
+      return response.json();
+    }
+  });
+  useEffect(()=>{
+    console.log("favorites",favorites?.favorites?.length)
+  },[favorites])
+  useEffect(()=>{
+    console.log("historyData",historyData?.sessions?.length)
+  },[favorites])
+  // Mutation for toggling favorites
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async ({ ideaId, isFavorited }: { ideaId: string; isFavorited: boolean }) => {
+      const response = await apiRequest('POST', '/api/ideas/favorite', { ideaId, isFavorited });
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchFavorites();
+      toast({ 
+        title: "Success", 
+        description: "Favorite status updated" 
+      });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to update favorite", 
+        variant: "destructive" 
+      });
+    }
+  });
 
   const form = useForm<IdeaGenerationInput>({
     resolver: zodResolver(ideaGenerationSchema),
@@ -102,17 +146,10 @@ function AIBusinessIdeasGenerator() {
       const response = await apiRequest("POST", "/api/ai/generate-ideas", data);
       const result = await response.json();
       setGeneratedIdeas(result.ideas || []);
-
-      // Add to session history
-      const session = {
-        id: Date.now(),
-        timestamp: new Date(),
-        query: data.userInput,
-        ideas: result.ideas || [],
-        filters: { industry: data.industry, budget: data.budget, location: data.location }
-      };
-      setSessionHistory(prev => [session, ...prev.slice(0, 9)]); // Keep last 10 sessions
-
+      
+      // Refetch history to include the new session
+      refetchHistory();
+      
       toast({
         title: "AI Ideas Generated Successfully!",
         description: `Generated ${result.ideas?.length || 0} personalized business ideas with market analysis`,
@@ -130,11 +167,11 @@ function AIBusinessIdeasGenerator() {
   };
 
   const toggleFavorite = (ideaId: string) => {
-    setFavoriteIdeas(prev =>
-      prev.includes(ideaId)
-        ? prev.filter(id => id !== ideaId)
-        : [...prev, ideaId]
-    );
+    const isCurrentlyFavorite = favorites?.favorites?.some(fav => fav.id === ideaId);
+    toggleFavoriteMutation.mutate({ 
+      ideaId, 
+      isFavorited: !isCurrentlyFavorite 
+    });
   };
 
   return (
@@ -180,7 +217,7 @@ function AIBusinessIdeasGenerator() {
           >
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              History ({sessionHistory.length})
+              History ({historyData?.sessions?.length})
             </div>
           </button>
           <button
@@ -192,7 +229,7 @@ function AIBusinessIdeasGenerator() {
           >
             <div className="flex items-center gap-2">
               <Heart className="h-4 w-4" />
-              Favorites ({favoriteIdeas.length})
+              Favorites ({favorites?.favorites?.length})
             </div>
           </button>
         </div>
@@ -324,7 +361,6 @@ function AIBusinessIdeasGenerator() {
                             <div className="h-6 w-6 animate-spin rounded-full border-[3px] border-white/70 border-t-transparent" />
                             <span className="text-sm font-medium">Generating AI-Powered Ideas...</span>
                           </div>
-
                         </div>
                       ) : (
                         <div className="flex items-center gap-3">
@@ -430,13 +466,13 @@ function AIBusinessIdeasGenerator() {
                       </div>
                     </div>
                     <button
-                      onClick={() => toggleFavorite(idea.title)}
-                      className={`p-2 rounded-full transition-colors ${favoriteIdeas.includes(idea.title)
+                      onClick={() => toggleFavorite(idea.id)}
+                      className={`p-2 rounded-full transition-colors ${favorites?.favorites?.some(fav => fav.id === idea.id)
                         ? 'text-red-500 hover:text-red-600'
                         : 'text-gray-400 hover:text-red-500'
                         }`}
                     >
-                      <Heart className={`h-5 w-5 ${favoriteIdeas.includes(idea.title) ? 'fill-current' : ''}`} />
+                      <Heart className={`h-5 w-5 ${favorites?.favorites?.some(fav => fav.id === idea.id) ? 'fill-current' : ''}`} />
                     </button>
                   </div>
                 </CardHeader>
@@ -565,28 +601,6 @@ function AIBusinessIdeasGenerator() {
                       </div>
                     )}
 
-                    {/* {idea.risks && idea.risks.length > 0 && (
-                      <div className="p-5 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                        <div className="flex items-center gap-2 mb-3">
-                          <AlertCircle className="h-5 w-5 text-orange-600" />
-                          <div className="text-base font-bold text-orange-800">Risk Assessment & Mitigation</div>
-                        </div>
-                        <div className="space-y-3">
-                          {idea?.risks?.slice(0, 5).map((risk: string, idx: number) => (
-                            <div key={idx} className="bg-white p-3 rounded-md border border-orange-100">
-                              <div className="text-sm text-orange-700">
-                                <div className="font-medium text-orange-800 mb-1">
-                                  {risk.split(':')[0]}
-                                </div>
-                                <div className="text-orange-600">
-                                  {risk.split(':').slice(1).join(':').trim()}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )} */}
                     {idea.risks && (
                       <div className="p-5 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
                         <div className="flex items-center gap-2 mb-3">
@@ -728,33 +742,48 @@ function AIBusinessIdeasGenerator() {
             <FileText className="h-5 w-5 text-blue-600" />
             Generation History
           </h3>
-          {sessionHistory.length === 0 ? (
+          {
+          // historyLoading ? (
+          //   <div className="text-center py-8">
+          //     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          //     <p className="mt-4 text-gray-600">Loading history...</p>
+          //   </div>
+          // ) :
+           historyData?.sessions?.length == 0 ? (
             <Card className="p-8 text-center">
               <div className="text-gray-500">No generation history yet. Create your first AI ideas!</div>
             </Card>
           ) : (
             <div className="space-y-4">
-              {sessionHistory.map((session) => (
+              {historyData && historyData?.sessions?.map((session) => (
                 <Card key={session.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="text-sm font-semibold text-gray-800">
-                          {new Date(session.timestamp).toLocaleDateString()} at {new Date(session.timestamp).toLocaleTimeString()}
+                          {new Date(session.createdAt).toLocaleDateString()} at {new Date(session.createdAt).toLocaleTimeString()}
                         </div>
-                        <div className="text-xs text-gray-600 mt-1">{session.ideas.length} ideas generated</div>
+                        <div className="text-xs text-gray-600 mt-1">{session.ideasCount} ideas generated</div>
                       </div>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setGeneratedIdeas(session.ideas)}
+                        onClick={() => {
+                          // Fetch session ideas from backend
+                          apiRequest('GET', `/api/ideas/session/${session.id}`)
+                            .then(response => response.json())
+                            .then(data => {
+                              setGeneratedIdeas(data.ideas);
+                              setActiveView('generator');
+                            });
+                        }}
                         className="text-purple-600 border-purple-200 hover:bg-purple-50"
                       >
                         Load Results
                       </Button>
                     </div>
                     <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
-                      "{session.query.substring(0, 200)}..."
+                      "{session.userInput.substring(0, 200)}..."
                     </div>
                   </CardContent>
                 </Card>
@@ -771,32 +800,35 @@ function AIBusinessIdeasGenerator() {
             <Heart className="h-5 w-5 text-red-500" />
             Favorite Ideas
           </h3>
-          {favoriteIdeas.length === 0 ? (
+          {favoritesLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading favorites...</p>
+            </div>
+          ) : favorites?.favorites?.length === 0 ? (
             <Card className="p-8 text-center">
               <div className="text-gray-500">No favorite ideas yet. Heart the ideas you love!</div>
             </Card>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {generatedIdeas
-                .filter(idea => favoriteIdeas.includes(idea.title))
-                .map((idea, index) => (
-                  <Card key={index} className="border-l-4 border-l-red-500">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold text-gray-800">{idea.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{idea.description}</p>
-                        </div>
-                        <button
-                          onClick={() => toggleFavorite(idea.title)}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          <Heart className="h-4 w-4 fill-current" />
-                        </button>
+              {favorites?.favorites?.map((idea) => (
+                <Card key={idea.id} className="border-l-4 border-l-red-500">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-semibold text-gray-800">{idea.title}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{idea.description}</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <button
+                        onClick={() => toggleFavorite(idea.id)}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <Heart className="h-4 w-4 fill-current" />
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </div>
@@ -1333,168 +1365,8 @@ export default function Dashboard() {
             </div>
           )}
 
-          {activeTab === "profile" && (
-            <div className="space-y-6">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
-                <h1 className="text-2xl font-bold">Profile</h1>
-              </div>
+          {activeTab === "profile" && <ProfileTab />}
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Profile Picture and Basic Info */}
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <Avatar className="h-24 w-24 mx-auto mb-4">
-                      <AvatarImage src="/placeholder-avatar.jpg" />
-                      <AvatarFallback className="text-2xl">{user.name?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
-                    <h3 className="text-lg font-semibold">{user.name || 'User'}</h3>
-
-                    <div className="space-y-3 mt-6 text-left">
-                      <Button variant="outline" className="w-full justify-start">
-                        Account
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start">
-                        Password
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start">
-                        Notification
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start">
-                        Security & Privacy
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Account Details Form */}
-                <div className="lg:col-span-2">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Account details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="firstName">First name</Label>
-                          <Input
-                            id="firstName"
-                            defaultValue={user.name?.split(' ')[0] || 'Neha'}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="lastName">Last name</Label>
-                          <Input
-                            id="lastName"
-                            defaultValue={user.name?.split(' ')[1] || 'Kumar'}
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            defaultValue={user.email || 'neha1897@gmail.com'}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="phone">Phone</Label>
-                          <Input
-                            id="phone"
-                            defaultValue="+91 9876543210"
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="gender">Gender</Label>
-                          <Select defaultValue="female">
-                            <SelectTrigger className="mt-1">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="female">Female</SelectItem>
-                              <SelectItem value="male">Male</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label htmlFor="age">Age</Label>
-                          <Input
-                            id="age"
-                            type="number"
-                            defaultValue="25"
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="aadhar">Aadhar ID</Label>
-                          <Input
-                            id="aadhar"
-                            defaultValue="25486 651651"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="income">Annual Income</Label>
-                          <Input
-                            id="income"
-                            defaultValue="800000"
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="caste">Caste</Label>
-                          <Input
-                            id="caste"
-                            defaultValue="OBC non creamy"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="area">Area</Label>
-                          <Input
-                            id="area"
-                            defaultValue="Urban"
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="address">Address</Label>
-                        <Textarea
-                          id="address"
-                          className="mt-1"
-                          placeholder="Enter your full address"
-                        />
-                      </div>
-
-                      <div className="flex gap-3 pt-4">
-                        <Button variant="outline">Cancel</Button>
-                        <Button className="bg-blue-600 hover:bg-blue-700">Update</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </div>
-          )}
 
           {activeTab === "rewards" && (
             <div className="space-y-6">

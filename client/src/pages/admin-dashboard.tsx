@@ -32,7 +32,8 @@ import {
   UserCheck,
   BookmarkCheck,
   Loader2,
-  X
+  X,
+  User
 } from "lucide-react";
 
 
@@ -92,7 +93,7 @@ interface SubmittedIdea {
 }
 
 export default function AdminDashboard() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("users");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<any>(false);
@@ -369,7 +370,7 @@ export default function AdminDashboard() {
 
   // Fetch activity logs
   const { data: activities, isLoading: activitiesLoading } = useQuery({
-    queryKey: ["/api/admin/activity-logs"],
+    queryKey: ["/api/admin/activities"],
     enabled: !!adminUser,
   });
   const { data: subscribersList, isLoading: subscribersListLoading } = useQuery({
@@ -707,6 +708,10 @@ export default function AdminDashboard() {
               <Settings className="h-4 w-4 mr-2" />
               System
             </TabsTrigger>
+            <TabsTrigger value="profile" className="data-[state=active]:bg-slate-700">
+              <User className="h-4 w-4 mr-2" />
+              Profile
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -753,7 +758,7 @@ export default function AdminDashboard() {
                     <div>
                       <p className="text-sm text-slate-400">Submissions</p>
                       <p className="text-2xl font-bold">
-                        {statsLoading ? "..." : (stats as any)?.totalSubmissions || 0}
+                        {statsLoading ? "..." : (stats as any)?.totalSubmittedIdeasCount || 0}
                       </p>
                     </div>
                   </div>
@@ -1208,11 +1213,11 @@ export default function AdminDashboard() {
                               <TableCell className="text-slate-300">{user.name}</TableCell>
                               <TableCell className="font-medium text-white">{user.email}</TableCell>
                               <TableCell>
-                                <Badge
-                                  className={user.isActive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}
-                                >
-                                  {user.isActive ? "Active" : "Inactive"}
-                                </Badge>
+                                <div className="mt-1 p-2 rounded">
+                                  <Badge className={user?.isActive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}>
+                                    {user?.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                </div>
                               </TableCell>
                               <TableCell className="text-slate-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                               <TableCell className="text-slate-300">{new Date(user.updatedAt).toLocaleDateString()}</TableCell>
@@ -1536,6 +1541,81 @@ export default function AdminDashboard() {
                         <p className="text-sm text-slate-400">Clear application cache</p>
                       </div>
                     </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="profile" className="space-y-6">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white">Admin Profile</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex flex-col items-center">
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center mb-4">
+                        <span className="text-2xl font-bold text-white">
+                          {adminUser?.name?.charAt(0).toUpperCase() || "A"}
+                        </span>
+                      </div>
+                      <Badge className="bg-blue-500/20 text-blue-400">Administrator</Badge>
+                    </div>
+
+                    <div className="flex-1 space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-slate-400">Name</h3>
+                        <p className="text-white">{adminUser?.name || "Admin User"}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-slate-400">Email</h3>
+                        <p className="text-white">{adminUser?.email || "admin@example.com"}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-slate-400">Role</h3>
+                        <p className="text-white">Admin</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-slate-400">Last Login</h3>
+                        <p className="text-white">
+                          {adminUser?.lastLogin
+                            ? new Date(adminUser.lastLogin).toLocaleString()
+                            : "First time login"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-700">
+                    <h3 className="text-lg font-medium text-white mb-4">Account Security</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 bg-slate-700/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Shield className="h-5 w-5 text-green-400" />
+                          <div>
+                            <p className="text-white font-medium">Two-Factor Authentication</p>
+                            <p className="text-sm text-slate-400">Not enabled</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="mt-3 bg-slate-600 border-slate-500">
+                          Enable
+                        </Button>
+                      </div>
+
+                      <div className="p-4 bg-slate-700/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Shield className="h-5 w-5 text-blue-400" />
+                          <div>
+                            <p className="text-white font-medium">Password</p>
+                            <p className="text-sm text-slate-400">Last changed 3 months ago</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="mt-3 bg-slate-600 border-slate-500">
+                          Change
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
