@@ -1,5 +1,6 @@
 import { eq, and, desc, count, sql, gte, lte, ilike, or, asc, getTableColumns } from 'drizzle-orm';
 import { db } from './db.js';
+import { v4 as uuidv4 } from "uuid";
 import {
   platformIdeas,
   uploadHistory,
@@ -30,7 +31,9 @@ export interface PaginationOptions {
 }
 
 export interface DashboardStats {
+  totalUsers: number,
   totalIdeas: number;
+  totalSubmittedIdeasCount: number,
   visibleIdeas: number;
   hiddenIdeas: number;
   recentlyAdded: number;
@@ -66,7 +69,9 @@ export class AdminStorage {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const [
+      totalUsers,
       totalIdeasCount,
+      totalSubmittedIdeasCount,
       visibleIdeasCount,
       hiddenIdeasCount,
       recentlyAddedCount,
@@ -75,7 +80,9 @@ export class AdminStorage {
       totalUploadsCount,
       viewsAndLikes
     ] = await Promise.all([
+      db.select({ count: count()}).from(users),
       db.select({ count: count() }).from(platformIdeas),
+      db.select({ count: count() }).from(submittedIdeas),
       db.select({ count: count() }).from(platformIdeas).where(eq(platformIdeas.isVisible, 'true')),
       db.select({ count: count() }).from(platformIdeas).where(eq(platformIdeas.isVisible, 'false')),
       db.select({ count: count() }).from(platformIdeas).where(gte(platformIdeas.createdAt, weekAgo)),
@@ -95,7 +102,9 @@ export class AdminStorage {
     ]);
 
     return {
+      totalUsers:totalUsers[0].count,
       totalIdeas: totalIdeasCount[0].count,
+      totalSubmittedIdeasCount: totalSubmittedIdeasCount[0].count,
       visibleIdeas: visibleIdeasCount[0].count,
       hiddenIdeas: hiddenIdeasCount[0].count,
       recentlyAdded: recentlyAddedCount[0].count,
@@ -175,7 +184,11 @@ export class AdminStorage {
   }
 
   async createPlatformIdea(ideaData: InsertPlatformIdea & { createdBy: string }): Promise<PlatformIdea> {
-    const [idea] = await db.insert(platformIdeas).values([ideaData]).returning();
+    const dataWithId: any = {
+      ...ideaData,
+      id: uuidv4(), // manually generate id
+    };
+    const [idea] = await db.insert(platformIdeas).values(dataWithId).returning();
     return idea;
   }
 
@@ -204,6 +217,7 @@ export class AdminStorage {
 
     // Store in delete history
     await db.insert(deleteHistory).values({
+      id: uuidv4() as string,
       itemType: 'platform_idea',
       itemId: id,
       itemData: idea,
@@ -243,7 +257,11 @@ export class AdminStorage {
 
   // Upload History Management
   async createUploadHistory(uploadData: InsertUploadHistory & { uploadedBy: string }): Promise<UploadHistory> {
-    const [upload] = await db.insert(uploadHistory).values(uploadData).returning();
+    const data: any = {
+      ...uploadHistory,
+      id: uuidv4() as string
+    }
+    const [upload] = await db.insert(uploadHistory).values(data).returning();
     return upload;
   }
 
@@ -303,6 +321,7 @@ export class AdminStorage {
 
     // Store in delete history
     await db.insert(deleteHistory).values({
+      id: uuidv4() as string,
       itemType: 'upload_batch',
       itemId: id,
       itemData: upload[0],
@@ -391,7 +410,7 @@ export class AdminStorage {
   // Clean up expired delete history (called by background job)
   async cleanupExpiredDeleteHistory(): Promise<number> {
     const now = new Date();
-    
+
     const deletedItems = await db
       .delete(deleteHistory)
       .where(and(
@@ -441,7 +460,7 @@ export class AdminStorage {
       .selectDistinct({ category: platformIdeas.category })
       .from(platformIdeas)
       .where(eq(platformIdeas.isVisible, 'true'));
-    
+
     return categories.map(c => c.category);
   }
 
@@ -471,7 +490,7 @@ export class AdminStorage {
         total: totalResult[0].count,
         totalPages: Math.ceil(totalResult[0].count / limit),
       },
-    };  
+    };
   }
   async deleteSubmittedIdeas(id: string): Promise<boolean> {
     const result = await db.delete(submittedIdeas).where(eq(submittedIdeas.id, id));
@@ -511,6 +530,7 @@ export class AdminStorage {
           id: users.id,
           name: users.name,
           email: users.email,
+          isActive:users.isActive,
           createdAt: users.createdAt,
           //isActive: users.isActive,
         })
@@ -519,15 +539,15 @@ export class AdminStorage {
         .orderBy(
           sortOrder === 'asc'
             ? asc(
-                sortBy === 'name' ? users.name :
+              sortBy === 'name' ? users.name :
                 sortBy === 'email' ? users.email :
-                users.createdAt // Default or fallback
-              )
+                  users.createdAt // Default or fallback
+            )
             : desc(
-                sortBy === 'name' ? users.name :
+              sortBy === 'name' ? users.name :
                 sortBy === 'email' ? users.email :
-                users.createdAt // Default or fallback
-              )
+                  users.createdAt // Default or fallback
+            )
         )
         .limit(limit)
         .offset(offset),
@@ -548,11 +568,31 @@ export class AdminStorage {
   }
   async getSubscriberList() {
     const subscribers = await db.select().from(emailSubscribers);
-    return subscribers; 
+
+    return subscribers.map((item) => {
+      let email = item.email_id;
+
+      // try to parse only if it’s JSON format
+      try {
+        const parsed = JSON.parse(item.email_id);
+        if (parsed && parsed.email_id) {
+          email = parsed.email_id;
+        }
+      } catch {
+        // it's plain text, so keep it as-is
+      }
+
+      return {
+        ...item,
+        email_id: email,
+      };
+    });
   }
+
+
   async deleteSubscriberList(id: string) {
     const subscribers = await db.delete(emailSubscribers).where(eq(emailSubscribers.id, id));
-    return subscribers; 
+    return subscribers;
   }
 
 }

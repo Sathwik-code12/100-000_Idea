@@ -3,7 +3,7 @@ import { aiIdeaService } from './ai-service.js';
 import { storage } from './storage.js';
 import { Competitor, insertAiGenerationSessionSchema, insertAiGeneratedIdeaSchema } from '../shared/schema.js';
 import type { Express } from "express";
-
+import { v4 as uuidv4 } from "uuid";
 export function registerAiRoutes(app: Express) {
   // Middleware to check authentication
   const requireAuth = (req: any, res: any, next: any) => {
@@ -18,16 +18,19 @@ export function registerAiRoutes(app: Express) {
     try {
       console.log("AI generate-ideas request received from user:", req.user?.id);
       console.log("Request body:", req.body);
-      req.body.userId = req.user?.id; // Attach userId to request body for session tracking
+      req.body.userId = req?.user?.id; // Attach userId to request body for session tracking
       const userId = req.user.id;
-      
+      const data = {
+        ...req.body,
+        id: uuidv4()
+      }
       // Validate input
-      const validatedInput = insertAiGenerationSessionSchema.parse(req.body);
+      const validatedInput = insertAiGenerationSessionSchema.parse(data);
       console.log("Validated input:", validatedInput);
-      
+
       // Create session record
       const session = await storage.createAiGenerationSession(userId, validatedInput);
-      
+
       // Generate ideas using AI
       const startTime = Date.now();
       const aiResponse = await aiIdeaService.generateIdeas({
@@ -36,10 +39,10 @@ export function registerAiRoutes(app: Express) {
         budget: validatedInput.budget || undefined,
         location: validatedInput.location || undefined,
       });
-      
+
       // Store generated ideas
       const storedIdeas = await Promise.all(
-        aiResponse.ideas.map(idea => 
+        aiResponse.ideas.map(idea =>
           storage.createAiGeneratedIdea({
             userId,
             sessionId: session.id,
@@ -60,25 +63,25 @@ export function registerAiRoutes(app: Express) {
           })
         )
       );
-      
+
       // Update session with completion status
       await storage.updateAiGenerationSession(session.id, {
         status: "completed",
         ideasCount: storedIdeas.length.toString(),
         processingTime: (Date.now() - startTime).toString(),
       });
-      
+
       res.json({
         sessionId: session.id,
         ideas: storedIdeas,
         processingTime: Date.now() - startTime,
         message: `Generated ${storedIdeas.length} personalized business ideas`
       });
-      
+
     } catch (error) {
       console.error("Error generating ideas:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
-      
+
       // Update session with error status if session was created
       if (req.sessionId) {
         try {
@@ -90,17 +93,17 @@ export function registerAiRoutes(app: Express) {
           console.error("Failed to update session error:", updateError);
         }
       }
-      
+
       if (error instanceof z.ZodError) {
         console.log("Validation error details:", error.errors);
-        return res.status(400).json({ 
-          message: "Invalid input", 
-          errors: error.errors 
+        return res.status(400).json({
+          message: "Invalid input",
+          errors: error.errors
         });
       }
-      
-      res.status(500).json({ 
-        message: "Failed to generate ideas", 
+
+      res.status(500).json({
+        message: "Failed to generate ideas",
         error: error instanceof Error ? error.message : "Unknown error",
         details: error instanceof Error ? error.stack : undefined
       });
@@ -113,13 +116,13 @@ export function registerAiRoutes(app: Express) {
       const userId = req.user.id;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
-      
+
       // Get user's AI sessions with pagination
       const allSessions = await storage.getUserAiSessions(userId);
       const sessions = allSessions
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice((page - 1) * limit, page * limit);
-      
+
       // Get ideas for each session
       const sessionsWithIdeas = await Promise.all(
         sessions.map(async (session) => {
@@ -136,7 +139,7 @@ export function registerAiRoutes(app: Express) {
           };
         })
       );
-      
+
       res.json({
         sessions: sessionsWithIdeas,
         pagination: {
@@ -146,10 +149,10 @@ export function registerAiRoutes(app: Express) {
           totalPages: Math.ceil(allSessions.length / limit)
         }
       });
-      
+
     } catch (error) {
       console.error("Error fetching history:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to fetch idea history",
         error: error instanceof Error ? error.message : "Unknown error"
       });
@@ -161,25 +164,25 @@ export function registerAiRoutes(app: Express) {
     try {
       const userId = req.user.id;
       const sessionId = req.params.sessionId;
-      
+
       // Verify session belongs to user
       const sessions = await storage.getUserAiSessions(userId);
       const session = sessions.find(s => s.id === sessionId);
-      
+
       if (!session) {
         return res.status(404).json({ message: "Session not found" });
       }
-      
+
       const ideas = await storage.getAiIdeasBySession(sessionId);
-      
+
       res.json({
         session,
         ideas
       });
-      
+
     } catch (error) {
       console.error("Error fetching session ideas:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to fetch session ideas",
         error: error instanceof Error ? error.message : "Unknown error"
       });
@@ -191,31 +194,31 @@ export function registerAiRoutes(app: Express) {
     try {
       const userId = req.user.id;
       const { ideaId, isFavorited } = req.body;
-      
+
       if (!ideaId || typeof isFavorited !== 'boolean') {
-        return res.status(400).json({ 
-          message: "ideaId and isFavorited (boolean) are required" 
+        return res.status(400).json({
+          message: "ideaId and isFavorited (boolean) are required"
         });
       }
-      
+
       // Verify idea belongs to user
       const userIdeas = await storage.getUserAiIdeas(userId);
       const idea = userIdeas.find(i => i.id === ideaId);
-      
+
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
       }
-      
+
       const updatedIdea = await storage.updateAiIdeaFavorite(ideaId, isFavorited);
-      
+
       res.json({
         message: isFavorited ? "Idea added to favorites" : "Idea removed from favorites",
         idea: updatedIdea
       });
-      
+
     } catch (error) {
       console.error("Error updating favorite:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to update favorite status",
         error: error instanceof Error ? error.message : "Unknown error"
       });
@@ -227,16 +230,16 @@ export function registerAiRoutes(app: Express) {
     try {
       const userId = req.user.id;
       const favorites = await storage.getUserFavoriteAiIdeas(userId);
-      
+
       res.json({
-        favorites: favorites.sort((a, b) => 
+        favorites: favorites.sort((a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
         )
       });
-      
+
     } catch (error) {
       console.error("Error fetching favorites:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to fetch favorite ideas",
         error: error instanceof Error ? error.message : "Unknown error"
       });
@@ -247,32 +250,32 @@ export function registerAiRoutes(app: Express) {
   app.get("/api/ideas/stats", requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       const [sessions, ideas, favorites] = await Promise.all([
         storage.getUserAiSessions(userId),
         storage.getUserAiIdeas(userId),
         storage.getUserFavoriteAiIdeas(userId)
       ]);
-      
+
       const completedSessions = sessions.filter(s => s.status === "completed");
       const totalProcessingTime = completedSessions.reduce((total, session) => {
         return total + (parseInt(session.processingTime || "0"));
       }, 0);
-      
+
       // Calculate usage by industry
       const industryUsage = sessions.reduce((acc, session) => {
         const industry = session.industry || "General";
         acc[industry] = (acc[industry] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
-      
+
       res.json({
         totalSessions: sessions.length,
         completedSessions: completedSessions.length,
         totalIdeas: ideas.length,
         favoriteIdeas: favorites.length,
-        averageProcessingTime: completedSessions.length > 0 
-          ? Math.round(totalProcessingTime / completedSessions.length) 
+        averageProcessingTime: completedSessions.length > 0
+          ? Math.round(totalProcessingTime / completedSessions.length)
           : 0,
         industryUsage,
         recentActivity: sessions
@@ -285,10 +288,10 @@ export function registerAiRoutes(app: Express) {
             createdAt: session.createdAt
           }))
       });
-      
+
     } catch (error) {
       console.error("Error fetching stats:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to fetch statistics",
         error: error instanceof Error ? error.message : "Unknown error"
       });

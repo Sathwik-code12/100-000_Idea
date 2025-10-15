@@ -35,6 +35,7 @@ export default function AdminLogin() {
       return response.json();
     },
     onSuccess: () => {
+      console.log("test")
       toast({
         title: "Success",
         description: "Welcome to the admin panel!",

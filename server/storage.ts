@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { v4 as uuidv4 } from "uuid";
 import { CompetitorSchema } from "../shared/schema.js";
-import { 
-  type User, 
-  type InsertUser, 
-  type SubmittedIdea, 
+import {
+  type User,
+  type InsertUser,
+  type SubmittedIdea,
   type PlatformIdea,
   type InsertSubmittedIdea,
   type Campaign,
@@ -29,7 +30,7 @@ import {
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { db } from "./db.js";
-import { eq,and,ilike } from "drizzle-orm";
+import { eq, and, ilike } from "drizzle-orm";
 
 function parseStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -54,7 +55,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   sessionStore: any;
-  
+
   // Idea submission methods
   createSubmittedIdea(idea: InsertSubmittedIdea & { tags: string[] }): Promise<SubmittedIdea>;
   getSubmittedIdeas(): Promise<SubmittedIdea[]>;
@@ -94,9 +95,9 @@ export class DatabaseStorage implements IStorage {
 
   constructor() {
     const PostgresSessionStore = connectPg(session);
-    this.sessionStore = new PostgresSessionStore({ 
+    this.sessionStore = new PostgresSessionStore({
       conString: process.env.DATABASE_URL,
-      createTableIfMissing: true 
+      createTableIfMissing: true
     });
   }
 
@@ -111,34 +112,51 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(user: InsertUser): Promise<User> {
+  async createUser(user: any): Promise<User> {
     const [newUser] = await db.insert(users).values(user).returning();
     return newUser;
   }
   // Storage function
-async updateUser(user: any): Promise<User> {
-  if (!user.id) throw new Error("User ID is required");
+  async updateUser(user: any): Promise<User> {
+    if (!user.id) throw new Error("User ID is required");
 
-  const [updatedUser] = await db
-    .update(users)
-    .set(user)
-    .where(eq(users.id, user.id))
-    .returning();
+    const [updatedUser] = await db
+      .update(users)
+      .set(user)
+      .where(eq(users.id, user.id))
+      .returning();
 
-  return updatedUser;
-}
+    return updatedUser;
+  }
+  // Storage function
+  async updateUserPassword(user: { id: string; password: string }): Promise<User> {
+    if (!user.id) throw new Error("User ID is required");
 
+    const [updatedUser] = await db
+      .update(users)
+      .set({ password: user.password, updatedAt: new Date() })
+      .where(eq(users.id, user.id))
+      .returning();
 
-  async createEmailSubscribers(email_id:emailSubscribers ): Promise<emailSubscribers> {
-    const [subscribed] = await db.insert(emailSubscribers).values(email_id).returning();
+    return updatedUser;
+  }
+
+  async createEmailSubscribers(email_id: emailSubscribers): Promise<emailSubscribers> {
+    const data:any={
+      id:uuidv4() as string,
+      email_id:email_id
+    }
+    const [subscribed] = await db.insert(emailSubscribers).values(data).returning();
     return subscribed;
   }
   // Submitted Ideas methods
   async createSubmittedIdea(idea: InsertSubmittedIdea & { tags: string[] }): Promise<SubmittedIdea> {
-    const [newIdea] = await db.insert(submittedIdeas).values({
+    const data:any={
+      id:uuidv4() as string,
       ...idea,
       tags: idea.tags
-    }).returning();
+    }
+    const [newIdea] = await db.insert(submittedIdeas).values(data).returning();
     return newIdea;
   }
   async getPlatformIdeas(): Promise<PlatformIdea[]> {
@@ -164,6 +182,7 @@ async updateUser(user: any): Promise<User> {
   // Campaign methods
   async createCampaign(userId: string, campaign: Partial<InsertCampaign>): Promise<Campaign> {
     const campaignData: InsertCampaign = {
+      id:uuidv4(),
       userId,
       title: campaign.title || "",
       description: campaign.description || "",
@@ -175,16 +194,19 @@ async updateUser(user: any): Promise<User> {
       location: campaign.location || "",
       useOfFunds: campaign.useOfFunds || "",
       campaignDuration: campaign.campaignDuration || "",
-      teamInfo: (campaign.teamInfo as {name: string, role: string, bio: string, image?: string}[]) || [],
-      financials: (campaign.financials as {revenue?: string, expenses?: string, projections?: string}) || {},
+      teamInfo: (campaign.teamInfo as { name: string, role: string, bio: string, image?: string }[]) || [],
+      financials: (campaign.financials as { revenue?: string, expenses?: string, projections?: string }) || {},
       risks: parseStringArray(campaign.risks),
       opportunities: parseStringArray(campaign.opportunities),
-      rewards: (campaign.rewards as {amount: string, reward: string}[]) || [],
+      rewards: (campaign.rewards as { amount: string, reward: string }[]) || [],
       images: (campaign.images as string[]) || [],
-      documents: (campaign.documents as {name: string, url: string}[]) || [],
-      socialLinks: (campaign.socialLinks as {platform: string, url: string}[]) || [],
+      documents: (campaign.documents as { name: string, url: string }[]) || [],
+      socialLinks: (campaign.socialLinks as { platform: string, url: string }[]) || [],
     };
-
+    const data:any={
+      id:uuidv4() as string,
+      campaignData:campaignData
+    }
     const [newCampaign] = await db.insert(campaigns).values([campaignData]).returning();
     return newCampaign;
   }
@@ -213,6 +235,7 @@ async updateUser(user: any): Promise<User> {
   // Investment methods
   async createInvestment(investment: Partial<InsertInvestment> & { campaignId: string, investorId: string }): Promise<Investment> {
     const investmentData: InsertInvestment = {
+      id:uuidv4() as string,
       campaignId: investment.campaignId,
       investorId: investment.investorId,
       amount: investment.amount || "0",
@@ -237,6 +260,7 @@ async updateUser(user: any): Promise<User> {
   // Payment transaction methods
   async createPaymentTransaction(transaction: Partial<InsertPaymentTransaction> & { userId: string }): Promise<PaymentTransaction> {
     const transactionData: InsertPaymentTransaction = {
+      id:uuidv4() as string,
       userId: transaction.userId,
       amount: transaction.amount || "0",
       type: transaction.type || ""
@@ -257,6 +281,7 @@ async updateUser(user: any): Promise<User> {
   // AI Generated Ideas methods
   async createAiGenerationSession(userId: string, session: Partial<InsertAiGenerationSession>): Promise<AiGenerationSession> {
     const sessionData: InsertAiGenerationSession = {
+      id:uuidv4() as string,
       userId,
       userInput: session.userInput || "",
       industry: session.industry || undefined,
@@ -279,6 +304,7 @@ async updateUser(user: any): Promise<User> {
 
   async createAiGeneratedIdea(idea: Partial<InsertAiGeneratedIdea> & { userId: string, sessionId: string }): Promise<AiGeneratedIdea> {
     const ideaData: InsertAiGeneratedIdea = {
+      id:uuidv4(),
       userId: idea.userId,
       sessionId: idea.sessionId,
       title: idea.title || "",
@@ -303,25 +329,25 @@ async updateUser(user: any): Promise<User> {
     return await db.select().from(aiGeneratedIdeas).where(eq(aiGeneratedIdeas.userId, userId));
   }
 
-   async search(search: string, category?: string, location?: string): Promise<PlatformIdea[]> {
+  async search(search: string, category?: string, location?: string): Promise<PlatformIdea[]> {
     const conditions = [];
-  
-  // Always search in title
-  conditions.push(ilike(platformIdeas.title, `%${search}%`));
-  
-  // Add category if provided
-  if (category && category.length > 0) {
-    conditions.push(eq(platformIdeas.category, category));
-  }
-  
-  // Add location if provided
-  if (location && location.length > 0) {
-    conditions.push(eq(platformIdeas.location, location));
-  }
-  
-  return await db.select()
-    .from(platformIdeas)
-    .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+    // Always search in title
+    conditions.push(ilike(platformIdeas.title, `%${search}%`));
+
+    // Add category if provided
+    if (category && category.length > 0) {
+      conditions.push(eq(platformIdeas.category, category));
+    }
+
+    // Add location if provided
+    if (location && location.length > 0) {
+      conditions.push(eq(platformIdeas.location, location));
+    }
+
+    return await db.select()
+      .from(platformIdeas)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
   }
 
   async getUserAiSessions(userId: string): Promise<AiGenerationSession[]> {

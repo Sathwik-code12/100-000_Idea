@@ -1,5 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { v4 as uuidv4 } from "uuid";
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -89,6 +90,7 @@ export function setupAuth(app: Express) {
       // Create new user
       const hashedPassword = await hashPassword(password);
       const user = await storage.createUser({
+        id:uuidv4() as string,
         name,
         email,
         password: hashedPassword,
@@ -113,6 +115,7 @@ export function setupAuth(app: Express) {
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) return next(err);
       if (!user) {
+        
         // Handle user not found case specifically - new user needs to sign up
         if (info?.message === "USER_NOT_FOUND") {
           return res.status(404).json({
@@ -166,6 +169,16 @@ export function setupAuth(app: Express) {
       id: user.id,
       name: user.name,
       email: user.email,
+      last_name: user.last_name,
+      phone: user.phone,
+      gender: user.gender,
+      age: user.age,
+      aadhar_id: user.aadhar_id,
+      annual_income: user.annual_income,
+      caste: user.caste,
+      area: user.area,
+      address: user.address,
+      password: user.password,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -175,6 +188,7 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) {
       return res.sendStatus(401);
     }
+    const user = req.user as SchemaUser;
 
     const {
       id, // user id must come from request (or session)
@@ -194,12 +208,12 @@ export function setupAuth(app: Express) {
 
     try {
       // Check if email is changing
-      if (email) {
-        const existingUser = await storage.getUserByEmail(email);
-        if (existingUser && existingUser.id !== id) {
-          return res.status(400).json({ message: "Email already registered" });
-        }
-      }
+      // if (email) {
+      //   const existingUser = await storage.getUserByEmail(email);
+      //   if (existingUser && existingUser.id !== id) {
+      //     return res.status(400).json({ message: "Email already registered" });
+      //   }
+      // }
 
       // Hash password if provided
       let hashedPassword = password;
@@ -207,9 +221,9 @@ export function setupAuth(app: Express) {
         const bcrypt = await import("bcrypt");
         hashedPassword = await bcrypt.hash(password, 10);
       }
-
+      const user_id = user.id
       const updatedUser = await storage.updateUser({
-        id,
+        id: user_id,
         name,
         last_name,
         phone,
@@ -230,5 +244,37 @@ export function setupAuth(app: Express) {
       return res.status(500).json({ message: "Server error" });
     }
   });
+  app.put("/api/user/update-password", async (req, res, next) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
 
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const user = req.user as SchemaUser;
+
+      // Verify current password
+      if (!(await comparePasswords(currentPassword, user.password))) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+
+      // Validate new password length
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "New password must be at least 6 characters long" });
+      }
+
+      // Hash new password
+      const hashedPassword = await hashPassword(newPassword);
+
+      // Update password
+      const updatedUser = await storage.updateUserPassword({
+        id: user.id,
+        password: hashedPassword
+      });
+
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      next(error);
+    }
+  });
 }
