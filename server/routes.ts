@@ -79,46 +79,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/search", async (req, res) => {
     try {
-      const { search = "", category = "", location = "" } = req.query;
+        const { search = "", category = "", location = "" } = req.query;
 
-      console.log("Search query received:", { search, category, location });
+        console.log("Search query received:", { search, category, location });
 
-      // Validate inputs
-      if (typeof search !== "string" || typeof category !== "string" || typeof location !== "string") {
-        return res.status(400).json({
-          success: false,
-          message: "Search, category, and location must be strings",
+        // Validate inputs
+        if (typeof search !== "string" || typeof category !== "string" || typeof location !== "string") {
+            return res.status(400).json({
+                success: false,
+                message: "Search, category, and location must be strings",
+            });
+        }
+
+        // Trim inputs safely
+        const cleanSearch = search.trim();
+        const cleanCategory = category.trim();
+        const cleanLocation = location.trim();
+
+        // Optional: check for empty search parameters
+        if (!cleanSearch && !cleanCategory && !cleanLocation) {
+            return res.status(400).json({
+                success: false,
+                message: "At least one search parameter is required",
+            });
+        }
+
+        // Call your storage search function
+        const results = await storage.search(cleanSearch, cleanCategory, cleanLocation);
+
+        return res.json({
+            success: true,
+            results,
         });
-      }
-
-      // Trim inputs safely
-      const cleanSearch = search.trim();
-      const cleanCategory = category.trim();
-      const cleanLocation = location.trim();
-
-      // Optional: check for empty search term
-      if (!cleanSearch && !cleanCategory && !cleanLocation) {
-        return res.status(400).json({
-          success: false,
-          message: "At least one search parameter is required",
-        });
-      }
-
-      // Call your storage search function
-      const results = await storage.search(cleanSearch, cleanCategory, cleanLocation);
-
-      return res.json({
-        success: true,
-        results,
-      });
     } catch (error) {
-      console.error("Error performing search:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
+        console.error("Error performing search:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
     }
-  });
+});
 
 
   // Submit idea endpoint with optimizations
