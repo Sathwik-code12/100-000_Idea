@@ -329,26 +329,28 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(aiGeneratedIdeas).where(eq(aiGeneratedIdeas.userId, userId));
   }
 
-  async search(search: string, category?: string, location?: string): Promise<PlatformIdea[]> {
+async search(search: string, category?: string, location?: string): Promise<PlatformIdea[]> {
     const conditions = [];
 
     // Always search in title
-    conditions.push(ilike(platformIdeas.title, `%${search}%`));
+    if (search.trim()) {
+        conditions.push(ilike(platformIdeas.title, `%${search}%`));
+    }
 
     // Add category if provided
     if (category && category.length > 0) {
-      conditions.push(eq(platformIdeas.category, category));
+        conditions.push(eq(platformIdeas.category, category));
     }
 
     // Add location if provided
     if (location && location.length > 0) {
-      conditions.push(eq(platformIdeas.location, location));
+        conditions.push(eq(platformIdeas.location, location));
     }
 
     return await db.select()
-      .from(platformIdeas)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
-  }
+        .from(platformIdeas)
+        .where(conditions.length > 0 ? and(...conditions) : undefined);
+}
 
   async getUserAiSessions(userId: string): Promise<AiGenerationSession[]> {
     return await db.select().from(aiGenerationSessions).where(eq(aiGenerationSessions.userId, userId));

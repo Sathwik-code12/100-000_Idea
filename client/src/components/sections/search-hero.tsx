@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import { apiRequestWithPage } from "@/lib/queryClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface IdeaCard {
   id: string;
@@ -34,6 +36,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [showNoResults, setShowNoResults] = useState(false);
 
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
@@ -72,6 +75,10 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
         });
         console.log('Fetched search response:', response.results);
         
+        // Check if results are empty
+        const hasResults = response.results && response.results.length > 0;
+        setShowNoResults(!hasResults);
+        
         // Update the parent component with search results
         if (onSearchResults) {
           onSearchResults(response.results || []);
@@ -82,6 +89,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
         return response;
       } catch (err: any) {
         setUsersError(err.message || "Failed to fetch search results");
+        setShowNoResults(false);
         return null;
       } finally {
         setUsersLoading(false);
@@ -113,6 +121,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
     setSelectedCategory("");
     setSelectedLocation("");
     setHasSearched(false);
+    setShowNoResults(false);
     onClearSearch();
   };
 
@@ -190,6 +199,18 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
             </Button>
           )}
         </form>
+
+        {/* No Results Alert */}
+        {showNoResults && (
+          <div className="mt-4">
+            <Alert variant="destructive" className="bg-yellow-50 border-yellow-200 text-yellow-800">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                No ideas found matching your search criteria. Try adjusting your search terms, category, or location.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
       </div>
     </section>
   );
