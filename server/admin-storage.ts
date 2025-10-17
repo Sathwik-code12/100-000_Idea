@@ -80,7 +80,7 @@ export class AdminStorage {
       totalUploadsCount,
       viewsAndLikes
     ] = await Promise.all([
-      db.select({ count: count()}).from(users),
+      db.select({ count: count() }).from(users),
       db.select({ count: count() }).from(platformIdeas),
       db.select({ count: count() }).from(submittedIdeas),
       db.select({ count: count() }).from(platformIdeas).where(eq(platformIdeas.isVisible, 'true')),
@@ -102,7 +102,7 @@ export class AdminStorage {
     ]);
 
     return {
-      totalUsers:totalUsers[0].count,
+      totalUsers: totalUsers[0].count,
       totalIdeas: totalIdeasCount[0].count,
       totalSubmittedIdeasCount: totalSubmittedIdeasCount[0].count,
       visibleIdeas: visibleIdeasCount[0].count,
@@ -118,64 +118,70 @@ export class AdminStorage {
 
   // Platform Ideas Management
   async getPlatformIdeas(options: PaginationOptions) {
-    const { page, limit, sortBy = 'createdAt', sortOrder = 'desc', search, category, visible } = options;
-    const offset = (page - 1) * limit;
+    try {
+      const { page, limit, sortBy = 'createdAt', sortOrder = 'desc', search, category, visible } = options;
+      const offset = (page - 1) * limit;
 
-    let whereConditions = [];
+      let whereConditions = [];
 
-    if (search) {
-      whereConditions.push(
-        or(
-          ilike(platformIdeas.title, `%${search}%`),
-          ilike(platformIdeas.description, `%${search}%`),
-          ilike(platformIdeas.category, `%${search}%`)
-        )
-      );
+      if (search) {
+        whereConditions.push(
+          or(
+            ilike(platformIdeas.title, `%${search}%`),
+            ilike(platformIdeas.description, `%${search}%`),
+            ilike(platformIdeas.category, `%${search}%`)
+          )
+        );
+      }
+
+      if (category && category !== 'all') {
+        whereConditions.push(eq(platformIdeas.category, category));
+      }
+
+      if (visible && visible !== 'all') {
+        whereConditions.push(eq(platformIdeas.isVisible, visible));
+      }
+
+      const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+      console.log('🧩 Final whereClause:', whereClause ? 'Has filters' : 'No filters applied');
+      // Get total count
+      const totalCountResult = await db
+        .select({ count: count() })
+        .from(platformIdeas)
+        .where(whereClause);
+
+      // Get ideas with pagination
+      const ideas = await db
+        .select({
+          ...getTableColumns(platformIdeas),
+        })
+        .from(platformIdeas)
+        .where(whereClause)
+        .orderBy(sortOrder === 'desc' ? desc(platformIdeas.createdAt) : platformIdeas.createdAt)
+        .limit(limit)
+        .offset(offset);
+
+      const parsedIdeas = ideas.map(idea => ({
+        ...idea,
+        tags: parseStringArray(idea.tags),
+        risks: parseStringArray(idea.risks),
+        opportunities: parseStringArray(idea.opportunities),
+      }));
+
+      return {
+        ideas: parsedIdeas,
+        pagination: {
+          page,
+          limit,
+          total: totalCountResult[0].count,
+          totalPages: Math.ceil(totalCountResult[0].count / limit),
+        },
+      };
     }
-
-    if (category && category !== 'all') {
-      whereConditions.push(eq(platformIdeas.category, category));
+    catch (error) {
+      console.error('❌ getPlatformIdeas() failed:', error);
+      throw new Error('Database query failed');
     }
-
-    if (visible && visible !== 'all') {
-      whereConditions.push(eq(platformIdeas.isVisible, visible));
-    }
-
-    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
-
-    // Get total count
-    const totalCountResult = await db
-      .select({ count: count() })
-      .from(platformIdeas)
-      .where(whereClause);
-
-    // Get ideas with pagination
-    const ideas = await db
-      .select({
-        ...getTableColumns(platformIdeas),
-      })
-      .from(platformIdeas)
-      .where(whereClause)
-      .orderBy(sortOrder === 'desc' ? desc(platformIdeas.createdAt) : platformIdeas.createdAt)
-      .limit(limit)
-      .offset(offset);
-
-    const parsedIdeas = ideas.map(idea => ({
-      ...idea,
-      tags: parseStringArray(idea.tags),
-      risks: parseStringArray(idea.risks),
-      opportunities: parseStringArray(idea.opportunities),
-    }));
-
-    return {
-      ideas: parsedIdeas,
-      pagination: {
-        page,
-        limit,
-        total: totalCountResult[0].count,
-        totalPages: Math.ceil(totalCountResult[0].count / limit),
-      },
-    };
   }
 
   async getPlatformIdeaById(id: string): Promise<PlatformIdea | null> {
@@ -257,11 +263,7 @@ export class AdminStorage {
 
   // Upload History Management
   async createUploadHistory(uploadData: InsertUploadHistory & { uploadedBy: string }): Promise<UploadHistory> {
-    const data: any = {
-      ...uploadHistory,
-      id: uuidv4() as string
-    }
-    const [upload] = await db.insert(uploadHistory).values(data).returning();
+    const [upload] = await db.insert(uploadHistory).values(uploadData).returning();
     return upload;
   }
 
@@ -530,7 +532,7 @@ export class AdminStorage {
           id: users.id,
           name: users.name,
           email: users.email,
-          isActive:users.isActive,
+          isActive: users.isActive,
           createdAt: users.createdAt,
           //isActive: users.isActive,
         })
