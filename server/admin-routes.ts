@@ -4,6 +4,7 @@ import csv from 'csv-parser';
 import Papa from 'papaparse';
 import fs from 'fs';
 import path from 'path';
+import { v4 as uuidv4 } from "uuid";
 import { z } from 'zod';
 import { AdminAuthService, requireAdminAuth, requireSuperAdmin } from './admin-auth.js';
 import { adminStorage, parseStringArray } from './admin-storage.js';
@@ -180,21 +181,23 @@ router.post('/upload-ideas', requireAdminAuth, upload.single('file'), async (req
 
     // Generate upload batch ID
     const batchId = `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
+    console.log("ideas calling")
     // Create upload history record
     const uploadRecord = await adminStorage.createUploadHistory({
+      id: uuidv4() as string,
       filename: file.originalname,
       fileType,
       fileSize: ideas.length.toString(), // Corrected to use ideas.length
       ideasCount: ideas.length.toString(),
       uploadedBy: admin.id,
     });
+    console.log("upload record calling")
 
     // Bulk create ideas
     const result = await adminStorage.bulkCreatePlatformIdeas(
       ideas.map(idea => ({ ...idea, createdBy: admin.id, uploadBatchId: uploadRecord.id }))
     );
-
+    console.log("result calling")
     // Update upload history with results
     await adminStorage.updateUploadHistory(uploadRecord.id, {
       successCount: result.successful.length.toString(),
@@ -271,7 +274,10 @@ router.get('/platform-ideas', requireAdminAuth, async (req: Request, res: Respon
       whereConditions,
     };
 
+    console.log('📩 API Request Options:', options);
+
     const result = await adminStorage.getPlatformIdeas(options);
+    console.log('✅ Platform ideas result count:', result?.ideas?.length);
     // console.log('Platform ideas result:', result);
     res.json(result);
   } catch (error) {
