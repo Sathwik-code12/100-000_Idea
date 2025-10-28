@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="">
         {/* Social Media */}
         <div className="text-center mb-12">
           <p className="text-gray-300 mb-6">Follow us on social media</p>
@@ -29,11 +29,11 @@ export default function Footer() {
           </div>
         </div>
         
-        {/* Logo */}
+        {/* Logo
         <div className="text-center mb-12">
           <span className="text-3xl font-bold">10000</span>
-          <span className="text-3xl font-light text-gray-400">ideas</span>
-        </div>
+          {/* <span className="text-3xl font-light text-gray-400"></span> */}
+        {/* </div>  */}
         
         {/* Footer Links */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
