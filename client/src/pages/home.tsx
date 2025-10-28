@@ -63,11 +63,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <Header />
-      <CategoryNavigation />
+      
       <SearchHero ideas={ideas}
         onSearchResults={handleSearchResults}
         onClearSearch={handleClearSearch} />
       <MainHero />
+      <CategoryNavigation />
       <MainContentLayout ideas={displayedIdeas}
         isSearchActive={isSearchActive}
         totalDefaultIdeas={ideas.length} />
