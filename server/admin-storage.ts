@@ -1,4 +1,4 @@
-import { eq, and, desc, count, sql, gte, lte, ilike, or, asc, getTableColumns } from 'drizzle-orm';
+import { eq, and, desc, count, sql, gte, lte, ilike, or, asc, getTableColumns, AnyColumn } from 'drizzle-orm';
 import { db } from './db.js';
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -17,7 +17,10 @@ import {
   InsertDeleteHistory,
   InsertAdminActivityLog,
   emailSubscribers,
-  users
+  users,
+  banners,
+  Banner,
+  InsertBanner
 } from '../shared/schema.js';
 
 export interface PaginationOptions {
@@ -199,11 +202,166 @@ export class AdminStorage {
   }
 
   async updatePlatformIdea(id: string, updates: Partial<PlatformIdea>): Promise<PlatformIdea | null> {
+    // Convert string arrays to actual arrays if needed
+    const processedUpdates = { ...updates };
+
+    // Handle array fields that might come as strings
+    if (typeof updates.tech_stack === 'string') {
+      processedUpdates.tech_stack = (updates.tech_stack as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.key_features === 'string') {
+      processedUpdates.key_features = (updates.key_features as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.risks === 'string') {
+      processedUpdates.risks = (updates.risks as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.opportunities === 'string') {
+      processedUpdates.opportunities = (updates.opportunities as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.tags === 'string') {
+      processedUpdates.tags = (updates.tags as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.images === 'string') {
+      processedUpdates.images = (updates.images as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.business_moats === 'string') {
+      processedUpdates.business_moats = (updates.business_moats as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.pitch_deck === 'string') {
+      processedUpdates.pitch_deck = (updates.pitch_deck as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.funding_options === 'string') {
+      processedUpdates.funding_options = (updates.funding_options as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.investment_breakdown === 'string') {
+      processedUpdates.investment_breakdown = (updates.investment_breakdown as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    if (typeof updates.bank_loan_details === 'string') {
+      processedUpdates.bank_loan_details = (updates.bank_loan_details as string).split(',').map(item => item.trim()).filter(item => item.length > 0);
+    }
+
+    // Handle JSON fields that might come as strings
+    if (typeof updates.market_analysis === 'string') {
+      try {
+        processedUpdates.market_analysis = JSON.parse(updates.market_analysis as string);
+      } catch (e) {
+        // If parsing fails, keep as string or set to default
+        processedUpdates.market_analysis = [];
+      }
+    }
+
+    if (typeof updates.industry_structure === 'string') {
+      try {
+        processedUpdates.industry_structure = JSON.parse(updates.industry_structure as string);
+      } catch (e) {
+        processedUpdates.industry_structure = [];
+      }
+    }
+
+    if (typeof updates.user_personas === 'string') {
+      try {
+        processedUpdates.user_personas = JSON.parse(updates.user_personas as string);
+      } catch (e) {
+        processedUpdates.user_personas = [];
+      }
+    }
+
+    if (typeof updates.product_narrative === 'string') {
+      try {
+        processedUpdates.product_narrative = JSON.parse(updates.product_narrative as string);
+      } catch (e) {
+        processedUpdates.product_narrative = [];
+      }
+    }
+
+    if (typeof updates.value_proposition === 'string') {
+      try {
+        processedUpdates.value_proposition = JSON.parse(updates.value_proposition as string);
+      } catch (e) {
+        processedUpdates.value_proposition = [];
+      }
+    }
+
+    if (typeof updates.business_model === 'string') {
+      try {
+        processedUpdates.business_model = JSON.parse(updates.business_model as string);
+      } catch (e) {
+        processedUpdates.business_model = [];
+      }
+    }
+
+    if (typeof updates.scale_path === 'string') {
+      try {
+        processedUpdates.scale_path = JSON.parse(updates.scale_path as string);
+      } catch (e) {
+        processedUpdates.scale_path = [];
+      }
+    }
+
+    if (typeof updates.key_metrics === 'string') {
+      try {
+        processedUpdates.key_metrics = JSON.parse(updates.key_metrics as string);
+      } catch (e) {
+        processedUpdates.key_metrics = [];
+      }
+    }
+
+    if (typeof updates.employment_generation === 'string') {
+      try {
+        processedUpdates.employment_generation = JSON.parse(updates.employment_generation as string);
+      } catch (e) {
+        processedUpdates.employment_generation = [];
+      }
+    }
+
+    if (typeof updates.pmegp_summary === 'string') {
+      try {
+        processedUpdates.pmegp_summary = JSON.parse(updates.pmegp_summary as string);
+      } catch (e) {
+        processedUpdates.pmegp_summary = [];
+      }
+    }
+
+    if (typeof updates.skills_required === 'string') {
+      try {
+        processedUpdates.skills_required = JSON.parse(updates.skills_required as string);
+      } catch (e) {
+        processedUpdates.skills_required = [];
+      }
+    }
+
+    if (typeof updates.ratings_reviews === 'string') {
+      try {
+        processedUpdates.ratings_reviews = JSON.parse(updates.ratings_reviews as string);
+      } catch (e) {
+        processedUpdates.ratings_reviews = [];
+      }
+    }
+
+    if (typeof updates.developing_your_idea === 'string') {
+      try {
+        processedUpdates.developing_your_idea = JSON.parse(updates.developing_your_idea as string);
+      } catch (e) {
+        processedUpdates.developing_your_idea = [];
+      }
+    }
+
     const [idea] = await db
       .update(platformIdeas)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...processedUpdates, updatedAt: new Date() })
       .where(eq(platformIdeas.id, id))
       .returning();
+
     return idea || null;
   }
 
@@ -595,6 +753,68 @@ export class AdminStorage {
   async deleteSubscriberList(id: string) {
     const subscribers = await db.delete(emailSubscribers).where(eq(emailSubscribers.id, id));
     return subscribers;
+  }
+  // Add these methods to your AdminStorage class
+
+  // Banner Management
+  async getBanners(options: PaginationOptions) {
+    const { page, limit, sortBy = 'displayOrder', sortOrder = 'asc' } = options;
+    const offset = (page - 1) * limit;
+
+    const [totalCountResult, bannersData] = await Promise.all([
+      db.select({ count: count() }).from(banners),
+      db
+        .select()
+        .from(banners)
+        .orderBy(
+          sortOrder === 'asc'
+            ? asc(banners[sortBy as keyof typeof banners.$inferSelect] as AnyColumn)
+            : desc(banners[sortBy as keyof typeof banners.$inferSelect] as AnyColumn)
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    const totalBanners = totalCountResult[0].count;
+    const totalPages = Math.ceil(totalBanners / limit);
+
+    return {
+      banners: bannersData,
+      pagination: {
+        page,
+        limit,
+        total: totalBanners,
+        totalPages,
+      },
+    };
+  }
+
+  async getBannerById(id: string): Promise<Banner | null> {
+    const [banner] = await db.select().from(banners).where(eq(banners.id, id));
+    return banner || null;
+  }
+
+  async createBanner(bannerData: InsertBanner & { createdBy: string }): Promise<Banner> {
+    const dataWithId: any = {
+      ...bannerData,
+      id: uuidv4(),
+    };
+    const [banner] = await db.insert(banners).values(dataWithId).returning();
+    return banner;
+  }
+
+  async updateBanner(id: string, updates: Partial<Banner>): Promise<Banner | null> {
+    const [banner] = await db
+      .update(banners)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(banners.id, id))
+      .returning();
+    return banner || null;
+  }
+
+  async deleteBanner(id: string): Promise<boolean> {
+    const result = await db.delete(banners).where(eq(banners.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
   }
 
 }
