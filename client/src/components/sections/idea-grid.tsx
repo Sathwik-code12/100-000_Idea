@@ -1,4 +1,185 @@
-import { DollarSign, Star, TrendingUp, Clock, AlertCircle } from "lucide-react";
+// import { DollarSign, Star, TrendingUp, Clock, AlertCircle } from "lucide-react";
+// import { Link } from "wouter";
+// import { useState } from "react";
+// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+// import { apiRequestWithPage } from "@/lib/queryClient";
+
+// interface IdeaCard {
+//   id: string;
+//   title: string;
+//   description: string;
+//   images: string[];
+//   category: string;
+//   difficulty: string;
+//   investment: {
+//     amount: number;
+//     currency: string;
+//     display: string;
+//     description: string;
+//   };
+//   timeframe: string;
+//   tags: string[];
+//   rating?: number;
+//   marketScore?: number;
+//   painPointScore?: number;
+//   timingScore?: number;
+// }
+
+// interface MainContentLayoutProps {
+//   ideas: IdeaCard[];
+//   isSearchActive: boolean;
+//   totalDefaultIdeas: number;
+// }
+
+// export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: MainContentLayoutProps) {
+//   const [usersPagination, setUsersPagination] = useState<any>({
+//     page: 1,
+//     limit: 10,
+//     total: 0,
+//     totalPages: 0,
+//   });
+//   const [usersLoading, setUsersLoading] = useState(false);
+//   const [usersError, setUsersError] = useState<string | null>(null);
+
+//   const getDifficultyColor = (difficulty: string) => {
+//     switch (difficulty?.toLowerCase()) {
+//       case 'easy': return 'bg-green-100 text-green-800';
+//       case 'medium': return 'bg-yellow-100 text-yellow-800';
+//       case 'hard': return 'bg-red-100 text-red-800';
+//       default: return 'bg-gray-100 text-gray-800';
+//     }
+//   };
+
+//   const getInvestmentColor = (investment: string) => {
+//     if (investment.includes('L')) return 'bg-green-500 text-white';
+//     if (investment.includes('Cr')) return 'bg-purple-500 text-white';
+//     if (investment.includes('M')) return 'bg-blue-500 text-white';
+//     return 'bg-purple-500 text-white';
+//   };
+
+//   const parseCategory = (category: string) => {
+//     try {
+//       const parsed = JSON.parse(category);
+//       return Array.isArray(parsed) ? parsed.join(', ') : category;
+//     } catch (e) {
+//       return category;
+//     }
+//   };
+
+//   const parseInvestment = (investment: any) => {
+//     if (typeof investment === 'string') {
+//       try {
+//         const parsed = JSON.parse(investment);
+//         return parsed.display || investment;
+//       } catch (e) {
+//         return investment;
+//       }
+//     }
+//     return investment.display || '₹0';
+//   };
+
+//   return (
+//     <section className="pt-4 pb-0 bg-gray-50">
+//       <div className="w-full">
+//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+//           {ideas?.map((idea) => (
+//             <Link key={idea.id} href={`/idea/${idea.id}`}>
+//               <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer flex flex-col min-h-[500px]">
+//                 <div className="relative">
+//                   <img
+//                     src={idea.images?.[0] || '/placeholder-image.jpg'}
+//                     alt={idea.title}
+//                     className="w-full h-56 object-cover"
+//                   />
+//                   <div className="absolute top-3 left-3">
+//                     <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getInvestmentColor(parseInvestment(idea.investment))}`}>
+//                       {parseInvestment(idea.investment)}
+//                     </span>
+//                   </div>
+//                   <div className="absolute top-3 right-3">
+//                     <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(idea.difficulty || 'Medium')}`}>
+//                       {idea.difficulty || 'Medium'}
+//                     </span>
+//                   </div>
+//                 </div>
+
+//                 <div className="p-4 sm:p-5 lg:p-6 flex flex-col flex-grow">
+//                   <div className="flex items-center justify-between mb-3">
+//                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+//                       {parseCategory(idea.category)}
+//                     </span>
+//                     <div className="flex items-center">
+//                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
+//                       <span className="text-sm text-gray-600 ml-1">{idea.rating || '4.0'}</span>
+//                     </div>
+//                   </div>
+
+//                   <h3 className="font-bold text-lg sm:text-xl text-gray-900 mb-3 line-clamp-2 leading-tight">
+//                     {idea.title}
+//                   </h3>
+
+//                   <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+//                     {idea.description}
+//                   </p>
+
+//                   <div className="flex flex-wrap gap-2 mb-4">
+//                     {idea.tags?.map((tag, index) => (
+//                       <span
+//                         key={index}
+//                         className="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1.5 rounded-full font-medium"
+//                       >
+//                         {tag}
+//                       </span>
+//                     ))}
+//                   </div>
+
+//                   {/* Scores - Only show if they exist */}
+//                   {(idea.marketScore || idea.painPointScore || idea.timingScore) && (
+//                     <div className="flex items-center gap-4 mb-3 text-xs">
+//                       {idea.marketScore && (
+//                         <div className="flex items-center gap-1">
+//                           <TrendingUp className="w-3 h-3 text-blue-600" />
+//                           <span className="font-medium">{idea.marketScore}</span>
+//                         </div>
+//                       )}
+//                       {idea.painPointScore && (
+//                         <div className="flex items-center gap-1">
+//                           <AlertCircle className="w-3 h-3 text-red-600" />
+//                           <span className="font-medium">{idea.painPointScore}</span>
+//                         </div>
+//                       )}
+//                       {idea.timingScore && (
+//                         <div className="flex items-center gap-1">
+//                           <Clock className="w-3 h-3 text-green-600" />
+//                           <span className="font-medium">{idea.timingScore}</span>
+//                         </div>
+//                       )}
+//                     </div>
+//                   )}
+
+//                   <div className="mt-auto space-y-3 text-sm text-gray-600">
+//                     <div className="flex items-center">
+//                       <TrendingUp className="w-4 h-4 mr-2 text-green-500" />
+//                       <span>{idea.profitability || 'High profitability'}</span>
+//                     </div>
+//                     <div className="flex items-center">
+//                       <Clock className="w-4 h-4 mr-2 text-blue-500" />
+//                       <span>Time to market: {idea.timeframe || '6 months'}</span>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </Link>
+//           ))}
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
+
+// idea-grid.tsx
+// idea-grid.tsx
+import { DollarSign, Star, TrendingUp, Clock, AlertCircle,MessageCircleMore , Zap, Wrench, Building2, BarChart3, Heart, MessageCircle, MoreVertical,Lightbulb , Target } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,10 +200,14 @@ interface IdeaCard {
   };
   timeframe: string;
   tags: string[];
-  rating?: number;
+  ratings_reviews?: {
+    average_rating: number;
+    total_reviews: number;
+  };
   marketScore?: number;
   painPointScore?: number;
   timingScore?: number;
+  views?: number;
 }
 
 interface MainContentLayoutProps {
@@ -38,28 +223,38 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
     total: 0,
     totalPages: 0,
   });
+  console.log('Ideas received in IdeaGrid:', ideas);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
 
   const getDifficultyColor = (difficulty: string) => {
+    // console.log('Getting color for difficulty:', difficulty);
     switch (difficulty?.toLowerCase()) {
-      case 'easy': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'hard': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'easy': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-400';
+      case 'hard': return 'bg-red-500';
+      default: return 'bg-yellow-400';
     }
   };
 
-  const getInvestmentColor = (investment: string) => {
-    if (investment.includes('L')) return 'bg-green-500 text-white';
-    if (investment.includes('Cr')) return 'bg-purple-500 text-white';
-    if (investment.includes('M')) return 'bg-blue-500 text-white';
-    return 'bg-purple-500 text-white';
-  };
+  // const getIconComponent = (iconName: string) => {
+  //   const icons: { [key: string]: any } = {
+  //     'Zap': Zap,
+  //     'Wrench': Wrench,
+  //     'Building2': Building2,
+  //     'BarChart3': BarChart3,
+  //     'Target': Target,
+  //     'DollarSign': DollarSign,
+  //     'TrendingUp': TrendingUp
+  //   };
+  //   return icons[iconName] || Zap;
+  // };
 
   const parseCategory = (category: string) => {
     try {
+      // console.log('--Category to parse:---', category);
       const parsed = JSON.parse(category);
+      // console.log('--Parsed category:---', parsed);
       return Array.isArray(parsed) ? parsed.join(', ') : category;
     } catch (e) {
       return category;
@@ -70,6 +265,7 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
     if (typeof investment === 'string') {
       try {
         const parsed = JSON.parse(investment);
+        // console.log('Parsed investment:', parsed);
         return parsed.display || investment;
       } catch (e) {
         return investment;
@@ -79,92 +275,153 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
   };
 
   return (
-    <section className="pt-4 pb-0 bg-gray-50">
-      <div className="w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="container mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {ideas?.map((idea) => (
             <Link key={idea.id} href={`/idea/${idea.id}`}>
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer flex flex-col min-h-[500px]">
+              <div className="block bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+                {/* Image Section with Badges */}
                 <div className="relative">
                   <img
-                    src={idea.images?.[0] || '/placeholder-image.jpg'}
+                    src={idea.images?.[0] || idea.images?.[1] || '/placeholder-image.jpg'}
                     alt={idea.title}
-                    className="w-full h-56 object-cover"
+                    className="w-full h-48 object-cover"
                   />
-                  <div className="absolute top-3 left-3">
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getInvestmentColor(parseInvestment(idea.investment))}`}>
+                  {/* Investment Badge - Top Left */}
+                  <div className="absolute top-0 left-0">
+                    <div className="bg-yellow-400 text-gray-900 px-6 py-3 rounded-br-3xl text-base font-bold shadow-md">
                       {parseInvestment(idea.investment)}
-                    </span>
+                    </div>
                   </div>
-                  <div className="absolute top-3 right-3">
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(idea.difficulty || 'Medium')}`}>
+                  {/* Difficulty Badge - Top Right */}
+                  <div className="absolute top-0 right-0">
+                    <div className={`${getDifficultyColor(idea.difficulty || 'Medium')} text-white px-6 py-3 rounded-bl-3xl text-base font-bold shadow-md uppercase`}>
                       {idea.difficulty || 'Medium'}
-                    </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="p-4 sm:p-5 lg:p-6 flex flex-col flex-grow">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      {parseCategory(idea.category)}
-                    </span>
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="text-sm text-gray-600 ml-1">{idea.rating || '4.0'}</span>
-                    </div>
-                  </div>
+                {/* Card Content */}
+                <div className="p-4">
+                  {/* Category */}
+                  <p className="text-sm text-gray-500 mb-1">
+                    {parseCategory(idea.category)}
+                  </p>
 
-                  <h3 className="font-bold text-lg sm:text-xl text-gray-900 mb-3 line-clamp-2 leading-tight">
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
                     {idea.title}
                   </h3>
 
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                     {idea.description}
                   </p>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {idea.tags?.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1.5 rounded-full font-medium"
-                      >
-                        {tag}
+                  {/* Rating and Action Buttons */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-gray-900">
+                        {idea.ratings_reviews?.average_rating || '4.0'}
                       </span>
-                    ))}
-                  </div>
+                      
+                    </div>
 
-                  {/* Scores - Only show if they exist */}
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {/* {idea.tags?.slice(0, 4).map((tag, index) => {
+                        const IconComponent = getIconComponent(tag);
+                        return (
+                          <button
+                            key={index}
+                            className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            <IconComponent className="w-5 h-5 text-gray-900" />
+                          </button>
+                        );
+                      })} */}
+                       
+                        <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                          <Target className="w-5 h-5 text-gray-900" />
+                        </button>
+                        <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                          <DollarSign className="w-5 h-5 text-gray-900" />
+                        </button>
+                        <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                          <TrendingUp className="w-5 h-5 text-gray-900" />
+                        </button>
+                        <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                          <Zap className="w-5 h-5 text-gray-900" />
+                        </button>
+                    </div>
+                    
+                  </div>
+                      <div className="flex gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <span 
+                            key={i} 
+                            className={`text-2xl ${
+                              i < Math.floor(idea.ratings_reviews?.average_rating || 4) 
+                                ? 'text-yellow-400' 
+                                : 'text-gray-300'
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                  {/* Scores Section */}
                   {(idea.marketScore || idea.painPointScore || idea.timingScore) && (
-                    <div className="flex items-center gap-4 mb-3 text-xs">
+                    <div className="flex items-center gap-4 mb-4 text-xs">
                       {idea.marketScore && (
                         <div className="flex items-center gap-1">
-                          <TrendingUp className="w-3 h-3 text-blue-600" />
-                          <span className="font-medium">{idea.marketScore}</span>
+                          <TrendingUp className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium text-gray-700">{idea.marketScore}</span>
                         </div>
                       )}
                       {idea.painPointScore && (
                         <div className="flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3 text-red-600" />
-                          <span className="font-medium">{idea.painPointScore}</span>
+                          <AlertCircle className="w-4 h-4 text-red-600" />
+                          <span className="font-medium text-gray-700">{idea.painPointScore}</span>
                         </div>
                       )}
                       {idea.timingScore && (
                         <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-green-600" />
-                          <span className="font-medium">{idea.timingScore}</span>
+                          <Clock className="w-4 h-4 text-green-600" />
+                          <span className="font-medium text-gray-700">{idea.timingScore}</span>
                         </div>
                       )}
                     </div>
                   )}
 
-                  <div className="mt-auto space-y-3 text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <TrendingUp className="w-4 h-4 mr-2 text-green-500" />
-                      <span>{idea.profitability || 'High profitability'}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                      <span>Time to market: {idea.timeframe || '6 months'}</span>
+                  {/* Footer Actions */}
+                  <div className="flex items-center justify-between pt-4 ">
+                    <div className="flex items-center gap-3 text-gray-600">
+                      <div className="flex items-center gap-1 border py-1.5 px-2.5 bg-gray-100 rounded-full hover:text-yellow-500 transition-colors hover:border-yellow-500">
+                        <Lightbulb className="w-4 h-4" />
+                        <span className="text-sm font-medium">{idea.views || 0}</span>
+                      </div>
+                      <button 
+                        className="hover:text-red-500 transition-colors border p-1.5 bg-gray-100 rounded-full hover:border-red-500"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <Heart className="w-5 h-5" />
+                      </button>
+                      <button 
+                        className="hover:text-blue-500 transition-colors border p-1.5 bg-gray-100 rounded-full hover:border-blue-500"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <MessageCircleMore className="w-5 h-5" />
+                      </button>
+                    
+                    <button 
+                      className="text-gray-600 hover:text-green-500 transition-colors border p-1.5 bg-gray-100 rounded-full hover:border-green-500"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <MoreVertical className="w-5 h-5" />
+                    </button>
                     </div>
                   </div>
                 </div>
@@ -173,6 +430,6 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
