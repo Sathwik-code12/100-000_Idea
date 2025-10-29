@@ -75,7 +75,7 @@ export default function SubscribeSection() {
   // );
 
   return (
-    <section className="bg-slate-800 py-16">
+    <section className="bg-slate-700 py-16">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <div className="flex items-center justify-center mb-6">
           <div className="flex items-center gap-0.5 text-yellow-500 text-5xl font-bold tracking-tight">

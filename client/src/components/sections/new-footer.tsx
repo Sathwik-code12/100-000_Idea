@@ -94,8 +94,8 @@ export default function NewFooter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Logo and Social */}
-          <div className="md:col-span-1">
-            <div className="flex items-center space-x-2 mb-6">
+          <div className="md:col-span-1 me-4">
+            <div className=" items-center space-x-2 mb-6">
               <div className="text-4xl font-bold text-white">10000</div>
               {/* <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center"> */}
                 {/* <div className="w-3 h-3 bg-slate-700 rounded-full"></div> */}

@@ -125,7 +125,7 @@ export default function CategoryNavigation() {
             return (
               <div 
                 key={index}
-                className="flex flex-col items-center cursor-pointer group flex-shrink-0 bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 min-w-[140px]"
+                className="flex flex-col items-center cursor-pointer border group flex-shrink-0 bg-white rounded-2xl p-6  shadow-md hover:shadow-lg bg-gray-200 transition-all duration-300 min-w-[140px]"
               >
                 <Link
                   key={index}
