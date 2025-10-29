@@ -5,37 +5,38 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Shield, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
 export default function AdminLogin() {
-  const [location, setLocation] = useLocation();
-  const [credentials, setCredentials] = useState({
-    email: "",
-    password: ""
-  });
+  const [, setLocation] = useLocation();
+  const [password, setPassword] = useState("");
   const { toast } = useToast();
 
   const loginMutation = useMutation({
-    mutationFn: async (data: { email: string; password: string }) => {
-      console.log('==Admin login data://', data);
+    mutationFn: async () => {
+      const payload = {
+        email: "admin1@10000ideas.com", // ✅ Static email
+        password: password,
+      };
+
       const response = await fetch("/api/admin/login", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
-      console.log('==Admin login response://', response.ok);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Login failed" }));
+        const errorData = await response.json().catch(() => ({
+          error: "Login failed",
+        }));
         throw new Error(errorData.error || "Login failed");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
-      console.log("test")
       toast({
         title: "Success",
         description: "Welcome to the admin panel!",
@@ -43,10 +44,9 @@ export default function AdminLogin() {
       setLocation("/admin/dashboard");
     },
     onError: (error: any) => {
-      console.error("Admin login error:", error);
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid credentials or access denied",
+        description: error.message || "Invalid credentials",
         variant: "destructive",
       });
     },
@@ -54,84 +54,57 @@ export default function AdminLogin() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!credentials.email || !credentials.password) {
+    if (!password) {
       toast({
         title: "Error",
-        description: "Please enter both email and password",
+        description: "Please enter password",
         variant: "destructive",
       });
       return;
     }
-    loginMutation.mutate(credentials);
+    loginMutation.mutate();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="border-slate-700 bg-slate-800/50 backdrop-blur-sm">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full">
-                <Shield className="h-8 w-8 text-white" />
-              </div>
+    <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center px-4">
+      <Card className="w-full max-w-md shadow-lg border-none rounded-xl">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-3">
+            <div className="p-4 bg-yellow-400 rounded-full shadow-md">
+              <Lock className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-white">
-              Admin Access
-            </CardTitle>
-            <p className="text-slate-400">
-              Authorized personnel only
-            </p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Input
-                  type="email"
-                  placeholder="Admin Email"
-                  value={credentials.email}
-                  onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-                  required
-                />
-              </div>
-              <div>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={credentials.password}
-                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-                  required
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-                disabled={loginMutation.isPending}
-              >
-                {loginMutation.isPending ? (
-                  <div className="flex items-center gap-2">
-                    <Lock className="h-4 w-4 animate-spin" />
-                    Authenticating...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" />
-                    Access Admin Panel
-                  </div>
-                )}
-              </Button>
-            </form>
-            
-            <div className="mt-6 p-4 bg-slate-700/50 rounded-lg">
-              <p className="text-xs text-slate-400 text-center">
-                This area is restricted to authorized administrators only.
-                Unauthorized access attempts are logged and monitored.
-              </p>
+          </div>
+          <CardTitle className="text-xl font-semibold text-gray-800">
+            Admin Access
+          </CardTitle>
+          <p className="text-gray-500 text-sm">
+            Enter admin password to continue
+          </p>
+        </CardHeader>
+
+        <CardContent>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Password</label>
+              <Input
+                type="password"
+                placeholder="Enter admin password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1"
+              />
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium rounded-md shadow-sm"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? "Authenticating..." : "Access Admin Panel"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

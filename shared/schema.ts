@@ -507,35 +507,35 @@ export const insertPlatformIdeaSchema = createInsertSchema(platformIdeas, {
   opportunities: z.array(z.string()).optional(),
   uploadBatchId: z.string().optional(),
   createdBy: z.string().optional(),
-  tech_stack:z.string().optional(),
-  key_features:z.string().optional(),
-  market_analysis:z.string().optional(),
-  industry_structure:z.string().optional(),
-  user_personas:z.string().optional(),
-  product_narrative:z.string().optional(),
-  value_proposition:z.string().optional(),
-  business_model:z.string().optional(),
-  scale_path:z.string().optional(),
-  business_moats:z.string().optional(),
-  key_metrics:z.string().optional(),
-  pitch_deck:z.string().optional(),
-  funding_options:z.string().optional(),
-  investment_breakdown:z.string().optional(),
-  employment_generation:z.string().optional(),
-  bank_loan_details:z.string().optional(),
-  pmegp_summary:z.string().optional(),
-  skills_required:z.string().optional(),
-  ratings_reviews:z.string().optional(),
-  heroImage:z.string().optional(),
-  developing_your_idea:z.string().optional(),
-
-}).omit({ id: true, createdAt: true, updatedAt: true, views: true, likes: true,  isVisible: true, fullDescription: true,  investment: true,  targetAudience: true, revenueModel: true, investmentRequired: true, expectedRoi: true, marketTrends: true, implementationSteps: true, isFeatured: true });
-
+  tech_stack: z.array(z.string()).optional(),
+  key_features: z.array(z.string()).optional(),
+  market_analysis: z.any().optional(), // Changed to any to handle object structure
+  industry_structure: z.any().optional(), // Changed to any to handle object structure
+  user_personas: z.any().optional(), // Changed to any to handle object structure
+  product_narrative: z.any().optional(), // Changed to any to handle object structure
+  value_proposition: z.any().optional(), // Changed to any to handle object structure
+  business_model: z.any().optional(), // Changed to any to handle object structure
+  scale_path: z.any().optional(), // Changed to any to handle object structure
+  business_moats: z.array(z.string()).optional(),
+  key_metrics: z.any().optional(), // Changed to any to handle object structure
+  pitch_deck: z.array(z.string()).optional(),
+  funding_options: z.array(z.string()).optional(),
+  investment_breakdown: z.array(z.string()).optional(),
+  employment_generation: z.any().optional(), // Changed to any to handle object structure
+  bank_loan_details: z.array(z.string()).optional(),
+  pmegp_summary: z.any().optional(), // Changed to any to handle object structure
+  skills_required: z.any().optional(), // Changed to any to handle object structure
+  ratings_reviews: z.any().optional(), // Changed to any to handle object structure
+  heroImage: z.array(z.string()).optional(),
+  developing_your_idea: z.any().optional(), // Changed to any to handle object structure
+  isVisible: z.any().optional(), // Changed to any to handle object structure
+  isFeatured: z.any().optional(), // Changed to any to handle object structure
+}).omit({ id: true, createdAt: true, updatedAt: true, views: true, likes: true,  fullDescription: true, investment: true, targetAudience: true, revenueModel: true, investmentRequired: true, expectedRoi: true, marketTrends: true, implementationSteps: true, });
 export const insertUploadHistorySchema = createInsertSchema(uploadHistory, {
   filename: z.string().min(1, "Filename is required"),
   fileType: z.string().min(1, "File type is required"),
   ideasCount: z.string().min(1, "Ideas count is required"),
-}).omit({  uploadedBy: true, createdAt: true, processingStatus: true, errors: true, successCount: true, errorCount: true, isDeleted: true, deletedAt: true, deletedBy: true });
+}).omit({ uploadedBy: true, createdAt: true, processingStatus: true, errors: true, successCount: true, errorCount: true, isDeleted: true, deletedAt: true, deletedBy: true });
 
 export const insertDeleteHistorySchema = createInsertSchema(deleteHistory, {
   itemType: z.string().min(1, "Item type is required"),
@@ -572,3 +572,33 @@ export type AdminSession = typeof adminSessions.$inferSelect;
 export type InsertAdminActivityLog = z.infer<typeof insertAdminActivityLogSchema>;
 export type AdminActivityLog = typeof adminActivityLogs.$inferSelect;
 export type emailSubscribers = z.infer<typeof insertemailSubscribers>;
+
+// Add this to your schema.ts file
+
+export const banners = pgTable("banners", {
+  id: varchar("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  buttonText: text("button_text").notNull(),
+  redirectUrl: text("redirect_url").notNull(),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  imageUrl: text("image_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  displayOrderIdx: index("banners_display_order_idx").on(table.displayOrder),
+  activeIdx: index("banners_active_idx").on(table.isActive),
+  createdAtIdx: index("banners_created_at_idx").on(table.createdAt),
+}));
+
+export const insertBannerSchema = createInsertSchema(banners, {
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  buttonText: z.string().min(1, "Button text is required"),
+  redirectUrl: z.string().min(1, "Redirect URL is required"), // Removed .url() validation
+  displayOrder: z.number().min(0, "Display order must be a positive number"),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertBanner = z.infer<typeof insertBannerSchema>;
+export type Banner = typeof banners.$inferSelect;

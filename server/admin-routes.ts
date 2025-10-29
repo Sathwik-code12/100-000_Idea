@@ -8,16 +8,17 @@ import { v4 as uuidv4 } from "uuid";
 import { z } from 'zod';
 import { AdminAuthService, requireAdminAuth, requireSuperAdmin } from './admin-auth.js';
 import { adminStorage, parseStringArray } from './admin-storage.js';
-import { 
-  insertPlatformIdeaSchema, 
-  InsertPlatformIdea, 
+import {
+  insertPlatformIdeaSchema,
+  InsertPlatformIdea,
   PlatformIdea,
   platformIdeas,
   uploadHistory,
   adminActivityLogs,
   AdminUser,
   aiGeneratedIdeas,
-  type AiGeneratedIdea
+  type AiGeneratedIdea,
+  insertBannerSchema
 } from '../shared/schema.js';
 import { db } from './db.js';
 import { eq, and, desc, asc, or, like, count, AnyColumn } from 'drizzle-orm';
@@ -66,7 +67,7 @@ const paginationSchema = z.object({
 router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = adminLoginSchema.parse(req.body);
-    
+
     const authResult = await AdminAuthService.validateAdmin(email, password);
     if (!authResult.success) {
       await AdminAuthService.logActivity(
@@ -127,7 +128,7 @@ router.post('/login', async (req: Request, res: Response) => {
 router.get('/me', requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const admin = (req as any).admin;
-    
+
     res.json({
       id: admin.id,
       email: admin.email,
@@ -234,7 +235,7 @@ router.post('/upload-ideas', requireAdminAuth, upload.single('file'), async (req
     });
   } catch (error) {
     console.error('Bulk upload error:', error);
-    
+
     // Clean up temp file if it exists
     if (req.file) {
       try {
@@ -243,7 +244,7 @@ router.post('/upload-ideas', requireAdminAuth, upload.single('file'), async (req
         console.error('Error cleaning up temp file:', e);
       }
     }
-    
+
     res.status(500).json({ error: 'Upload failed' });
   }
 });
@@ -255,7 +256,7 @@ router.post('/upload-ideas', requireAdminAuth, upload.single('file'), async (req
 router.get('/platform-ideas', requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 10, search } = paginationSchema.parse(req.query);
-    
+
     const whereConditions: any[] = [];
 
     if (search) {
@@ -293,7 +294,7 @@ router.get('/platform-ideas', requireAdminAuth, async (req: Request, res: Respon
 router.get('/submitted-ideas', requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 10, search } = paginationSchema.parse(req.query);
-    
+
     const whereConditions: any[] = [];
 
     if (search) {
@@ -391,15 +392,15 @@ router.get("/stats", requireAdminAuth, async (req, res) => {
  * Get admin activity logs
  */
 router.get('/activities', requireAdminAuth, async (req, res) => {
-    try {
-        const options = paginationSchema.parse(req.query);
-        const result = await adminStorage.getAdminActivityLogs(options);
-        res.json(result);
-    }
-    catch (error) {
-        console.error('Get activity logs error:', error);
-        res.status(500).json({ error: 'Failed to fetch activity logs' });
-    }
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getAdminActivityLogs(options);
+    res.json(result);
+  }
+  catch (error) {
+    console.error('Get activity logs error:', error);
+    res.status(500).json({ error: 'Failed to fetch activity logs' });
+  }
 });
 router.delete('/subscriber-list/:id', requireAdminAuth, async (req: Request, res: Response) => {
   try {
@@ -420,9 +421,9 @@ router.delete('/upload-history/:id', requireAdminAuth, async (req: Request, res:
   try {
     const admin = (req as any).admin;
     const { id } = req.params;
-    
+
     const success = await adminStorage.softDeleteUploadHistory(id, admin.id);
-    
+
     if (!success) {
       return res.status(404).json({ error: 'Upload not found' });
     }
@@ -469,9 +470,9 @@ router.post('/delete-history/:id/restore', requireAdminAuth, async (req: Request
   try {
     const admin = (req as any).admin;
     const { id } = req.params;
-    
+
     const success = await adminStorage.restoreFromDeleteHistory(id, admin.id);
-    
+
     if (!success) {
       return res.status(404).json({ error: 'Item not found or cannot be restored' });
     }
@@ -539,4 +540,133 @@ router.get('/all-users', requireAdminAuth, async (req: Request, res: Response) =
   }
 });
 
+
+// Add these routes to your admin router
+
+/**
+ * GET /api/admin/banners
+ * Get banners with pagination
+ */
+router.get('/banners', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getBanners(options);
+    res.json(result);
+  } catch (error) {
+    console.error('Get banners error:', error);
+    res.status(500).json({ error: 'Failed to fetch banners' });
+  }
+});
+
+/**
+ * POST /api/admin/banners
+ * Create a new banner
+ */
+router.post('/banners', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const admin = (req as any).admin;
+    const bannerData = insertBannerSchema.parse(req.body);
+
+    const banner = await adminStorage.createBanner({
+      ...bannerData,
+      createdBy: admin.id,
+    });
+
+    res.json(banner);
+  } catch (error) {
+    console.error('Create banner error:', error);
+    res.status(400).json({ error: 'Invalid request data' });
+  }
+});
+
+/**
+ * PUT /api/admin/banners/:id
+ * Update a banner
+ */
+router.put('/banners/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertBannerSchema.partial().parse(req.body);
+
+    const banner = await adminStorage.updateBanner(id, updates);
+    if (!banner) {
+      return res.status(404).json({ error: 'Banner not found' });
+    }
+
+    res.json(banner);
+  } catch (error) {
+    console.error('Update banner error:', error);
+    res.status(400).json({ error: 'Invalid request data' });
+  }
+});
+
+/**
+ * DELETE /api/admin/banners/:id
+ * Delete a banner
+ */
+router.delete('/banners/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const success = await adminStorage.deleteBanner(id);
+
+    if (!success) {
+      return res.status(404).json({ error: 'Banner not found' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete banner error:', error);
+    res.status(500).json({ error: 'Failed to delete banner' });
+  }
+});
+// Get single platform idea
+router.get('/platform-ideas/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const idea = await adminStorage.getPlatformIdeaById(id);
+    if (!idea) {
+      return res.status(404).json({ error: 'Idea not found' });
+    }
+    res.json(idea);
+  } catch (error) {
+    console.error('Get platform idea error:', error);
+    res.status(500).json({ error: 'Failed to fetch idea' });
+  }
+});
+
+// Create platform idea
+router.post('/platform-ideas', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const admin = (req as any).admin;
+    const ideaData = insertPlatformIdeaSchema.parse(req.body);
+
+    const idea = await adminStorage.createPlatformIdea({
+      ...ideaData,
+      createdBy: admin.id,
+    });
+
+    res.json(idea);
+  } catch (error) {
+    console.error('Create platform idea error:', error);
+    res.status(400).json({ error: 'Invalid request data' });
+  }
+});
+
+// Update platform idea
+router.put('/platform-ideas/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertPlatformIdeaSchema.partial().parse(req.body);
+    
+    const idea = await adminStorage.updatePlatformIdea(id, updates);
+    if (!idea) {
+      return res.status(404).json({ error: 'Idea not found' });
+    }
+
+    res.json(idea);
+  } catch (error) {
+    console.error('Update platform idea error:', error);
+    res.status(400).json({ error: 'Invalid request data' });
+  }
+});
 export default router;
