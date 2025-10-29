@@ -547,7 +547,7 @@ router.get('/all-users', requireAdminAuth, async (req: Request, res: Response) =
  * GET /api/admin/banners
  * Get banners with pagination
  */
-router.get('/banners', requireAdminAuth, async (req: Request, res: Response) => {
+router.get('/banners',  async (req: Request, res: Response) => {
   try {
     const options = paginationSchema.parse(req.query);
     const result = await adminStorage.getBanners(options);

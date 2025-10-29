@@ -1723,6 +1723,19 @@ export default function AdminDashboard() {
                       min="0"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Badge
+                    </label>
+                    <Input
+                      name="imageUrl"
+                      type="text"
+                      value={bannerForm.imageUrl}
+                      onChange={handleBannerFormChange}
+                      className="w-full"
+                      min="0"
+                    />
+                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
