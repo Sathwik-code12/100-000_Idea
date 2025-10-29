@@ -989,6 +989,7 @@ import {
   Briefcase,
   GraduationCap
 } from "lucide-react";
+import { authenticate } from "passport";
 
 interface IdeaCard {
   id: string;
@@ -1487,90 +1488,98 @@ const handleSubmitReview = () => {
                   </CardContent>
                 </Card>
               )} */}
-              {activeTab === "reviews" && (
+                {activeTab === "reviews" &&  (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Star className="h-5 w-5 text-gray-600" />
-                      Reviews ({idea?.ratings_reviews?.total_reviews || 0})
-                    </CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-gray-600" />
+                    Reviews ({idea?.ratings_reviews?.total_reviews || 0})
+                  </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {/* Rating Display */}
-                    <div className="py-6">
-                      <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-5xl font-bold text-gray-900">
-                          {idea?.ratings_reviews?.average_rating || "0.0"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`h-5 w-5 ${star <= Math.round(idea?.ratings_reviews?.average_rating)
-                              ? 'text-yellow-500 fill-yellow-500'
-                              : 'text-gray-300'
-                              }`}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        Based on {idea?.ratings_reviews?.total_reviews || 0} reviews
-                      </p>
+                  {/* Rating Display */}
+                  <div className="py-6">
+                    <div className="flex items-baseline gap-2 mb-2">
+                    <span className="text-5xl font-bold text-gray-900">
+                      {idea?.ratings_reviews?.average_rating || "0.0"}
+                    </span>
                     </div>
-                    {/* Write a Review Section */}
-                    <div className="border-t pt-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Write a Review</h3>
+                    <div className="flex items-center gap-1 mb-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                      key={star}
+                      className={`h-5 w-5 ${star <= Math.round(idea?.ratings_reviews?.average_rating)
+                        ? 'text-yellow-500 fill-yellow-500'
+                        : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                    </div>
+                    <p className="text-sm text-gray-600">
+                    Based on {idea?.ratings_reviews?.total_reviews || 0} reviews
+                    </p>
+                  </div>
+                  {/* Write a Review Section */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Write a Review</h3>
 
-                      {/* Rating Input */}
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Rating
-                        </label>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-6 w-6 cursor-pointer transition-all duration-200 hover:scale-110 ${star <= (hoverRating || selectedRating)
-                                ? 'text-yellow-500 fill-yellow-500'
-                                : 'text-gray-300'
-                                }`}
-                              onClick={() => setSelectedRating(star)}
-                              onMouseEnter={() => setHoverRating(star)}
-                              onMouseLeave={() => setHoverRating(0)}
-                            />
-                          ))}
-                          {selectedRating > 0 && (
-                            <span className="ml-2 text-sm text-gray-600">
-                              {selectedRating} star{selectedRating !== 1 ? 's' : ''}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {/* Comment Input */}
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Comment
-                        </label>
-                        <textarea
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                          placeholder="Share your thoughts about this idea..."
-                          className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                        />
-                      </div>
-                      {/* Submit Button */}
-                      <button
-                        onClick={handleSubmitReview}
-                        className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        disabled={selectedRating === 0}
-                      >
-                        Submit Review
-                      </button>
+                    {/* Rating Input */}
+                    <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Rating
+                    </label>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-6 w-6 cursor-pointer transition-all duration-200 hover:scale-110 ${star <= (hoverRating || selectedRating)
+                        ? 'text-yellow-500 fill-yellow-500'
+                        : 'text-gray-300'
+                        }`}
+                        onClick={() => setSelectedRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                      />
+                      ))}
+                      {selectedRating > 0 && (
+                      <span className="ml-2 text-sm text-gray-600">
+                        {selectedRating} star{selectedRating !== 1 ? 's' : ''}
+                      </span>
+                      )}
                     </div>
+                    </div>
+                    {/* Comment Input */}
+                    <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Comment
+                    </label>
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="Share your thoughts about this idea..."
+                      className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    />
+                    </div>
+                    {/* Submit Button */}
+                    <button
+                    onClick={() => {
+                      const isLoggedIn = Boolean(localStorage.getItem('token') || localStorage.getItem('user'));
+                      if (!isLoggedIn) {
+                      // redirect to sign-in page if not logged in
+                      window.location.href = '/auth';
+                      return;
+                      }
+                      handleSubmitReview();
+                    }}
+                    className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled={selectedRating === 0}
+                    >
+                    Submit Review
+                    </button>
+                  </div>
                   </CardContent>
                 </Card>
-              )}
+                )}
               {activeTab === "ai-analysis" && (
                 <Card>
                   <CardHeader>
