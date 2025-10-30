@@ -125,12 +125,12 @@ export default function NewFooter() {
           <div>
             <h3 className="font-semibold text-white mb-6 text-sm tracking-wider">CATEGORIES</h3>
             <ul className="space-y-3 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">All Categories</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Technology</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Manufacturing</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">For Women</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Fashion</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">E-commerce</a></li>
+              <li><a href="/all-ideas" className="hover:text-white transition-colors">All Categories</a></li>
+              <li><a href="/all-ideas?category=Technology" className="hover:text-white transition-colors">Technology</a></li>
+              <li><a href="/all-ideas?category=Manufacturing" className="hover:text-white transition-colors">Manufacturing</a></li>
+              <li><a href="/all-ideas?category=For Women" className="hover:text-white transition-colors">For Women</a></li>
+              <li><a href="/all-ideas?category=Fashion" className="hover:text-white transition-colors">Fashion</a></li>
+              <li><a href="/all-ideas?category=E-commerce" className="hover:text-white transition-colors">E-commerce</a></li>
             </ul>
           </div>
 
@@ -139,10 +139,10 @@ export default function NewFooter() {
             <h3 className="font-semibold text-white mb-6 text-sm tracking-wider">ABOUT</h3>
             <ul className="space-y-3 text-sm text-gray-400">
               <li><a href="/about" className="hover:text-white transition-colors">Our Company</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Who We Are</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">The Journal</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Reviews</a></li>
+              <li><a href="" className="hover:text-white transition-colors">Who We Are</a></li>
+              <li><a href="" className="hover:text-white transition-colors">FAQ</a></li>
+              <li><a href="" className="hover:text-white transition-colors">The Journal</a></li>
+              <li><a href="" className="hover:text-white transition-colors">Reviews</a></li>
               <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
             </ul>
           </div>

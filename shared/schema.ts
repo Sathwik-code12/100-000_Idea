@@ -50,7 +50,26 @@ export const submittedIdeas = pgTable("submitted_ideas", {
   emailIdx: index("ideas_email_idx").on(table.email),
   statusCreatedIdx: index("ideas_status_created_idx").on(table.status, table.createdAt),
 }));
+// Add this to your schema.ts file
 
+export const savedIdeas = pgTable("saved_ideas", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ideaId: varchar("idea_id").notNull().references(() => platformIdeas.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("saved_ideas_user_id_idx").on(table.userId),
+  ideaIdIdx: index("saved_ideas_idea_id_idx").on(table.ideaId),
+  userIdeaIdx: index("saved_ideas_user_idea_idx").on(table.userId, table.ideaId),
+}));
+
+export const insertSavedIdeaSchema = createInsertSchema(savedIdeas, {
+  userId: z.string(),
+  ideaId: z.string(),
+}).omit({  createdAt: true });
+
+export type InsertSavedIdea = z.infer<typeof insertSavedIdeaSchema>;
+export type SavedIdea = typeof savedIdeas.$inferSelect;
 // Campaigns table for fundraising
 export const campaigns = pgTable("campaigns", {
   id: varchar("id").primaryKey(),
@@ -605,3 +624,30 @@ export const insertBannerSchema = createInsertSchema(banners, {
 
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
 export type Banner = typeof banners.$inferSelect;
+
+// Add to schemas.ts after existing table definitions
+
+export const ideaReviews = pgTable("idea_reviews", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ideaId: varchar("idea_id").notNull().references(() => platformIdeas.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(), // Rating from 1-5
+  comment: text("comment").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("idea_reviews_user_id_idx").on(table.userId),
+  ideaIdIdx: index("idea_reviews_idea_id_idx").on(table.ideaId),
+  ratingIdx: index("idea_reviews_rating_idx").on(table.rating),
+  createdAtIdx: index("idea_reviews_created_at_idx").on(table.createdAt),
+}));
+
+// Schema for inserting a review
+export const insertIdeaReviewSchema = createInsertSchema(ideaReviews, {
+  rating: z.number().min(1).max(5, "Rating must be between 1 and 5"),
+  comment: z.string().optional(), 
+}).omit({  createdAt: true, updatedAt: true });
+
+// Types
+export type InsertIdeaReview = z.infer<typeof insertIdeaReviewSchema>;
+export type IdeaReview = typeof ideaReviews.$inferSelect;

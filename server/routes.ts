@@ -9,6 +9,7 @@ import { registerAiRoutes } from "./ai-routes.js";
 import adminRoutes from "./admin-routes.js";
 import { AdminAuthService } from "./admin-auth.js";
 import { User as SchemaUser } from "../shared/schema.js";
+import { v4 as uuidv4 } from "uuid";
 // Simple in-memory cache for better performance
 const cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
 
@@ -329,30 +330,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all submitted ideas with caching
   app.get("/api/platformideas", async (req, res) => {
     const startTime = Date.now();
-    const cacheKey = "platformideas";
+    // const cacheKey = "platformideas";
 
     try {
       // Check cache first
-      const cachedIdeas = getFromCache(cacheKey);
-      if (cachedIdeas) {
-        res.setHeader("X-Cache", "HIT");
-        return res.json({
-          success: true,
-          ideas: cachedIdeas,
-          _meta: {
-            processTime: Date.now() - startTime,
-            cached: true
-          }
-        });
-      }
+      // const cachedIdeas = getFromCache(cacheKey);
+      // if (cachedIdeas) {
+      //   res.setHeader("X-Cache", "HIT");
+      //   return res.json({
+      //     success: true,
+      //     ideas: cachedIdeas,
+      //     _meta: {
+      //       processTime: Date.now() - startTime,
+      //       cached: true
+      //     }
+      //   });
+      // }
 
       const ideas = await storage.getPlatformIdeas();
+      // const ideas = await storage.getPlatformIdeasWithReviews();
 
       // Cache the result for 5 minutes
-      setCache(cacheKey, ideas, 300000);
+      // setCache(cacheKey, ideas, 300000);
 
-      res.setHeader("X-Cache", "MISS");
-      res.setHeader("Cache-Control", "public, max-age=300"); // Client-side cache for 5 minutes
+      // res.setHeader("X-Cache", "MISS");
+      // res.setHeader("Cache-Control", "public, max-age=300"); // Client-side cache for 5 minutes
 
       res.json({
         success: true,
@@ -549,6 +551,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add these routes to your routes.ts file
+
+  // Save an idea
+  app.post("/api/saved-ideas", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.sendStatus(401);
+      }
+      const user = req.user as SchemaUser;
+      const { ideaId } = req.body;
+
+      if (!ideaId) {
+        return res.status(400).json({
+          success: false,
+          message: "Idea ID is required",
+        });
+      }
+
+      // Check if the idea exists
+      const idea = await storage.getPlatformIdeaById(ideaId);
+      if (!idea) {
+        return res.status(404).json({
+          success: false,
+          message: "Idea not found",
+        });
+      }
+
+      // Check if already saved
+      const isSaved = await storage.isIdeaSavedByUser(user.id, ideaId);
+      if (isSaved) {
+        return res.status(400).json({
+          success: false,
+          message: "Idea already saved",
+        });
+      }
+
+      const savedIdea = await storage.saveIdea(user.id, ideaId);
+      res.status(201).json({
+        success: true,
+        message: "Idea saved successfully",
+        savedIdea,
+      });
+    } catch (error: any) {
+      console.error("Error saving idea:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  });
+
+  // Get saved ideas for the current user
+  app.get("/api/saved-ideas", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.sendStatus(401);
+      }
+      const user = req.user as SchemaUser;
+      const savedIdeas = await storage.getSavedIdeasByUser(user.id);
+      res.json({
+        success: true,
+        savedIdeas,
+      });
+    } catch (error: any) {
+      console.error("Error fetching saved ideas:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  });
+
+  // Unsave an idea
+  app.delete("/api/saved-ideas/:ideaId", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.sendStatus(401);
+      }
+      const user = req.user as SchemaUser;
+      const ideaId = req.params.ideaId;
+
+      await storage.unsaveIdea(user.id, ideaId);
+      res.json({
+        success: true,
+        message: "Idea unsaved successfully",
+      });
+    } catch (error: any) {
+      console.error("Error unsaving idea:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  });
+  // Add to routes.ts
+
+  // Get reviews for an idea
+  app.get("/api/ideas/:id/reviews", async (req, res) => {
+    try {
+      const ideaId = req.params.id;
+      const reviews = await storage.getIdeaReviews(ideaId);
+
+      // Get average rating
+      const ratingData = await storage.getAverageRating(ideaId);
+
+      res.json({
+        success: true,
+        reviews,
+        averageRating: ratingData.average,
+        totalReviews: ratingData.count
+      });
+    } catch (error: any) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
+  // Submit a review
+  app.post("/api/ideas/:id/reviews", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({
+          success: false,
+          message: "Authentication required"
+        });
+      }
+
+      const user = req.user as SchemaUser;
+      const ideaId = req.params.id;
+      const { rating, comment } = req.body;
+
+      // Validate input
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({
+          success: false,
+          message: "Rating must be between 1 and 5"
+        });
+      }
+
+      // Create the review
+      const review = await storage.createIdeaReview({
+        id: uuidv4() as string,
+        userId: user.id,
+        ideaId,
+        rating,
+        comment: comment || ""
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Review submitted successfully",
+        review
+      });
+    } catch (error: any) {
+      console.error("Error submitting review:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
   const httpServer = createServer(app);
 
   return httpServer;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { CompetitorSchema } from "../shared/schema.js";
+import { CompetitorSchema, IdeaReview, ideaReviews, InsertIdeaReview, InsertSavedIdea, SavedIdea, savedIdeas } from "../shared/schema.js";
 import {
   type User,
   type InsertUser,
@@ -30,7 +30,7 @@ import {
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { db } from "./db.js";
-import { eq, and, ilike } from "drizzle-orm";
+import { eq, and, ilike, sql, getTableColumns } from "drizzle-orm";
 
 function parseStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -162,6 +162,44 @@ export class DatabaseStorage implements IStorage {
   async getPlatformIdeas(): Promise<PlatformIdea[]> {
     return await db.select().from(platformIdeas);
   }
+  // Add this method to the DatabaseStorage class in storage.ts
+
+  async getPlatformIdeasWithReviews(): Promise<PlatformIdea[]> {
+    // Subquery with explicit aliases for every computed field
+    const reviewStats = db
+      .select({
+        ideaId: ideaReviews.ideaId,
+        avgRating: sql`CAST(AVG(${ideaReviews.rating}) AS FLOAT)`.as('avg_rating'),
+        reviewCount: sql`COUNT(${ideaReviews.id})`.as('review_count'),
+      })
+      .from(ideaReviews)
+      .groupBy(ideaReviews.ideaId)
+      .as('review_stats');
+
+    // Join subquery with platformIdeas
+    const query = db
+      .select({
+        ...getTableColumns(platformIdeas),
+        avg_rating: sql`COALESCE(${reviewStats.avgRating}, 0.0)`,
+        review_count: sql`COALESCE(${reviewStats.reviewCount}, 0)`
+      })
+      .from(platformIdeas)
+      .leftJoin(reviewStats, eq(platformIdeas.id, reviewStats.ideaId));
+
+    const results = await query;
+
+    // ✅ Map results to include ratings_reviews as a string array
+    return results.map((idea) => ({
+      ...idea,
+      ratings_reviews: [
+        `average_rating: ${(idea.avg_rating as number) ?? 0}`,
+        `total_reviews: ${(idea.review_count as number) ?? 0}`
+      ],
+    }));
+  }
+
+
+
   async getSubmittedIdeas(): Promise<SubmittedIdea[]> {
     return await db.select().from(submittedIdeas);
   }
@@ -390,6 +428,140 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(aiGeneratedIdeas)
       .where(eq(aiGeneratedIdeas.userId, userId));
   }
+  // Add these methods to your DatabaseStorage class in storage.ts
+
+  async saveIdea(userId: string, ideaId: string): Promise<SavedIdea> {
+    const data: InsertSavedIdea = {
+      id: uuidv4(),
+      userId,
+      ideaId,
+    };
+    const [savedIdea] = await db.insert(savedIdeas).values(data).returning();
+    return savedIdea;
+  }
+
+  async getSavedIdeasByUser(userId: string): Promise<SavedIdea[]> {
+    return await db.select().from(savedIdeas).where(eq(savedIdeas.userId, userId));
+  }
+
+  async isIdeaSavedByUser(userId: string, ideaId: string): Promise<boolean> {
+    const [savedIdea] = await db
+      .select()
+      .from(savedIdeas)
+      .where(and(eq(savedIdeas.userId, userId), eq(savedIdeas.ideaId, ideaId)));
+    return !!savedIdea;
+  }
+
+  async unsaveIdea(userId: string, ideaId: string): Promise<void> {
+    await db
+      .delete(savedIdeas)
+      .where(and(eq(savedIdeas.userId, userId), eq(savedIdeas.ideaId, ideaId)));
+  }
+
+  async getPlatformIdeaById(id: string): Promise<PlatformIdea | undefined> {
+    const [idea] = await db.select().from(platformIdeas).where(eq(platformIdeas.id, id));
+    return idea;
+  }
+
+  // Add to DatabaseStorage class in storage.ts
+
+  // Review methods
+  // async createIdeaReview(review: InsertIdeaReview & { userId: string; ideaId: string }): Promise<IdeaReview> {
+  //   const data: InsertIdeaReview = {
+  //     ...review,
+
+  //     rating: review.rating,
+  //     comment: review.comment || "",
+  //   };
+
+  //   const [newReview] = await db.insert(ideaReviews).values(data).returning();
+
+  //   return newReview;
+  // }
+  async createIdeaReview(
+    review: InsertIdeaReview & { userId: string; ideaId: string }
+  ): Promise<IdeaReview> {
+    // Insert the new review
+    const [newReview] = await db
+      .insert(ideaReviews)
+      .values({
+        ...review,
+        rating: review.rating,
+        comment: review.comment || "",
+      })
+      .returning();
+
+    // Fetch the related idea
+    const [idea] = await db
+      .select()
+      .from(platformIdeas)
+      .where(eq(platformIdeas.id, review.ideaId));
+
+    if (idea) {
+      // Parse ratings_reviews safely
+      let avg = 0;
+      let total = 0;
+
+      try {
+        if (Array.isArray(idea.ratings_reviews) && idea.ratings_reviews.length === 2) {
+          const avgStr = idea.ratings_reviews.find(s => s.startsWith("average_rating:"));
+          const totalStr = idea.ratings_reviews.find(s => s.startsWith("total_reviews:"));
+          if (avgStr && totalStr) {
+            avg = parseFloat(avgStr.split(":")[1].trim());
+            total = parseInt(totalStr.split(":")[1].trim());
+          }
+        }
+      } catch (err) {
+        console.warn("Error parsing ratings_reviews:", err);
+      }
+
+      // Update stats
+      const newTotal = total + 1;
+      console.log("newTotal:", newTotal);
+      const newAverage = (avg * total + review.rating) / newTotal;
+      console.log("newAverage:", newAverage)
+
+      // Store as string array (to match schema type)
+      const updatedStats = {
+        average_rating: newAverage,
+        total_reviews: newTotal,
+      };
+
+      await db
+        .update(platformIdeas)
+         .set({ ratings_reviews: updatedStats as any })
+        .where(eq(platformIdeas.id, review.ideaId));
+    }
+
+    return newReview;
+  }
+
+
+
+  async getIdeaReviews(ideaId: string): Promise<IdeaReview[]> {
+    return await db.select().from(ideaReviews).where(eq(ideaReviews.ideaId, ideaId));
+  }
+
+  async getIdeaReviewsByUser(userId: string): Promise<IdeaReview[]> {
+    return await db.select().from(ideaReviews).where(eq(ideaReviews.userId, userId));
+  }
+
+  async getAverageRating(ideaId: string): Promise<{ average: number; count: number }> {
+    const reviews = await this.getIdeaReviews(ideaId);
+
+    if (reviews.length === 0) {
+      return { average: 0, count: 0 };
+    }
+
+    const total = reviews.reduce((sum, review) => sum + review.rating, 0);
+    const average = total / reviews.length;
+
+    return {
+      average: parseFloat(average.toFixed(1)),
+      count: reviews.length
+    };
+  }
+
 }
 
 export const storage = new DatabaseStorage();
