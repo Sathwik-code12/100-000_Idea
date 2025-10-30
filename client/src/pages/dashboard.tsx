@@ -48,7 +48,22 @@ export default function EnhancedDashboard() {
     queryKey: ["/api/investments/user"],
     enabled: !!user,
   });
-
+  const { data: savedIdeas = [] } = useQuery({
+    queryKey: ["/api/saved-ideas"],
+    queryFn: async () => {
+      const response = await fetch("/api/saved-ideas");
+      if (!response.ok) {
+        if (response.status === 401) {
+          // User not authenticated
+          return [];
+        }
+        throw new Error("Failed to fetch saved ideas");
+      }
+      const data = await response.json();
+      console.log("data", data)
+      return data.savedIdeas;
+    },
+  });
   // Fetch favorites
   const { data: favorites = { favorites: [] } } = useQuery({
     queryKey: ['/api/ideas/favorites'],
@@ -408,7 +423,7 @@ export default function EnhancedDashboard() {
                     <div className="text-sm text-slate-600 font-medium">Saved Ideas</div>
 
                     {/* Value */}
-                    <div className="text-xl font-bold text-slate-800">{savedIdeasCount}</div>
+                    <div className="text-xl font-bold text-slate-800">{savedIdeas.length}</div>
                   </div>
                 </div>
                 <div className="text-right">

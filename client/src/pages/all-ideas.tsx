@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Star, TrendingUp, DollarSign, Clock, Users, X, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
-import { Link } from 'wouter';
+import { Search, Filter, Star, TrendingUp, DollarSign, Clock, Users, X, ChevronRight, ChevronLeft, Sparkles, Heart } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
 import Header from '@/components/layout/header';
+import { useSearchParams } from 'wouter';
 
 // Define TypeScript interfaces
 interface Idea {
@@ -24,6 +25,8 @@ interface Idea {
 interface InvestmentRange {
   label: string;
   value: string;
+  min: number;
+  max: number;
 }
 
 interface OnboardingQuestion {
@@ -49,43 +52,103 @@ const BusinessIdeasPlatform: React.FC = () => {
   const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSavedOnly, setShowSavedOnly] = useState<boolean>(false);
+  // Get URL search params
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  useEffect(() => {
+    const savedParam = searchParams.get('saved');
+    setShowSavedOnly(savedParam === 'true');
+  }, [searchParams]);
+  // Parse investment amount from string
+  const parseInvestmentAmount = (investmentStr: string): number => {
+    try {
+      // Remove currency symbols and commas
+      const cleanStr = investmentStr.replace(/[^\d.]/g, '');
+      const amount = parseFloat(cleanStr);
+
+      if (isNaN(amount)) return 0;
+
+      // Handle Lakhs and Crores
+      if (investmentStr.toLowerCase().includes('lakh')) {
+        return amount * 100000; // 1 Lakh = 100,000
+      }
+      if (investmentStr.toLowerCase().includes('cr')) {
+        return amount * 10000000; // 1 Crore = 10,000,000
+      }
+
+      return amount;
+    } catch (e) {
+      console.error("Error parsing investment amount:", e);
+      return 0;
+    }
+  };
+
+  // Initialize filters from URL
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategories([categoryParam]);
+    }
+  }, [searchParams]);
 
   // Fetch ideas from API
   useEffect(() => {
     const fetchIdeas = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        const response = await fetch('/api/platformideas');
-        if (!response.ok) {
-          throw new Error('Failed to fetch ideas');
+        let response;
+        let data;
+        let saved = [];
+
+        // If saved only mode
+        if (showSavedOnly) {
+          const savedResponse = await fetch("/api/saved-ideas");
+          if (!savedResponse.ok) {
+            if (savedResponse.status === 401) {
+              return []; // user not logged in
+            }
+            throw new Error("Failed to fetch saved ideas");
+          }
+
+          const savedData = await savedResponse.json();
+          saved = savedData.savedIdeas || [];
         }
-        const data = await response.json();
-        
-        // Transform API data to match our interface
-        const transformedIdeas: Idea[] = data.ideas.map((item: any) => {
-          // Parse investment if it's a JSON string
+
+        // Fetch all ideas (always)
+        response = await fetch("/api/platformideas");
+        if (!response.ok) {
+          throw new Error("Failed to fetch ideas");
+        }
+
+        data = await response.json();
+        const allIdeas = data.ideas || [];
+
+        // Transform ideas
+        const transformedIdeas: Idea[] = allIdeas.map((item: any) => {
           let investmentDisplay = item.investment;
           try {
-            if (typeof item.investment === 'string') {
+            if (typeof item.investment === "string") {
               const investmentObj = JSON.parse(item.investment);
               investmentDisplay = investmentObj.display || investmentDisplay;
-            } else if (item.investment && item.investment.display) {
+            } else if (item.investment?.display) {
               investmentDisplay = item.investment.display;
             }
           } catch (e) {
             console.error("Error parsing investment:", e);
           }
 
-          // Get image URL
-          const imageUrl = item.heroImage || 
-                          (item.images && item.images.length > 0 ? item.images[0] : '') || 
-                          'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop';
+          const imageUrl =
+            item.heroImage ||
+            (item.images?.length > 0 ? item.images[0] : "") ||
+            "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop";
 
-          // Get rating
-          const rating = item.ratings_reviews ? parseFloat(item.ratings_reviews.average_rating) : 0;
+          const rating = item.ratings_reviews
+            ? parseFloat(item.ratings_reviews.average_rating)
+            : 0;
 
-          // Calculate scores based on available data
           const marketScore = item.market_analysis?.TAM ? 8 : 7;
           const painPointScore = item.user_personas?.pain_points ? 8 : 7;
           const timingScore = item.industry_structure?.growth ? 8 : 7;
@@ -97,28 +160,39 @@ const BusinessIdeasPlatform: React.FC = () => {
             category: item.category,
             difficulty: item.difficulty,
             investment: investmentDisplay,
-            rating: rating,
+            rating,
             tags: item.tags || [],
-            profitability: item.profitability || 'Medium',
-            timeToMarket: item.timeframe || '6 months',
+            profitability: item.profitability || "Medium",
+            timeToMarket: item.timeframe || "6 months",
             marketScore,
             painPointScore,
             timingScore,
-            image: imageUrl
+            image: imageUrl,
           };
         });
 
-        setIdeas(transformedIdeas);
-        setFilteredIdeas(transformedIdeas);
+        // ✅ Filter ideas based on saved list
+        const filtered =
+          showSavedOnly && saved.length > 0
+            ? transformedIdeas.filter((idea) =>
+              saved.some((s) => s.ideaId === idea.id)
+            )
+            : transformedIdeas;
+
+        setIdeas(filtered);
+        setFilteredIdeas(filtered);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchIdeas();
-  }, []);
+  }, [showSavedOnly]);
+
 
   // Filter and sort ideas
   useEffect(() => {
@@ -127,7 +201,7 @@ const BusinessIdeasPlatform: React.FC = () => {
     // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      result = result.filter(idea => 
+      result = result.filter(idea =>
         idea.title.toLowerCase().includes(searchLower) ||
         idea.description.toLowerCase().includes(searchLower) ||
         idea.category.toLowerCase().includes(searchLower) ||
@@ -143,13 +217,23 @@ const BusinessIdeasPlatform: React.FC = () => {
     // Apply investment range filters
     if (selectedInvestmentRange.length > 0) {
       result = result.filter(idea => {
+        const investmentAmount = parseInvestmentAmount(idea.investment);
+
         return selectedInvestmentRange.some(range => {
-          if (range === '0-10' && idea.investment.includes('₹10')) return true;
-          if (range === '10-25' && idea.investment.includes('₹25')) return true;
-          if (range === '25-50' && idea.investment.includes('₹50')) return true;
-          if (range === '50-100' && idea.investment.includes('₹1')) return true;
-          if (range === '100+' && idea.investment.includes('₹1')) return true;
-          return false;
+          switch (range) {
+            case '0-10':
+              return investmentAmount >= 0 && investmentAmount < 10; // Under 10 Lakhs
+            case '10-25':
+              return investmentAmount >= 10 && investmentAmount < 25; // 10-25 Lakhs
+            case '25-50':
+              return investmentAmount >= 25 && investmentAmount < 50; // 25-50 Lakhs
+            case '50-100':
+              return investmentAmount >= 50 && investmentAmount < 100; // 50 Lakhs - 1 Crore
+            case '100+':
+              return investmentAmount >= 10000000; // Above 1 Crore
+            default:
+              return false;
+          }
         });
       });
     }
@@ -166,9 +250,8 @@ const BusinessIdeasPlatform: React.FC = () => {
         break;
       case 'investment':
         result.sort((a, b) => {
-          // Simple sort by investment amount (not perfect but works for demonstration)
-          const aAmount = parseInt(a.investment.replace(/[^\d]/g, '')) || 0;
-          const bAmount = parseInt(b.investment.replace(/[^\d]/g, '')) || 0;
+          const aAmount = parseInvestmentAmount(a.investment);
+          const bAmount = parseInvestmentAmount(b.investment);
           return aAmount - bAmount;
         });
         break;
@@ -188,11 +271,11 @@ const BusinessIdeasPlatform: React.FC = () => {
   const difficulties = Array.from(new Set(ideas.map(idea => idea.difficulty)));
 
   const investmentRanges: InvestmentRange[] = [
-    { label: 'Under ₹10 Lakhs', value: '0-10' },
-    { label: '₹10-25 Lakhs', value: '10-25' },
-    { label: '₹25-50 Lakhs', value: '25-50' },
-    { label: '₹50 Lakhs - 1 Crore', value: '50-100' },
-    { label: 'Above 1 Crore', value: '100+' }
+    { label: 'Under ₹10 Lakhs', value: '0-10', min: 0, max: 1000000 },
+    { label: '₹10-25 Lakhs', value: '10-25', min: 1000000, max: 2500000 },
+    { label: '₹25-50 Lakhs', value: '25-50', min: 2500000, max: 5000000 },
+    { label: '₹50 Lakhs - 1 Crore', value: '50-100', min: 5000000, max: 10000000 },
+    { label: 'Above 1 Crore', value: '100+', min: 10000000, max: Infinity }
   ];
 
   const onboardingQuestions: OnboardingQuestion[] = [
@@ -264,8 +347,16 @@ const BusinessIdeasPlatform: React.FC = () => {
     setSelectedInvestmentRange([]);
     setSelectedDifficulty([]);
     setSearchTerm('');
+    // Clear URL params
+    window.history.replaceState({}, '', location.pathname);
   };
-
+  const clearSavedFilter = (): void => {
+    setShowSavedOnly(false);
+    // Remove saved parameter from URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('saved');
+    window.history.replaceState({}, '', url.toString());
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -361,7 +452,12 @@ const BusinessIdeasPlatform: React.FC = () => {
       {/* Header */}
       <div className=" shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-4xl font-bold text-center text-gray-900 mb-2">Discover 10000+ Ideas</h1>
+          <h1 className="text-4xl font-bold text-center text-gray-900 mb-2">
+            {showSavedOnly ? 'Your Saved Ideas' : 'Discover 10000+ Ideas'}
+          </h1>
+          {showSavedOnly && (
+            <p className="text-center text-gray-600">Ideas you've saved for later</p>
+          )}
         </div>
       </div>
 
@@ -408,13 +504,34 @@ const BusinessIdeasPlatform: React.FC = () => {
                 setOnboardingStep(1);
               }}
               className="ml-auto flex items-center gap-2 px-6 py-2 rounded-full text-white font-medium 
-             bg-gradient-to-r from-orange-400 via-yellow-400 to-green-400
-             hover:opacity-90 hover:shadow-xl hover:shadow-orange-300 transition transition-all duration-300"
+              bg-gradient-to-r from-orange-400 via-yellow-400 to-green-400
+              hover:opacity-90 hover:shadow-xl hover:shadow-orange-300 transition transition-all duration-300"
             >
               <Sparkles className="w-4 h-4" />
               AI Ideas
             </button>
-
+            {showSavedOnly ?
+              <button
+                onClick={() => {
+                  if (showSavedOnly) {
+                    clearSavedFilter();
+                  } else {
+                    // Add saved parameter to URL
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('saved', 'true');
+                    window.history.replaceState({}, '', url.toString());
+                    setShowSavedOnly(true);
+                  }
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showSavedOnly
+                  ? 'bg-red-100 text-red-700 border border-red-300'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+              >
+                {showSavedOnly ?
+                  <Heart className={`w-4 h-4 ${showSavedOnly ? 'fill-current text-red-500' : ''}`} /> : null}
+                {showSavedOnly ? 'Showing Saved' : null}
+              </button> : null}
             {(selectedCategories.length > 0 || selectedInvestmentRange.length > 0 || selectedDifficulty.length > 0) && (
               <button
                 onClick={clearFilters}

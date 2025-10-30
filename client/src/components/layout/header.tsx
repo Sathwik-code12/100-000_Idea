@@ -84,7 +84,7 @@ export default function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="#" className="cursor-pointer flex w-full items-center py-2">
+                      <Link href="/all-ideas?saved=true" className="cursor-pointer flex w-full items-center py-2">
                         <Bookmark className="h-4 w-4 mr-3 text-gray-600" />
                         <span className="text-sm">My Saved Ideas</span>
                       </Link>
@@ -137,7 +137,7 @@ export default function Header() {
                     </div>
                     <Link href="/dashboard" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors">My Profile</Link>
                     <Link href="/my-ideas" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors">Your Ideas</Link>
-                    <Link href="/saved-ideas" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors">My Saved Ideas</Link>
+                    <Link href="/all-ideas?saved=true" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors">My Saved Ideas</Link>
                     <Link href="/settings" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors">Settings</Link>
                     <button
                       onClick={handleLogout}

@@ -179,11 +179,11 @@
 
 // idea-grid.tsx
 // idea-grid.tsx
-import { DollarSign, Star, TrendingUp, Clock, AlertCircle,MessageCircleMore , Zap, Wrench, Building2, BarChart3, Heart, MessageCircle, MoreVertical,Lightbulb , Target } from "lucide-react";
+import { DollarSign, Star, TrendingUp, Clock, AlertCircle, MessageCircleMore, Zap, Wrench, Building2, BarChart3, Heart, MessageCircle, MoreVertical, Lightbulb, Target } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequestWithPage } from "@/lib/queryClient";
+import { apiRequest, apiRequestWithPage } from "@/lib/queryClient";
 
 interface IdeaCard {
   id: string;
@@ -217,39 +217,62 @@ interface MainContentLayoutProps {
 }
 
 export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: MainContentLayoutProps) {
-  const [usersPagination, setUsersPagination] = useState<any>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
-  console.log('Ideas received in IdeaGrid:', ideas);
-  const [usersLoading, setUsersLoading] = useState(false);
-  const [usersError, setUsersError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const getDifficultyColor = (difficulty: string) => {
-    // console.log('Getting color for difficulty:', difficulty);
-    switch (difficulty?.toLowerCase()) {
-      case 'easy': return 'bg-green-500';
-      case 'medium': return 'bg-yellow-400';
-      case 'hard': return 'bg-red-500';
-      default: return 'bg-yellow-400';
-    }
+  // Fetch saved ideas for the current user
+  const { data: savedIdeas = [] } = useQuery({
+    queryKey: ["/api/saved-ideas"],
+    queryFn: async () => {
+      const response = await fetch("/api/saved-ideas");
+      if (!response.ok) {
+        if (response.status === 401) {
+          // User not authenticated
+          return [];
+        }
+        throw new Error("Failed to fetch saved ideas");
+      }
+      const data = await response.json();
+      return data.savedIdeas;
+    },
+  });
+
+  // Mutation to save an idea
+  const saveIdeaMutation = useMutation({
+    mutationFn: async (ideaId: string) => {
+      const response = await apiRequest("POST", "/api/saved-ideas", { ideaId });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-ideas"] });
+    },
+  });
+
+  // Mutation to unsave an idea
+  const unsaveIdeaMutation = useMutation({
+    mutationFn: async (ideaId: string) => {
+      const response = await apiRequest("DELETE", `/api/saved-ideas/${ideaId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-ideas"] });
+    },
+  });
+
+  // Check if an idea is saved
+  const isIdeaSaved = (ideaId: string) => {
+    return savedIdeas.some((savedIdea: any) => savedIdea.ideaId === ideaId);
   };
 
-  // const getIconComponent = (iconName: string) => {
-  //   const icons: { [key: string]: any } = {
-  //     'Zap': Zap,
-  //     'Wrench': Wrench,
-  //     'Building2': Building2,
-  //     'BarChart3': BarChart3,
-  //     'Target': Target,
-  //     'DollarSign': DollarSign,
-  //     'TrendingUp': TrendingUp
-  //   };
-  //   return icons[iconName] || Zap;
-  // };
+  // Handle save/unsave
+  const handleSaveIdea = (e: React.MouseEvent, ideaId: string) => {
+    e.preventDefault(); // Prevent navigation when clicking the heart
 
+    if (isIdeaSaved(ideaId)) {
+      unsaveIdeaMutation.mutate(ideaId);
+    } else {
+      saveIdeaMutation.mutate(ideaId);
+    }
+  };
   const parseCategory = (category: string) => {
     try {
       // console.log('--Category to parse:---', category);
@@ -260,7 +283,15 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
       return category;
     }
   };
-
+  const getDifficultyColor = (difficulty: string) => {
+    // console.log('Getting color for difficulty:', difficulty);
+    switch (difficulty?.toLowerCase()) {
+      case 'easy': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-400';
+      case 'hard': return 'bg-red-500';
+      default: return 'bg-yellow-400';
+    }
+  };
   const parseInvestment = (investment: any) => {
     if (typeof investment === 'string') {
       try {
@@ -325,53 +356,39 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
                       <span className="text-lg font-bold text-gray-900">
                         {idea.ratings_reviews?.average_rating || '4.0'}
                       </span>
-                      
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex gap-2">
-                      {/* {idea.tags?.slice(0, 4).map((tag, index) => {
-                        const IconComponent = getIconComponent(tag);
-                        return (
-                          <button
-                            key={index}
-                            className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors"
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            <IconComponent className="w-5 h-5 text-gray-900" />
-                          </button>
-                        );
-                      })} */}
-                       
-                        <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <Target className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <DollarSign className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <TrendingUp className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <Zap className="w-5 h-5 text-gray-900" />
-                        </button>
+                      <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                        <Target className="w-5 h-5 text-gray-900" />
+                      </button>
+                      <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                        <DollarSign className="w-5 h-5 text-gray-900" />
+                      </button>
+                      <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                        <TrendingUp className="w-5 h-5 text-gray-900" />
+                      </button>
+                      <button className="w-9 h-9 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                        <Zap className="w-5 h-5 text-gray-900" />
+                      </button>
                     </div>
-                    
                   </div>
-                      <div className="flex gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <span 
-                            key={i} 
-                            className={`text-2xl ${
-                              i < Math.floor(idea.ratings_reviews?.average_rating || 4) 
-                                ? 'text-yellow-400' 
-                                : 'text-gray-300'
-                            }`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
+
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <span
+                        key={i}
+                        className={`text-2xl ${i < Math.floor(idea.ratings_reviews?.average_rating || 4)
+                            ? 'text-yellow-400'
+                            : 'text-gray-300'
+                          }`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+
                   {/* Scores Section */}
                   {(idea.marketScore || idea.painPointScore || idea.timingScore) && (
                     <div className="flex items-center gap-4 mb-4 text-xs">
@@ -397,31 +414,34 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
                   )}
 
                   {/* Footer Actions */}
-                  <div className="flex items-center justify-between pt-4 ">
+                  <div className="flex items-center justify-between pt-4">
                     <div className="flex items-center gap-3 text-gray-600">
                       <div className="flex items-center gap-1 border py-1.5 px-2.5 bg-gray-100 rounded-full hover:text-yellow-500 transition-colors hover:border-yellow-500">
                         <Lightbulb className="w-4 h-4" />
                         <span className="text-sm font-medium">{idea.views || 0}</span>
                       </div>
-                      <button 
-                        className="hover:text-red-500 transition-colors border p-1.5 bg-gray-100 rounded-full hover:border-red-500"
-                        onClick={(e) => e.preventDefault()}
+
+                      {/* Save Idea Button */}
+                      <button
+                        className={`hover:text-red-500 transition-colors border p-1.5 bg-gray-100 rounded-full hover:border-red-500 ${isIdeaSaved(idea.id) ? 'text-red-500 border-red-500' : ''}`}
+                        onClick={(e) => handleSaveIdea(e, idea.id)}
                       >
-                        <Heart className="w-5 h-5" />
+                        <Heart className="w-5 h-5" fill={isIdeaSaved(idea.id) ? "currentColor" : "none"} />
                       </button>
-                      <button 
+
+                      <button
                         className="hover:text-blue-500 transition-colors border p-1.5 bg-gray-100 rounded-full hover:border-blue-500"
                         onClick={(e) => e.preventDefault()}
                       >
                         <MessageCircleMore className="w-5 h-5" />
                       </button>
-                    
-                    <button 
-                      className="text-gray-600 hover:text-green-500 transition-colors border p-1.5 bg-gray-100 rounded-full hover:border-green-500"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      <MoreVertical className="w-5 h-5" />
-                    </button>
+
+                      <button
+                        className="text-gray-600 hover:text-green-500 transition-colors border p-1.5 bg-gray-100 rounded-full hover:border-green-500"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
                     </div>
                   </div>
                 </div>

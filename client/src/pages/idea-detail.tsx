@@ -1011,6 +1011,8 @@ interface IdeaCard {
 interface heroProps {
   idea: any;
   onhandleShare: (summary: string) => void;
+  averageRating: any;
+  totalReviews: any
 }
 
 const parseInvestment = (investment: any) => {
@@ -1025,47 +1027,41 @@ const parseInvestment = (investment: any) => {
   return investment.display || '₹0';
 };
 
-
 // Enhanced Hero Section matching the image design
-const HeroSection = memo(({ idea, onhandleShare }: heroProps) => (
+const HeroSection = memo(({ idea, onhandleShare, averageRating, totalReviews }: heroProps) => (
   <div className="bg-white">
     <div className="container mx-auto px-4 py-0 mt-3">
       {/* Hero Image with Overlays */}
-      <div className="relative w-full h-96 rounded-lg overflow-hidden border border-red  shadow-md">
-
+      <div className="relative w-full h-96 rounded-lg overflow-hidden border border-red shadow-md">
         <img
           src={idea?.images || idea?.heroImage || idea?.images?.[0]}
           alt={idea?.title}
-          className="w-full h-full object-cover "
+          className="w-full h-full object-cover"
         />
         {/* Investment Badge - Top Left */}
-        <div className="absolute top-4 bg-yellow-500 left-4  px-4 py-1 m-2 font-bold rounded-sm shadow-lg">
-          {/* <Badge className=" text-white-900  px-4 py-1  ">/ */}
+        <div className="absolute top-4 bg-yellow-500 left-4 px-4 py-1 m-2 font-bold rounded-sm shadow-lg">
           {parseInvestment(idea.investment)}
-          {/* </Badge> */}
         </div>
         {/* Category Badge - Top Right */}
-        <div className="absolute top-4 right-4 bg-gray-900 text-white px-4 py-1 m-2 fond-bold-300 rounded-sm shadow-lg">
-          {/* <Badge className="bg-blue-600 text-white text-sm px-3 py-1"> */}
+        <div className="absolute top-4 right-4 bg-gray-900 text-white px-4 py-1 m-2 font-bold rounded-sm shadow-lg">
           {idea?.category}
-          {/* </Badge> */}
         </div>
       </div>
 
       {/* Title and Meta Information */}
       <div className="py-6 ms-9">
-        <h1 className="text-3xl font-bold text-gray-900 mb-3 ">{idea?.title}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">{idea?.title}</h1>
 
         {/* Rating */}
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center">
             <span className="text-2xl font-bold text-gray-900">
-              {idea?.ratings_reviews?.average_rating || "0.0"}
+              {averageRating || "0.0"}
             </span>
             <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 ml-1" />
           </div>
           <span className="text-gray-500">
-            ({idea?.ratings_reviews?.total_reviews || 0} reviews)
+            ({totalReviews || 0} reviews)
           </span>
         </div>
 
@@ -1127,6 +1123,13 @@ export default function IdeaDetail() {
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Add state for reviews
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   useEffect(() => {
     const fetchIdea = async () => {
@@ -1136,6 +1139,25 @@ export default function IdeaDetail() {
         if (response.ok) {
           const data = await response.json();
           const ideaData = data?.ideas?.find((idea: any) => String(idea.id) === String(ideaId));
+          console.log("ideaData:", ideaData)
+          let avgValue = 0;
+          let totalReviewscount = 0;
+
+          if (Array.isArray(ideaData?.ratings_reviews)) {
+            const avgStr = ideaData.ratings_reviews.find((s: any) => s.startsWith("average_rating:"));
+            const totalStr = ideaData.ratings_reviews.find((s: any) => s.startsWith("total_reviews:"));
+
+            avgValue = avgStr ? parseFloat(avgStr.split(":")[1].trim()) : 0;
+            totalReviewscount = totalStr ? parseInt(totalStr.split(":")[1].trim()) : 0;
+            setAverageRating(avgValue);
+            setTotalReviews(totalReviewscount);
+          }
+          else {
+            console.log("idea", ideaData)
+            setAverageRating(ideaData?.ratings_reviews?.average_rating);
+            setTotalReviews(ideaData?.ratings_reviews?.total_reviews);
+          }
+
           setIdea(ideaData);
         } else {
           setError('Failed to fetch idea details');
@@ -1150,20 +1172,79 @@ export default function IdeaDetail() {
 
     fetchIdea();
   }, [ideaId]);
+  useEffect(() => {
+    console.log("averageRating", averageRating)
+  }, [averageRating])
 
-  const [activeTab, setActiveTab] = useState("overview");
-  
-const handleSubmitReview = () => {
-  if (selectedRating === 0) {
-    alert('Please select a rating');
-    return;
-  }
-  console.log('Review submitted:', { rating: selectedRating, comment });
-  // Add your API call here to submit the review
-  // Reset form
-  setSelectedRating(0);
-  setComment('');
-};
+  // Fetch reviews when the component loads or idea changes
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!idea) return;
+
+      setLoadingReviews(true);
+      try {
+        const response = await fetch(`/api/ideas/${idea.id}/reviews`);
+        if (response.ok) {
+          const data = await response.json();
+          setReviews(data.reviews || []);
+          // setAverageRating(data.averageRating || 0);
+          // setTotalReviews(data.totalReviews || 0);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+
+    fetchReviews();
+  }, [idea]);
+
+  // Update the review submission function
+  const handleSubmitReview = async () => {
+    if (selectedRating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+
+    if (!idea) return;
+
+    try {
+      const response = await fetch(`/api/ideas/${idea.id}/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating: selectedRating,
+          comment: comment
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Refresh reviews
+        const reviewsResponse = await fetch(`/api/ideas/${idea.id}/reviews`);
+        if (reviewsResponse.ok) {
+          const reviewsData = await reviewsResponse.json();
+          setReviews(reviewsData.reviews || []);
+          setAverageRating(reviewsData.averageRating || 0);
+          setTotalReviews(reviewsData.totalReviews || 0);
+        }
+
+        // Reset form
+        setSelectedRating(0);
+        setComment('');
+        alert('Review submitted successfully!');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to submit review');
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('An error occurred while submitting your review');
+    }
+  };
 
   const handleShare = async (summary: string) => {
     if (navigator.share) {
@@ -1215,11 +1296,11 @@ const handleSubmitReview = () => {
       {!loading && !error && idea && (
         <>
           {/* Hero Section */}
-          <HeroSection idea={idea} onhandleShare={handleShare} />
+          <HeroSection idea={idea} averageRating={averageRating} totalReviews={totalReviews} onhandleShare={handleShare} />
 
           {/* Tab Navigation */}
           <div className="bg-white border-b sticky top-16 z-40 ms-9">
-            <div className="container mx-auto px-4 ">
+            <div className="container mx-auto px-4">
               <div className="flex space-x-8 overflow-x-auto">
                 {[
                   { key: "overview", label: "Overview", icon: BookOpen },
@@ -1465,121 +1546,124 @@ const handleSubmitReview = () => {
                 </div>
               )}
 
-              {/* {activeTab === "reviews" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Star className="h-5 w-5 text-yellow-600" />
-                      Reviews & Ratings
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-8">
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <span className="text-4xl font-bold text-gray-900">
-                          {idea?.ratings_reviews?.average_rating || "0.0"}
-                        </span>
-                        <Star className="h-8 w-8 fill-yellow-400 text-yellow-400" />
-                      </div>
-                      <p className="text-gray-600">
-                        Based on {idea?.ratings_reviews?.total_reviews || 0} reviews
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )} */}
-                {activeTab === "reviews" &&  (
-                <Card>
-                  <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="h-5 w-5 text-gray-600" />
-                    Reviews ({idea?.ratings_reviews?.total_reviews || 0})
-                  </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                  {/* Rating Display */}
-                  <div className="py-6">
-                    <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-5xl font-bold text-gray-900">
-                      {idea?.ratings_reviews?.average_rating || "0.0"}
-                    </span>
-                    </div>
-                    <div className="flex items-center gap-1 mb-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                      key={star}
-                      className={`h-5 w-5 ${star <= Math.round(idea?.ratings_reviews?.average_rating)
-                        ? 'text-yellow-500 fill-yellow-500'
-                        : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                    </div>
-                    <p className="text-sm text-gray-600">
-                    Based on {idea?.ratings_reviews?.total_reviews || 0} reviews
-                    </p>
-                  </div>
-                  {/* Write a Review Section */}
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Write a Review</h3>
+              {activeTab === "reviews" && (
+                <div className="space-y-6">
+                  {/* Rating Summary */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Star className="h-5 w-5 text-yellow-600" />
+                        Reviews & Ratings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col md:flex-row items-center gap-8">
+                        <div className="text-center flex ">
+                          <div>
+                            <div className="text-5xl font-bold text-gray-900 mb-2">
+                              {averageRating.toFixed(1)}
 
-                    {/* Rating Input */}
-                    <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Rating
-                    </label>
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-6 w-6 cursor-pointer transition-all duration-200 hover:scale-110 ${star <= (hoverRating || selectedRating)
-                        ? 'text-yellow-500 fill-yellow-500'
-                        : 'text-gray-300'
-                        }`}
-                        onClick={() => setSelectedRating(star)}
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(0)}
-                      />
-                      ))}
-                      {selectedRating > 0 && (
-                      <span className="ml-2 text-sm text-gray-600">
-                        {selectedRating} star{selectedRating !== 1 ? 's' : ''}
-                      </span>
-                      )}
-                    </div>
-                    </div>
-                    {/* Comment Input */}
-                    <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Comment
-                    </label>
-                    <textarea
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="Share your thoughts about this idea..."
-                      className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    />
-                    </div>
-                    {/* Submit Button */}
-                    <button
-                    onClick={() => {
-                      const isLoggedIn = Boolean(localStorage.getItem('token') || localStorage.getItem('user'));
-                      if (!isLoggedIn) {
-                      // redirect to sign-in page if not logged in
-                      window.location.href = '/auth';
-                      return;
-                      }
-                      handleSubmitReview();
-                    }}
-                    className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    disabled={selectedRating === 0}
-                    >
-                    Submit Review
-                    </button>
-                  </div>
-                  </CardContent>
-                </Card>
-                )}
+                            </div>
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-5 w-5 ${star <= Math.round(averageRating)
+                                    ? 'text-yellow-500 fill-yellow-500'
+                                    : 'text-gray-300'
+                                    }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-gray-600 flex items-center">
+                            Based on {totalReviews}
+                          </p>
+                        </div>
+
+                        {/* Rating Distribution */}
+                        {/* <div className="flex-1">
+                          {[5, 4, 3, 2, 1].map((rating) => {
+                            const count = reviews.filter(r => r.rating === rating).length;
+                            const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+
+                            return (
+                              <div key={rating} className="flex items-center gap-2 mb-1">
+                                <span className="text-sm w-4">{rating}</span>
+                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-yellow-500"
+                                    style={{ width: `${percentage}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-sm text-gray-600 w-8">{count}</span>
+                              </div>
+                            );
+                          })}
+                        </div> */}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Write a Review */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Write a Review</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Rating
+                          </label>
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-6 w-6 cursor-pointer transition-all duration-200 hover:scale-110 ${star <= (hoverRating || selectedRating)
+                                  ? 'text-yellow-500 fill-yellow-500'
+                                  : 'text-gray-300'
+                                  }`}
+                                onClick={() => setSelectedRating(star)}
+                                onMouseEnter={() => setHoverRating(star)}
+                                onMouseLeave={() => setHoverRating(0)}
+                              />
+                            ))}
+                            {selectedRating > 0 && (
+                              <span className="ml-2 text-sm text-gray-600">
+                                {selectedRating} star{selectedRating !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Comment
+                          </label>
+                          <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder="Share your thoughts about this idea..."
+                            className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                          />
+                        </div>
+
+                        <button
+                          onClick={handleSubmitReview}
+                          className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          disabled={selectedRating === 0}
+                        >
+                          Submit Review
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                </div>
+              )}
+
               {activeTab === "ai-analysis" && (
                 <Card>
                   <CardHeader>

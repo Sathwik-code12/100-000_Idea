@@ -465,7 +465,7 @@ export default function YourIdeas() {
                             <FormItem>
                               <FormLabel>Phone Number *</FormLabel>
                               <FormControl>
-                                <Input type="tel" placeholder="9876543210" {...field} />
+                                <Input type="tel" placeholder="1234567890" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -917,7 +917,7 @@ export default function YourIdeas() {
                       <FormItem>
                         <FormLabel>Phone Number *</FormLabel>
                         <FormControl>
-                          <Input type="tel" placeholder="9876543210" {...field} />
+                          <Input type="tel" placeholder="1234567890" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

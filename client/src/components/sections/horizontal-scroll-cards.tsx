@@ -145,12 +145,17 @@
 // }
 
 // horizontal-scroll-cards.tsx
+// horizontal-scroll-cards.tsx
 import { TrendingUp, Zap, Target, DollarSign, ArrowLeft, ArrowRight } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 
-export default function FeaturedIdeasCards() {
+// Add prop interface
+interface HorizontalScrollCardsProps {
+  featuredIdeas: IdeaCard[];
+}
+
+export default function HorizontalScrollCards({ featuredIdeas }: HorizontalScrollCardsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {
@@ -165,62 +170,39 @@ export default function FeaturedIdeasCards() {
     }
   };
 
-  const featuredCards = [
-    {
-      id: "13",
-      title: "Mobile Food Truck Business",
-      image: "https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=600&h=400&fit=crop",
-      category: "Fashion",
-      badge: "Idea of the Day",
-      investment: "₹5-10 Lakhs",
-      difficulty: "Easy",
-      description: "Eco-friendly fashion brand using recycled materials and sustainable manufacturing processes to create trendy clothing for...",
-      rating: 4.8
-
-    },
-    {
-      id: "2",
-      title: "Smart Home Automation for Senior Citizens",
-      image: "https://images.unsplash.com/photo-1558002038-1055907df827?w=600&h=400&fit=crop",
-      category: "Technology",
-      investment: "₹5-10 Lakhs",
-      difficulty: "MEDIUM",
-      description: "IoT-based home automation system specifically designed for elderly people....",
-      rating: 4.8
-    },
-    {
-      id: "6",
-      title: "Renewable Energy Microgrid Solutions",
-      image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&h=400&fit=crop",
-      category: "Energy",
-      investment: "Above ₹1 Crore",
-      difficulty: "HARD",
-      description: "Smart microgrid systems that integrate solar, wind, and battery storage to provid...",
-      rating: 3.3
-    },
-    {
-      id: "3",
-      title: "Precision Agriculture IoT Platform",
-      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&h=400&fit=crop",
-      category: "Agriculture",
-      investment: "₹25-50 Lakhs",
-      difficulty: "MEDIUM",
-      description: "Comprehensive IoT platform for precision agriculture that monitors soil conditions....",
-      rating: 3.4
+  // Helper functions to parse data
+  const parseCategory = (category: string) => {
+    try {
+      const parsed = JSON.parse(category);
+      return Array.isArray(parsed) ? parsed.join(', ') : category;
+    } catch (e) {
+      return category;
     }
-  ];
+  };
+
+  const parseInvestment = (investment: any) => {
+    if (typeof investment === 'string') {
+      try {
+        const parsed = JSON.parse(investment);
+        return parsed.display || investment;
+      } catch (e) {
+        return investment;
+      }
+    }
+    return investment.display || '₹0';
+  };
 
   const getDifficultyColor = (difficulty: string) => {
-    switch(difficulty) {
-      case "MEDIUM": return "bg-yellow-400";
-      case "HARD": return "bg-red-500";
+    switch(difficulty?.toLowerCase()) {
+      case "medium": return "bg-yellow-400";
+      case "hard": return "bg-red-500";
       default: return "bg-green-500";
     }
   };
 
-   return (
+  return (
     <section className="bg-gray-50 py-12">
-      <div className=" px-2 mx-auto max-w-7xl  pb-8">
+      <div className="px-2 mx-auto max-w-7xl pb-8">
         <h2 className="text-2xl text-center font-bold text-gray-900 mb-8">
           Discover Our Featured Trending Opportunities
         </h2>
@@ -233,7 +215,6 @@ export default function FeaturedIdeasCards() {
             className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 z-20 border border-gray-900 bg-yellow-400 hover:bg-yellow-500 shadow-lg rounded-full w-12 h-12"
             onClick={scrollLeft}
           >
-            {/* <ChevronLeft className="h-6 w-6 text-gray-900" /> */}
             <ArrowLeft className="h-6 w-6 text-gray-900" />
           </Button>
 
@@ -244,7 +225,6 @@ export default function FeaturedIdeasCards() {
             className="absolute right-0 top-1/2 transform -translate-y-1/2 border border-gray-900 translate-x-4 z-20 bg-yellow-400 hover:bg-yellow-500 shadow-lg rounded-full w-12 h-12"
             onClick={scrollRight}
           >
-            {/* <ChevronRight className="h-6 w-6 text-gray-900" /> */}
             <ArrowRight className="h-6 w-6 text-gray-900" />
           </Button>
 
@@ -254,34 +234,34 @@ export default function FeaturedIdeasCards() {
             className="flex gap-6 overflow-x-auto scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {featuredCards.map((card, index) => (
+            {featuredIdeas.map((idea, index) => (
               <a 
-                key={index} 
-                href={`/idea/${card.id}`}
+                key={idea.id} 
+                href={`/idea/${idea.id}`}
                 className="block"
               >
                 <div className="flex-shrink-0 w-80 bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   {/* Investment and Difficulty Badges */}
                   <div className="relative">
                     <img
-                      src={card.image}
-                      alt={card.title}
+                      src={idea.images?.[0] || '/placeholder-image.jpg'}
+                      alt={idea.title}
                       className="w-full h-48 object-cover"
                     />
                     <div className="absolute top-0 left-0">
                       <div className="bg-yellow-400 text-gray-900 px-6 py-3 rounded-br-3xl text-base font-bold shadow-md">
-                        {card.investment}
+                        {parseInvestment(idea.investment)}
                       </div>
                     </div>
                     <div className="absolute top-0 right-0">
-                      <div className={`${getDifficultyColor(card.difficulty)} text-white px-6 py-3 rounded-bl-3xl text-base font-bold shadow-md`}>
-                        {card.difficulty}
+                      <div className={`${getDifficultyColor(idea.difficulty)} text-white px-6 py-3 rounded-bl-3xl text-base font-bold shadow-md`}>
+                        {idea.difficulty}
                       </div>
                     </div>
-                    {card.badge && (
+                    {index === 0 && (
                       <div className="absolute bottom-4 left-4">
                         <span className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-full text-sm font-bold shadow-md">
-                          {card.badge}
+                          Idea of the Day
                         </span>
                       </div>
                     )}
@@ -289,62 +269,44 @@ export default function FeaturedIdeasCards() {
 
                   {/* Card Content */}
                   <div className="p-6">
-                    <p className="text-sm text-gray-500 mb-2">{card.category}</p>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3">{card.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{card.description}</p>
+                    <p className="text-sm text-gray-500 mb-2">{parseCategory(idea.category)}</p>
+                    <h3 className="text-xl font-bold text-gray-900 mb-3">{idea.title}</h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{idea.description}</p>
                     
                     <div className="flex gap-2">
-                      <span className="text-lg font-bold text-gray-900 me-5">{card.rating}</span>
-                        <button className="w-10 h-10 ms-5 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <Target className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <DollarSign className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <TrendingUp className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <Zap className="w-5 h-5 text-gray-900" />
-                        </button>
-                      </div>
+                      <span className="text-lg font-bold text-gray-900 me-5">
+                        {idea.ratings_reviews?.average_rating || '4.0'}
+                      </span>
+                      <button className="w-10 h-10 ms-5 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                        <Target className="w-5 h-5 text-gray-900" />
+                      </button>
+                      <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                        <DollarSign className="w-5 h-5 text-gray-900" />
+                      </button>
+                      <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                        <TrendingUp className="w-5 h-5 text-gray-900" />
+                      </button>
+                      <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
+                        <Zap className="w-5 h-5 text-gray-900" />
+                      </button>
+                    </div>
 
-                    {/* Rating and Actions */}
-                    <div className="flex items-center justify-between">
-                      
-                      <div className="flex items-center gap-2">
-                        {/* {card.ratingCount && (
-                          <div className="flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                            <span>N</span>
-                            <span>{card.ratingCount}</span>
-                            <button className="ml-1">×</button>
-                          </div>
-                        )} */}
-                        <div className="flex gap-1">
-                          
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} className={`text-2xl ${i < Math.floor(card.rating) ? 'text-yellow-400' : 'text-gray-300'}`}>
-                              ★
-                            </span>
-                          ))}
-                        </div>
-                        
+                    {/* Rating */}
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <span 
+                            key={i} 
+                            className={`text-2xl ${
+                              i < Math.floor(idea.ratings_reviews?.average_rating || 4) 
+                                ? 'text-yellow-400' 
+                                : 'text-gray-300'
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
                       </div>
-                      
-                      {/* <div className="flex gap-2">
-                        <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <Target className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <DollarSign className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <TrendingUp className="w-5 h-5 text-gray-900" />
-                        </button>
-                        <button className="w-10 h-10 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
-                          <Zap className="w-5 h-5 text-gray-900" />
-                        </button>
-                      </div> */}
                     </div>
                   </div>
                 </div>
