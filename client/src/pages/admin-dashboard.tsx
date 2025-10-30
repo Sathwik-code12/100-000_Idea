@@ -569,7 +569,7 @@ export default function AdminDashboard() {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/admin/logout", {
+      const response = await fetch("/api/logout", {
         method: "POST",
       });
 
@@ -577,7 +577,7 @@ export default function AdminDashboard() {
         throw new Error("Logout failed");
       }
 
-      return response.json();
+      // return response.json();
     },
     onSuccess: () => {
       toast({

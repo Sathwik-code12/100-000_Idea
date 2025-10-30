@@ -42,6 +42,7 @@ export const submittedIdeas = pgTable("submitted_ideas", {
   status: text("status").default("pending"), // pending, reviewing, approved, rejected
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdBy:varchar("createdBy"),
 }, (table) => ({
   statusIdx: index("ideas_status_idx").on(table.status),
   categoryIdx: index("ideas_category_idx").on(table.category),
@@ -174,7 +175,9 @@ export const insertSubmittedIdeaSchema = createInsertSchema(submittedIdeas, {
   knowledge: z.string().min(1, "Please select your knowledge level"),
   experience: z.string().min(1, "Please select your experience level"),
   operations: z.string().optional(),
-}).omit({ id: true, createdAt: true, updatedAt: true, status: true, tags: true });
+  createdBy:z.string().optional,
+  updatedAt:z.date().optional
+}).omit({ id: true, createdAt: true,  status: true, tags: true });
 
 export const insertCampaignSchema = createInsertSchema(campaigns, {
   id: z.string(),
