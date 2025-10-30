@@ -142,17 +142,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEmailSubscribers(email_id: emailSubscribers): Promise<emailSubscribers> {
-    const data:any={
-      id:uuidv4() as string,
-      email_id:email_id
+    const data: any = {
+      id: uuidv4() as string,
+      email_id: email_id
     }
     const [subscribed] = await db.insert(emailSubscribers).values(data).returning();
     return subscribed;
   }
   // Submitted Ideas methods
   async createSubmittedIdea(idea: InsertSubmittedIdea & { tags: string[] }): Promise<SubmittedIdea> {
-    const data:any={
-      id:uuidv4() as string,
+    const data: any = {
+      id: uuidv4() as string,
       ...idea,
       tags: idea.tags
     }
@@ -165,7 +165,25 @@ export class DatabaseStorage implements IStorage {
   async getSubmittedIdeas(): Promise<SubmittedIdea[]> {
     return await db.select().from(submittedIdeas);
   }
+  async getSubmittedIdeasByUser(user: any): Promise<SubmittedIdea[]> {
+    return await db.select().from(submittedIdeas).where(eq(submittedIdeas.createdBy, user.id));
+  }
 
+  async updateSubmittedIdea(id: string, data: Partial<InsertSubmittedIdea> & { tags?: string[] }): Promise<SubmittedIdea> {
+    const [updatedIdea] = await db
+      .update(submittedIdeas)
+      .set({
+        ...data,
+        updatedAt: new Date()
+      })
+      .where(eq(submittedIdeas.id, id))
+      .returning();
+    return updatedIdea;
+  }
+
+  async deleteSubmittedIdea(id: string): Promise<void> {
+    await db.delete(submittedIdeas).where(eq(submittedIdeas.id, id));
+  }
   async getSubmittedIdeaById(id: string): Promise<SubmittedIdea | undefined> {
     const [idea] = await db.select().from(submittedIdeas).where(eq(submittedIdeas.id, id));
     return idea;
@@ -182,7 +200,7 @@ export class DatabaseStorage implements IStorage {
   // Campaign methods
   async createCampaign(userId: string, campaign: Partial<InsertCampaign>): Promise<Campaign> {
     const campaignData: InsertCampaign = {
-      id:uuidv4(),
+      id: uuidv4(),
       userId,
       title: campaign.title || "",
       description: campaign.description || "",
@@ -203,9 +221,9 @@ export class DatabaseStorage implements IStorage {
       documents: (campaign.documents as { name: string, url: string }[]) || [],
       socialLinks: (campaign.socialLinks as { platform: string, url: string }[]) || [],
     };
-    const data:any={
-      id:uuidv4() as string,
-      campaignData:campaignData
+    const data: any = {
+      id: uuidv4() as string,
+      campaignData: campaignData
     }
     const [newCampaign] = await db.insert(campaigns).values([campaignData]).returning();
     return newCampaign;
@@ -235,7 +253,7 @@ export class DatabaseStorage implements IStorage {
   // Investment methods
   async createInvestment(investment: Partial<InsertInvestment> & { campaignId: string, investorId: string }): Promise<Investment> {
     const investmentData: InsertInvestment = {
-      id:uuidv4() as string,
+      id: uuidv4() as string,
       campaignId: investment.campaignId,
       investorId: investment.investorId,
       amount: investment.amount || "0",
@@ -260,7 +278,7 @@ export class DatabaseStorage implements IStorage {
   // Payment transaction methods
   async createPaymentTransaction(transaction: Partial<InsertPaymentTransaction> & { userId: string }): Promise<PaymentTransaction> {
     const transactionData: InsertPaymentTransaction = {
-      id:uuidv4() as string,
+      id: uuidv4() as string,
       userId: transaction.userId,
       amount: transaction.amount || "0",
       type: transaction.type || ""
@@ -281,7 +299,7 @@ export class DatabaseStorage implements IStorage {
   // AI Generated Ideas methods
   async createAiGenerationSession(userId: string, session: Partial<InsertAiGenerationSession>): Promise<AiGenerationSession> {
     const sessionData: InsertAiGenerationSession = {
-      id:uuidv4() as string,
+      id: uuidv4() as string,
       userId,
       userInput: session.userInput || "",
       industry: session.industry || undefined,
@@ -304,7 +322,7 @@ export class DatabaseStorage implements IStorage {
 
   async createAiGeneratedIdea(idea: Partial<InsertAiGeneratedIdea> & { userId: string, sessionId: string }): Promise<AiGeneratedIdea> {
     const ideaData: InsertAiGeneratedIdea = {
-      id:uuidv4(),
+      id: uuidv4(),
       userId: idea.userId,
       sessionId: idea.sessionId,
       title: idea.title || "",
@@ -329,28 +347,28 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(aiGeneratedIdeas).where(eq(aiGeneratedIdeas.userId, userId));
   }
 
-async search(search: string, category?: string, location?: string): Promise<PlatformIdea[]> {
+  async search(search: string, category?: string, location?: string): Promise<PlatformIdea[]> {
     const conditions = [];
 
     // Always search in title
     if (search.trim()) {
-        conditions.push(ilike(platformIdeas.title, `%${search}%`));
+      conditions.push(ilike(platformIdeas.title, `%${search}%`));
     }
 
     // Add category if provided
     if (category && category.length > 0) {
-        conditions.push(eq(platformIdeas.category, category));
+      conditions.push(eq(platformIdeas.category, category));
     }
 
     // Add location if provided
     if (location && location.length > 0) {
-        conditions.push(eq(platformIdeas.location, location));
+      conditions.push(eq(platformIdeas.location, location));
     }
 
     return await db.select()
-        .from(platformIdeas)
-        .where(conditions.length > 0 ? and(...conditions) : undefined);
-}
+      .from(platformIdeas)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+  }
 
   async getUserAiSessions(userId: string): Promise<AiGenerationSession[]> {
     return await db.select().from(aiGenerationSessions).where(eq(aiGenerationSessions.userId, userId));

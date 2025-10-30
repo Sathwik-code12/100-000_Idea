@@ -78,19 +78,19 @@ export default function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/my-ideas" className="cursor-pointer flex w-full items-center py-2">
+                      <Link href="/submit-idea" className="cursor-pointer flex w-full items-center py-2">
                         <IdeaIcon className="h-4 w-4 mr-3 text-yellow-500" />
                         <span className="text-sm">Your Ideas</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/saved-ideas" className="cursor-pointer flex w-full items-center py-2">
+                      <Link href="#" className="cursor-pointer flex w-full items-center py-2">
                         <Bookmark className="h-4 w-4 mr-3 text-gray-600" />
                         <span className="text-sm">My Saved Ideas</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/settings" className="cursor-pointer flex w-full items-center py-2">
+                      <Link href="#" className="cursor-pointer flex w-full items-center py-2">
                         <Settings className="h-4 w-4 mr-3 text-gray-600" />
                         <span className="text-sm">Settings</span>
                       </Link>

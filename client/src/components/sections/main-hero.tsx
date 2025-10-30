@@ -254,12 +254,13 @@
 // main-hero.tsx
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Star, Users, TrendingUp, ChevronLeft, ChevronRight, Filter, Menu, Search, X } from "lucide-react";
+import { Star, Users, TrendingUp, ChevronLeft, ChevronRight, Filter, Menu, Search, X, Crown, Shield, Sparkles, Users2, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequestWithPage } from "@/lib/queryClient";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface IdeaCard {
   id: string;
@@ -283,34 +284,12 @@ interface MainHeroProps {
   onClearSearch?: () => void;
 }
 
-const slides = [
-  {
-    badge: "10000 IDEA",
-    title: "WELCOME DAY MANI",
-    description: "Collect your First day rewards at Reward Shelf and start your entrepreneurial journey today!",
-    buttonText: "Earn My Icoins"
-  },
-  {
-    badge: "SPECIAL OFFER",
-    title: "UNLOCK PREMIUM IDEAS",
-    description: "Get access to exclusive business ideas and strategies used by successful entrepreneurs!",
-    buttonText: "Explore Now"
-  },
-  {
-    badge: "NEW FEATURE",
-    title: "AI IDEA GENERATOR",
-    description: "Use our AI-powered tool to generate personalized business ideas based on your skills!",
-    buttonText: "Try It Now"
-  }
-];
-
 export default function MainHero({ onSearchResults, onClearSearch }: MainHeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [showNoResults, setShowNoResults] = useState(false);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
@@ -347,13 +326,10 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
             location: location,
           },
         });
-        console.log('Fetched search response:', response.results);
 
-        // Check if results are empty
         const hasResults = response.results && response.results.length > 0;
         setShowNoResults(!hasResults);
 
-        // Update the parent component with search results
         if (onSearchResults) {
           onSearchResults(response.results || []);
         }
@@ -370,25 +346,19 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
       }
     },
   });
-  const { data: banner, isLoading: bannersLoading } = useQuery({
+
+  const { data: banner } = useQuery({
     queryKey: ["/api/admin/banners"],
   });
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+
+  const handleSearch = () => {
     if (!searchTerm.trim()) return;
 
-    console.log("Searching for:", { searchTerm });
-
-    // Reset pagination to page 1 for new search
     setUsersPagination(prev => ({ ...prev, page: 1 }));
-
-    // Invalidate any previous search queries
     queryClient.invalidateQueries({ queryKey: ["searchResults"] });
 
-    // Execute search with current parameters (only search term, no category/location filters)
     searchMutation.mutate({
       searchstr: searchTerm,
-
       page: 1
     });
   };
@@ -405,12 +375,11 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSearch(e);
+      handleSearch();
     }
   };
 
   const nextSlide = () => {
-    console.log("ll",)
     if (!banner?.banners?.length) return;
     setCurrentSlide((prev) => (prev + 1) % banner.banners.length);
   };
@@ -420,9 +389,8 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
     setCurrentSlide((prev) => (prev - 1 + banner.banners.length) % banner.banners.length);
   };
 
-
   useEffect(() => {
-    if (!banner?.banners?.length) return; // run only after data loads
+    if (!banner?.banners?.length) return;
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banner.banners.length);
@@ -430,6 +398,7 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
 
     return () => clearInterval(interval);
   }, [banner?.banners?.length]);
+
   return (
     <section className="bg-gradient-to-br from-yellow-400 via-yellow-400 to-yellow-500 py-16 relative overflow-hidden">
       {/* Floating colored circles */}
@@ -453,15 +422,18 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
             <p className="text-lg text-gray-800 mb-8 leading-relaxed">
               Find the perfect business opportunity that matches your skills and investment capacity
             </p>
-            <a href="/auth">
-              <Button className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2">
-                Get Started
-                <span className="text-xl">→</span>
-              </Button></a>
+
+            <Button
+              onClick={() => setIsPremiumModalOpen(true)}
+              className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2"
+            >
+              Get Started
+              <span className="text-xl">→</span>
+            </Button>
 
             {/* Stats */}
             <div className="flex flex-wrap gap-8 mt-10 text-sm text-gray-800">
-              <div className="flex items-center gap-2  border-gray-300  p-2 rounded-full bg-yellow-500">
+              <div className="flex items-center gap-2 border-gray-300 p-2 rounded-full bg-yellow-500">
                 <Star className="w-5 h-5 fill-blue-700 text-blue-700" />
                 <span className="font-semibold">4.9/5 Rating</span>
               </div>
@@ -481,7 +453,7 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
             <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden min-h-[320px] flex flex-col justify-center">
               {/* Decorative dots */}
               <div className="absolute top-6 right-6 flex gap-1.5">
-                {banner?.banners?.map((_, index) => (
+                {banner?.banners?.map((_: any, index: number) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
@@ -505,7 +477,7 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
                 <ChevronRight className="w-6 h-6" />
               </button>
 
-              {/* Decorative circles in background */}
+              {/* Decorative circles */}
               <div className="absolute top-12 left-12 w-6 h-6 bg-yellow-400/20 rounded-full animate-pulse"></div>
               <div className="absolute bottom-16 right-16 w-4 h-4 bg-yellow-400/20 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
               <div className="absolute bottom-12 left-20 w-3 h-3 bg-yellow-400/20 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
@@ -530,17 +502,6 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
                   {banner?.banners[currentSlide]?.buttonText}
                   <span className="text-lg">→</span>
                 </Button>
-
-                {/* <a
-                  href={banner?.banners[currentSlide]?.redirectUrl || "#"}
-                  // target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 px-7 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 text-base flex items-center gap-2 mx-auto">
-                    {banner?.banners[currentSlide]?.buttonText || "Learn More"}
-                    <span className="text-lg">→</span>
-                  </Button>
-                </a> */}
               </div>
             </div>
           </div>
@@ -549,23 +510,21 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
         {/* Search Bar */}
         <div className="mt-16 flex justify-center">
           <div className="max-w-4xl w-full relative">
-            {/* Upgrade Banner - Exact diagonal ribbon style */}
+            {/* Upgrade Banner */}
             <div className="absolute -top-3 -left-6 z-10">
               <div className="bg-gradient-to-r from-blue-950 to-blue-700 text-white px-8 py-2.5 text-sm font-bold shadow-xl transform -rotate-2 origin-left">
-                <span className="inline-block transform rotate-1">No free views left — <span className="text-yellow-300">Upgrade now</span></span>
-                {/* Triangle shadow effect */}
+                <span className="inline-block transform rotate-1">
+                  No free views left — <span className="text-yellow-300">Upgrade now</span>
+                </span>
                 <div className="absolute -bottom-2 left-0 w-0 h-0 border-l-8 border-l-transparent border-t-8 border-t-blue-950 transform -rotate-12"></div>
               </div>
             </div>
 
-            {/* Search Form */}
-
-            <form onSubmit={handleSearch} className="bg-white rounded-lg shadow-3xl p-2 flex items-center gap-2 mt-2 border border-gray-200">
-              {/* Search Icon */}
+            {/* Search Bar */}
+            <div className="bg-white rounded-lg shadow-3xl p-2 flex items-center gap-2 mt-2 border border-gray-200">
               <div className="w-full border border-gray-100 shadow-md rounded-full p-2 flex items-center gap-3">
                 <Search className="w-5 h-5 text-yellow-500 flex-shrink-0 ml-3" />
 
-                {/* Input */}
                 <Input
                   type="text"
                   placeholder="Search business ideas, categories, or keywords..."
@@ -576,7 +535,6 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
                   disabled={usersLoading}
                 />
 
-                {/* Clear Button (shown when there's text or has searched) */}
                 {(searchTerm || hasSearched) && (
                   <Button
                     type="button"
@@ -585,55 +543,26 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
                     className="p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200 border-0"
                     disabled={usersLoading}
                   >
-                    <X className="w-4 h-4 text-gray-500" />
+                    <X className="w-4 w-4 text-gray-500" />
                   </Button>
                 )}
-
-                {/* Search Button */}
-                {/* <Button
-                type="submit"
-                disabled={usersLoading || !searchTerm.trim()}
-                className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
-              >
-                {usersLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
-                    <span>Searching...</span>
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4" />
-                    <span>Search</span>
-                  </>
-                )}
-              </Button>
-               */}
               </div>
-              {/* Filter Icon */}
-              <button
-                type="button"
-                className="p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200"
-              >
+
+              <button type="button" className="p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200">
                 <Filter className="w-5 h-5 text-gray-500" />
               </button>
 
-              {/* Menu Icon */}
-              <button
-                type="button"
-                className="p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200"
-              >
+              <button type="button" className="p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200">
                 <Menu className="w-5 h-5 text-gray-500" />
               </button>
-            </form>
+            </div>
 
             {/* Error Alert */}
             {usersError && (
               <div className="mt-4">
                 <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {usersError}
-                  </AlertDescription>
+                  <AlertDescription>{usersError}</AlertDescription>
                 </Alert>
               </div>
             )}
@@ -652,6 +581,103 @@ export default function MainHero({ onSearchResults, onClearSearch }: MainHeroPro
           </div>
         </div>
       </div>
+
+      {/* Premium Upgrade Modal */}
+      <Dialog open={isPremiumModalOpen} onOpenChange={setIsPremiumModalOpen}>
+        <DialogContent className="max-w-xl p-0 overflow-auto    rounded-2xl shadow-2xl border border-gray-100">
+          <div className="flex flex-col items-center text-center">
+            {/* Header Section */}
+            <div className="w-full bg-white pt-2 px-6">
+              <div className="w-14 h-14 bg-yellow-400 rounded-2xl flex items-center justify-center mx-auto shadow-md mb-4">
+                <Crown className="h-7 w-7 text-blue-900" />
+              </div>
+
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                Unlock Premium Access
+              </h2>
+              <p className="text-gray-600 text-sm max-w-sm mx-auto mb-4">
+                You've reached your free limit of 5 featured ideas. Upgrade to Premium for unlimited access to our complete library.
+              </p>
+
+              <div className="inline-block bg-yellow-400 text-blue-900 text-xs font-semibold rounded-full px-3 py-1">
+                Limited Time Offer
+              </div>
+            </div>
+
+            {/* Features Grid */}
+            <div className="grid grid-cols-2 gap-3 mt-4 px-6 w-full">
+              <div className="flex items-start gap-2 p-3 border rounded-xl border-gray-200 hover:border-blue-300 transition">
+                <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-blue-700" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-sm font-semibold text-slate-900">Unlimited Access</h3>
+                  <p className="text-xs text-gray-600">View all business ideas without restrictions</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 p-3 border rounded-xl border-gray-200 hover:border-blue-300 transition">
+                <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Crown className="h-5 w-5 text-blue-700" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-sm font-semibold text-slate-900">Premium Content</h3>
+                  <p className="text-xs text-gray-600">Exclusive high-value business opportunities</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 p-3 border rounded-xl border-gray-200 hover:border-blue-300 transition">
+                <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-blue-700" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-sm font-semibold text-slate-900">Priority Support</h3>
+                  <p className="text-xs text-gray-600">24/7 expert guidance and mentorship</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 p-3 border rounded-xl border-gray-200 hover:border-blue-300 transition">
+                <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users2 className="h-5 w-5 text-blue-700" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-sm font-semibold text-slate-900">Community Access</h3>
+                  <p className="text-xs text-gray-600">Connect with successful entrepreneurs</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pricing Section */}
+            <div className="mt-8 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-xl w-11/12 mx-auto py-3 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-300 opacity-20 rounded-full -mr-10 -mt-5"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 bg-yellow-300 opacity-20 rounded-full -ml-8 -mb-4"></div>
+
+              <div className="relative z-10">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <span className="text-3xl font-bold text-blue-900">₹999</span>
+                  <span className="text-lg text-blue-800 line-through">₹2999</span>
+                </div>
+                <p className="text-blue-900 font-semibold text-sm">One-time payment • Lifetime access</p>
+                <p className="text-blue-900 text-sm font-medium mt-1">67% OFF - Limited Time</p>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="w-full px-6 mt-2">
+              <Button className="w-full bg-gradient-to-r from-blue-900 to-blue-700 hover:from-blue-800 hover:to-blue-600 text-white py-4 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2">
+                <Crown className="h-4 w-4" />
+                Upgrade to Premium
+              </Button>
+
+              <p className="text-center text-xs text-gray-600 mt-3 mb-5">
+                30-day money-back guarantee • Secure payment
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+
     </section>
   );
 }

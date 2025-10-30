@@ -8,7 +8,7 @@ import { setupCampaignRoutes } from "./campaign-api.js";
 import { registerAiRoutes } from "./ai-routes.js";
 import adminRoutes from "./admin-routes.js";
 import { AdminAuthService } from "./admin-auth.js";
-
+import { User as SchemaUser } from "../shared/schema.js";
 // Simple in-memory cache for better performance
 const cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
 
@@ -79,52 +79,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/search", async (req, res) => {
     try {
-        const { search = "", category = "", location = "" } = req.query;
+      const { search = "", category = "", location = "" } = req.query;
 
-        console.log("Search query received:", { search, category, location });
+      console.log("Search query received:", { search, category, location });
 
-        // Validate inputs
-        if (typeof search !== "string" || typeof category !== "string" || typeof location !== "string") {
-            return res.status(400).json({
-                success: false,
-                message: "Search, category, and location must be strings",
-            });
-        }
-
-        // Trim inputs safely
-        const cleanSearch = search.trim();
-        const cleanCategory = category.trim();
-        const cleanLocation = location.trim();
-
-        // Optional: check for empty search parameters
-        if (!cleanSearch && !cleanCategory && !cleanLocation) {
-            return res.status(400).json({
-                success: false,
-                message: "At least one search parameter is required",
-            });
-        }
-
-        // Call your storage search function
-        const results = await storage.search(cleanSearch, cleanCategory, cleanLocation);
-
-        return res.json({
-            success: true,
-            results,
+      // Validate inputs
+      if (typeof search !== "string" || typeof category !== "string" || typeof location !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "Search, category, and location must be strings",
         });
+      }
+
+      // Trim inputs safely
+      const cleanSearch = search.trim();
+      const cleanCategory = category.trim();
+      const cleanLocation = location.trim();
+
+      // Optional: check for empty search parameters
+      if (!cleanSearch && !cleanCategory && !cleanLocation) {
+        return res.status(400).json({
+          success: false,
+          message: "At least one search parameter is required",
+        });
+      }
+
+      // Call your storage search function
+      const results = await storage.search(cleanSearch, cleanCategory, cleanLocation);
+
+      return res.json({
+        success: true,
+        results,
+      });
     } catch (error) {
-        console.error("Error performing search:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
-        });
+      console.error("Error performing search:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
     }
-});
+  });
 
 
   // Submit idea endpoint with optimizations
   app.post("/api/submit-idea", async (req, res) => {
     const startTime = Date.now();
     try {
+      if (!req.isAuthenticated()) {
+        return res.sendStatus(401);
+      }
+      const user = req.user as SchemaUser;
       // Validate the request body and ensure tags is an array
       const validatedData = insertSubmittedIdeaSchema.parse(req.body);
       const { tags = [], ...ideaData } = req.body;
@@ -132,15 +136,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create the idea in storage
       const submittedIdea = await storage.createSubmittedIdea({
         ...validatedData,
-        tags: Array.isArray(tags) ? tags : []
+        tags: Array.isArray(tags) ? tags : [],
+        createdBy: user.id
       });
 
       // Invalidate ideas cache since we added a new one
-      cache.delete("submitted-ideas");
+      // cache.delete("submitted-ideas");
 
-      // Set security headers
-      res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("X-Frame-Options", "DENY");
+      // // Set security headers
+      // res.setHeader("X-Content-Type-Options", "nosniff");
+      // res.setHeader("X-Frame-Options", "DENY");
 
       res.status(201).json({
         success: true,
@@ -272,7 +277,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  app.get("/api/user/submitted-ideas", async (req, res) => {
+    const startTime = Date.now();
+    // const cacheKey = "submitted-ideas";
 
+    try {
+      // Check cache first
+      // const cachedIdeas = getFromCache(cacheKey);
+      // if (cachedIdeas) {
+      //   res.setHeader("X-Cache", "HIT");
+      //   return res.json({
+      //     success: true,
+      //     ideas: cachedIdeas,
+      //     _meta: {
+      //       processTime: Date.now() - startTime,
+      //       cached: true
+      //     }
+      //   });
+      // }
+      if (!req.isAuthenticated()) {
+        return res.sendStatus(401);
+      }
+      const user = req.user as SchemaUser;
+      const ideas = await storage.getSubmittedIdeasByUser(user);
+
+      // Cache the result for 5 minutes
+      // setCache(cacheKey, ideas, 300000);
+
+      // res.setHeader("X-Cache", "MISS");
+      // res.setHeader("Cache-Control", "public, max-age=300"); // Client-side cache for 5 minutes
+
+      res.json({
+        success: true,
+        ideas,
+        _meta: {
+          processTime: Date.now() - startTime,
+          cached: false
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching ideas:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        _meta: {
+          processTime: Date.now() - startTime
+        }
+      });
+    }
+  });
   // Get all submitted ideas with caching
   app.get("/api/platformideas", async (req, res) => {
     const startTime = Date.now();
@@ -320,7 +373,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  // Update Idea Endpoint
+  app.put("/api/user/submitted-ideas/:id", async (req, res) => {
+    const startTime = Date.now();
+    try {
+      if (!req.isAuthenticated()) {
+        return res.sendStatus(401);
+      }
 
+      const user = req.user as SchemaUser;
+      const ideaId = req.params.id;
+
+      // Check if the idea exists and belongs to the user
+      const existingIdea = await storage.getSubmittedIdeaById(ideaId);
+      if (!existingIdea || existingIdea.createdBy !== user.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to update this idea"
+        });
+      }
+
+      // Validate the request body
+      const validatedData = insertSubmittedIdeaSchema.partial().parse(req.body);
+      const { tags = [], ...ideaData } = req.body;
+
+      // Update the idea
+      const updatedIdea = await storage.updateSubmittedIdea(ideaId, {
+        ...validatedData,
+        tags: Array.isArray(tags) ? tags : [],
+        updatedAt: new Date()
+      });
+
+      // Invalidate cache
+      // cache.delete("submitted-ideas");
+
+      // res.setHeader("X-Content-Type-Options", "nosniff");
+      // res.setHeader("X-Frame-Options", "DENY");
+
+      res.json({
+        success: true,
+        message: "Idea updated successfully",
+        idea: updatedIdea,
+        _meta: {
+          processTime: Date.now() - startTime
+        }
+      });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        const validationError = fromZodError(error);
+        res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: validationError.details,
+          _meta: {
+            processTime: Date.now() - startTime
+          }
+        });
+      } else {
+        console.error("Error updating idea:", error);
+        res.status(500).json({
+          success: false,
+          message: "Internal server error",
+          _meta: {
+            processTime: Date.now() - startTime
+          }
+        });
+      }
+    }
+  });
+
+  // Delete Idea Endpoint
+  app.delete("/api/user/submitted-ideas/:id", async (req, res) => {
+    const startTime = Date.now();
+    try {
+      if (!req.isAuthenticated()) {
+        return res.sendStatus(401);
+      }
+
+      const user = req.user as SchemaUser;
+      const ideaId = req.params.id;
+
+      // Check if the idea exists and belongs to the user
+      const existingIdea = await storage.getSubmittedIdeaById(ideaId);
+      if (!existingIdea || existingIdea.createdBy !== user.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to delete this idea"
+        });
+      }
+
+      // Delete the idea
+      await storage.deleteSubmittedIdea(ideaId);
+
+      // Invalidate cache
+      cache.delete("submitted-ideas");
+
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("X-Frame-Options", "DENY");
+
+      res.json({
+        success: true,
+        message: "Idea deleted successfully",
+        _meta: {
+          processTime: Date.now() - startTime
+        }
+      });
+    } catch (error: any) {
+      console.error("Error deleting idea:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        _meta: {
+          processTime: Date.now() - startTime
+        }
+      });
+    }
+  });
 
   // Get submitted idea by ID
   app.get("/api/submitted-ideas/:id", async (req, res) => {
