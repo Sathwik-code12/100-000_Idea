@@ -32,12 +32,20 @@ import NewFooter from "@/components/sections/new-footer";
 import { insertCampaignSchema } from "@shared/schema";
 
 // Schema
-const detailSetupSchema = insertCampaignSchema.extend({
-  targetAmount: z.preprocess(val => String(val), z.string().min(1)),
-  teamSize: z.preprocess(val => String(val), z.string().min(1)),
-  campaignDuration: z.preprocess(val => String(val), z.string().min(1)),
-  video: z.string().url().optional().or(z.literal("")),
-});
+// const detailSetupSchema = insertCampaignSchema.extend({
+//   targetAmount: z.preprocess(val => String(val), z.string().min(1)),
+//   teamSize: z.preprocess(val => String(val), z.string().min(1)),
+//   campaignDuration: z.preprocess(val => String(val), z.string().min(1)),
+//   video: z.string().url().optional().or(z.literal("")),
+// });
+const detailSetupSchema = insertCampaignSchema
+  .omit({ id: true, userId: true }) // remove backend-only fields
+  .extend({
+    targetAmount: z.preprocess(val => String(val), z.string().min(1)),
+    teamSize: z.preprocess(val => String(val), z.string().min(1)),
+    campaignDuration: z.preprocess(val => String(val), z.string().min(1)),
+    video: z.string().url().optional().or(z.literal("")),
+  });
 
 type DetailSetupData = z.infer<typeof detailSetupSchema>;
 
@@ -130,7 +138,7 @@ export default function CampaignSetup() {
         location: campaign.location || "",
         useOfFunds: campaign.useOfFunds || "",
         campaignDuration: campaign.campaignDuration || "",
-        teamSize: campaign.teamSize || "",
+        teamSize: String(campaign.teamSize ?? "1"),
         video: campaign.video || "",
       });
 
@@ -143,7 +151,7 @@ export default function CampaignSetup() {
 
   useEffect(() => {
     console.log("Form values changed:", values, form.formState.isDirty);
-    if (!campaign) return;
+    // if (!campaign) return;
     if (!form.formState.isDirty) return; // Only save if form changed
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -156,13 +164,29 @@ export default function CampaignSetup() {
   }, [values, form.formState, updateCampaignMutation]);
 
   // Publish campaign
+  // const handlePublish = form.handleSubmit(
+  //   (data) => {
+  //     updateCampaignMutation.mutate(data, {
+  //       onSuccess: () => publishCampaignMutation.mutate(),
+  //     });
+  //   },
+  //   () => {
+  //     toast({
+  //       title: "Incomplete Information",
+  //       description: "Please fill in all required fields before publishing.",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // );
   const handlePublish = form.handleSubmit(
     (data) => {
+      console.log("✅ Valid data:", data);
       updateCampaignMutation.mutate(data, {
         onSuccess: () => publishCampaignMutation.mutate(),
       });
     },
-    () => {
+    (errors) => {
+      console.error("❌ Validation errors:", errors);
       toast({
         title: "Incomplete Information",
         description: "Please fill in all required fields before publishing.",
@@ -473,7 +497,7 @@ export default function CampaignSetup() {
                             <Input
                               placeholder="e.g., 5"
                               type="number"
-                              min="1"
+                              min="1"   
                               {...field}
                             />
                           </FormControl>

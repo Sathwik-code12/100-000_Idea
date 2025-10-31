@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: User) => {
       // Don't auto-login after registration, let the component handle the flow
       // Just invalidate queries to clear any cached data
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onError: (error: any) => {
       toast({
