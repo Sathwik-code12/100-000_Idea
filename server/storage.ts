@@ -30,7 +30,7 @@ import {
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { db } from "./db.js";
-import { eq, and, ilike, sql, getTableColumns } from "drizzle-orm";
+import { eq, and, ilike, sql, getTableColumns, gt } from "drizzle-orm";
 
 function parseStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -112,10 +112,10 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(user: any): Promise<User> {
-    const [newUser] = await db.insert(users).values(user).returning();
-    return newUser;
-  }
+  // async createUser(user: any): Promise<User> {
+  //   const [newUser] = await db.insert(users).values(user).returning();
+  //   return newUser;
+  // }
   // Storage function
   async updateUser(user: any): Promise<User> {
     if (!user.id) throw new Error("User ID is required");
@@ -498,42 +498,100 @@ export class DatabaseStorage implements IStorage {
       .where(eq(platformIdeas.id, review.ideaId));
 
     if (idea) {
-      // Parse ratings_reviews safely
       let avg = 0;
       let total = 0;
 
       try {
-        if (Array.isArray(idea.ratings_reviews) && idea.ratings_reviews.length === 2) {
-          const avgStr = idea.ratings_reviews.find(s => s.startsWith("average_rating:"));
-          const totalStr = idea.ratings_reviews.find(s => s.startsWith("total_reviews:"));
-          if (avgStr && totalStr) {
-            avg = parseFloat(avgStr.split(":")[1].trim());
-            total = parseInt(totalStr.split(":")[1].trim());
+        const ratingsStr = idea.ratings_reviews; // stored as string in PostgreSQL
+        console.log("Raw ratings_reviews:", ratingsStr);
+
+        if (ratingsStr) {
+          let parsed: any;
+
+          try {
+            // Try to parse JSON safely
+            parsed = ratingsStr
+          } catch {
+            console.log("ratings_reviews is not valid JSON, using as-is");
+            parsed = ratingsStr;
           }
+
+          if (Array.isArray(parsed)) {
+            // Case: ["average_rating:4.5","total_reviews:10"]
+            console.log("Parsed as array");
+
+            const avgStr = parsed.find((s) => s.startsWith("average_rating:"));
+            const totalStr = parsed.find((s) => s.startsWith("total_reviews:"));
+
+            if (avgStr && totalStr) {
+              avg = parseFloat(avgStr.split(":")[1].trim());
+              total = parseInt(totalStr.split(":")[1].trim());
+            }
+          } else if (
+            typeof parsed === "object" &&
+            parsed !== null &&
+            "average_rating" in parsed &&
+            "total_reviews" in parsed
+          ) {
+            // Case: {"average_rating":4.5,"total_reviews":10}
+            console.log("Parsed as object");
+
+            avg = parseFloat(parsed.average_rating ?? 0);
+            total = parseInt(parsed.total_reviews ?? 0);
+          }
+        } else {
+          console.log("ratings_reviews is null or empty");
         }
       } catch (err) {
         console.warn("Error parsing ratings_reviews:", err);
       }
 
-      // Update stats
+      // Compute new stats
       const newTotal = total + 1;
-      console.log("newTotal:", newTotal);
       const newAverage = (avg * total + review.rating) / newTotal;
-      console.log("newAverage:", newAverage)
 
-      // Store as string array (to match schema type)
-      const updatedStats = {
+      console.log("newTotal:", newTotal);
+      console.log("newAverage:", newAverage);
+
+      // Save back as JSON string (since your column is text)
+      const updatedStats = JSON.stringify({
         average_rating: newAverage,
         total_reviews: newTotal,
-      };
+      });
 
       await db
         .update(platformIdeas)
-         .set({ ratings_reviews: updatedStats as any })
+        // .set({ ratings_reviews: updatedStats })
+        .set({ ratings_reviews: updatedStats as any })
         .where(eq(platformIdeas.id, review.ideaId));
     }
 
     return newReview;
+  }
+
+  // Add these methods to your DatabaseStorage class in storage.ts
+
+  async getIdeaReviewById(reviewId: string): Promise<IdeaReview | undefined> {
+    const [review] = await db.select().from(ideaReviews).where(eq(ideaReviews.id, reviewId));
+    return review;
+  }
+
+  async updateIdeaReview(reviewId: string, updates: Partial<IdeaReview>): Promise<IdeaReview> {
+    const [updated] = await db.update(ideaReviews)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(ideaReviews.id, reviewId))
+      .returning();
+    return updated;
+  }
+
+  async deleteIdeaReview(reviewId: string): Promise<void> {
+    await db.delete(ideaReviews).where(eq(ideaReviews.id, reviewId));
+  }
+
+  async getUserReviewForIdea(userId: string, ideaId: string): Promise<IdeaReview | undefined> {
+    const [review] = await db.select().from(ideaReviews)
+      .where(and(eq(ideaReviews.userId, userId), eq(ideaReviews.ideaId, ideaId)));
+    return review;
   }
 
 
@@ -561,7 +619,75 @@ export class DatabaseStorage implements IStorage {
       count: reviews.length
     };
   }
+  // Add these methods to your DatabaseStorage class in storage.ts
 
+  // OTP methods
+  async createEmailVerificationOtp(email: string): Promise<string> {
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+    // Update user with OTP
+    await db
+      .update(users)
+      .set({
+        otp,
+        otpExpires: expiresAt,
+        updatedAt: new Date()
+      })
+      .where(eq(users.email, email));
+
+    return otp;
+  }
+
+  async verifyEmailOtp(email: string, otp: string): Promise<boolean> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.email, email),
+          eq(users.otp, otp),
+          gt(users.otpExpires, new Date())
+        )
+      );
+
+    console.log("email", email)
+    console.log("otp", otp)
+    console.log("use", user)
+    if (!user) {
+      return false;
+    }
+
+    // Clear OTP and activate account
+    await db
+      .update(users)
+      .set({
+        otp: null,
+        otpExpires: null,
+        isActive: true,
+        updatedAt: new Date()
+      })
+      .where(eq(users.email, email));
+      console.log("true")
+    return true;
+  }
+
+  async isEmailVerified(email: string): Promise<boolean> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user?.isActive || false;
+  }
+
+  // Update createUser to set isActive to false by default
+  async createUser(user: any): Promise<User> {
+    const data = {
+      id: uuidv4(),
+      ...user,
+      isActive: false,
+    }
+    const [newUser] = await db.insert(users).values(data).returning();
+    return newUser;
+  }
 }
 
 export const storage = new DatabaseStorage();

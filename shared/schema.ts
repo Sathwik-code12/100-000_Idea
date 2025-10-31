@@ -14,6 +14,8 @@ export const users = pgTable("users", {
   phone: varchar("phone", { length: 15 }).notNull(),
   gender: varchar("gender", { length: 10 }),
   age: integer("age"),
+  otp: text("otp"),
+  otpExpires: timestamp("otp_expires"),
   aadhar_id: varchar("aadhar_id", { length: 12 }),
   annual_income: numeric("annual_income", { precision: 12, scale: 2 }),
   caste: varchar("caste", { length: 50 }),
@@ -42,7 +44,7 @@ export const submittedIdeas = pgTable("submitted_ideas", {
   status: text("status").default("pending"), // pending, reviewing, approved, rejected
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  createdBy:varchar("createdBy"),
+  createdBy: varchar("createdBy"),
 }, (table) => ({
   statusIdx: index("ideas_status_idx").on(table.status),
   categoryIdx: index("ideas_category_idx").on(table.category),
@@ -66,7 +68,7 @@ export const savedIdeas = pgTable("saved_ideas", {
 export const insertSavedIdeaSchema = createInsertSchema(savedIdeas, {
   userId: z.string(),
   ideaId: z.string(),
-}).omit({  createdAt: true });
+}).omit({ createdAt: true });
 
 export type InsertSavedIdea = z.infer<typeof insertSavedIdeaSchema>;
 export type SavedIdea = typeof savedIdeas.$inferSelect;
@@ -180,8 +182,15 @@ export const paymentTransactions = pgTable("payment_transactions", {
 export const insertUserSchema = createInsertSchema(users, {
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Valid email is required"),
+  otp: z.string().optional(),
+  otpExpires: z.date().optional(),
   password: z.string().min(6, "Password must be at least 6 characters"),
-}).omit({ id: true, createdAt: true, updatedAt: true });
+  isActive: z.boolean().default(false),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 export const insertSubmittedIdeaSchema = createInsertSchema(submittedIdeas, {
   name: z.string().min(1, "Name is required"),
@@ -194,9 +203,9 @@ export const insertSubmittedIdeaSchema = createInsertSchema(submittedIdeas, {
   knowledge: z.string().min(1, "Please select your knowledge level"),
   experience: z.string().min(1, "Please select your experience level"),
   operations: z.string().optional(),
-  createdBy:z.string().optional,
-  updatedAt:z.date().optional
-}).omit({ id: true, createdAt: true,  status: true, tags: true });
+  createdBy: z.string().optional,
+  updatedAt: z.date().optional
+}).omit({ id: true, createdAt: true, status: true, tags: true });
 
 export const insertCampaignSchema = createInsertSchema(campaigns, {
   id: z.string(),
@@ -552,7 +561,7 @@ export const insertPlatformIdeaSchema = createInsertSchema(platformIdeas, {
   developing_your_idea: z.any().optional(), // Changed to any to handle object structure
   isVisible: z.any().optional(), // Changed to any to handle object structure
   isFeatured: z.any().optional(), // Changed to any to handle object structure
-}).omit({ id: true, createdAt: true, updatedAt: true, views: true, likes: true,  fullDescription: true, investment: true, targetAudience: true, revenueModel: true, investmentRequired: true, expectedRoi: true, marketTrends: true, implementationSteps: true, });
+}).omit({ id: true, createdAt: true, updatedAt: true, views: true, likes: true, fullDescription: true, investment: true, targetAudience: true, revenueModel: true, investmentRequired: true, expectedRoi: true, marketTrends: true, implementationSteps: true, });
 export const insertUploadHistorySchema = createInsertSchema(uploadHistory, {
   filename: z.string().min(1, "Filename is required"),
   fileType: z.string().min(1, "File type is required"),
@@ -645,8 +654,8 @@ export const ideaReviews = pgTable("idea_reviews", {
 // Schema for inserting a review
 export const insertIdeaReviewSchema = createInsertSchema(ideaReviews, {
   rating: z.number().min(1).max(5, "Rating must be between 1 and 5"),
-  comment: z.string().optional(), 
-}).omit({  createdAt: true, updatedAt: true });
+  comment: z.string().optional(),
+}).omit({ createdAt: true, updatedAt: true });
 
 // Types
 export type InsertIdeaReview = z.infer<typeof insertIdeaReviewSchema>;

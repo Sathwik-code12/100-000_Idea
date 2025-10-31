@@ -715,6 +715,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  // Add these routes to your routes.ts file
+
+// Update a review
+app.put("/api/ideas/:ideaId/reviews/:reviewId", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
+
+    const user = req.user as SchemaUser;
+    const { ideaId, reviewId } = req.params;
+    const { rating, comment } = req.body;
+
+    // Validate input
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 1 and 5"
+      });
+    }
+
+    // Check if the review exists and belongs to the user
+    const existingReview = await storage.getIdeaReviewById(reviewId);
+    if (!existingReview || existingReview.userId !== user.id || existingReview.ideaId !== ideaId) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to update this review"
+      });
+    }
+
+    // Update the review
+    const updatedReview = await storage.updateIdeaReview(reviewId, {
+      rating,
+      comment: comment || ""
+    });
+
+    res.json({
+      success: true,
+      message: "Review updated successfully",
+      review: updatedReview
+    });
+  } catch (error: any) {
+    console.error("Error updating review:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+// Delete a review
+app.delete("/api/ideas/:ideaId/reviews/:reviewId", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
+
+    const user = req.user as SchemaUser;
+    const { ideaId, reviewId } = req.params;
+
+    // Check if the review exists and belongs to the user
+    const existingReview = await storage.getIdeaReviewById(reviewId);
+    if (!existingReview || existingReview.userId !== user.id || existingReview.ideaId !== ideaId) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this review"
+      });
+    }
+
+    // Delete the review
+    await storage.deleteIdeaReview(reviewId);
+
+    res.json({
+      success: true,
+      message: "Review deleted successfully"
+    });
+  } catch (error: any) {
+    console.error("Error deleting review:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+// Get user's review for a specific idea
+app.get("/api/ideas/:ideaId/user-review", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
+
+    const user = req.user as SchemaUser;
+    const { ideaId } = req.params;
+
+    const userReview = await storage.getUserReviewForIdea(user.id, ideaId);
+
+    res.json({
+      success: true,
+      review: userReview
+    });
+  } catch (error: any) {
+    console.error("Error fetching user review:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
   const httpServer = createServer(app);
 
   return httpServer;

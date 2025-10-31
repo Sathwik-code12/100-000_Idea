@@ -354,7 +354,7 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-bold text-gray-900">
-                        {idea.ratings_reviews?.average_rating || '4.0'}
+                        {Number(idea?.ratings_reviews?.average_rating ?? 0).toFixed(1)}
                       </span>
                     </div>
 

@@ -275,7 +275,8 @@ export default function HorizontalScrollCards({ featuredIdeas }: HorizontalScrol
                     
                     <div className="flex gap-2">
                       <span className="text-lg font-bold text-gray-900 me-5">
-                        {idea.ratings_reviews?.average_rating || '4.0'}
+                        {/* {(idea.ratings_reviews?.average_rating).toFixed(1) || '4.0'} */}
+                        {Number(idea?.ratings_reviews?.average_rating ?? 0).toFixed(1)}
                       </span>
                       <button className="w-10 h-10 ms-5 bg-yellow-400 hover:bg-yellow-500 rounded-lg flex items-center justify-center transition-colors">
                         <Target className="w-5 h-5 text-gray-900" />
