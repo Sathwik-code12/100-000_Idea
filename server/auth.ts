@@ -277,15 +277,27 @@ export function setupAuth(app: Express) {
       next(error);
     }
   });
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: parseInt("587"),
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: "jeeva.smiksystems@gmail.com", // your email
-      pass: "hoag cgsp vbwr svdr", // your app password
-    },
+  const transporter = nodemailer.createTransport(
+    {
+      host: "smtp.gmail.com",
+      port: parseInt("587"),
+      secure: false, // true for 465, false for other ports
+      auth: {
+        // user: process.env.EMAIL_USER,
+        // pass: process.env.EMAIL_PASS,
+        user:"jeeva.smiksystems@gmail.com",
+        pass:"hoag cgsp vbwr svdr"
+      },
+    }
+  );
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("SMTP connection error:", error);
+    } else {
+      console.log("SMTP connection successful:", success);
+    }
   });
+
   async function sendOtpEmail(email: string, otp: string) {
     try {
       const info = await transporter.sendMail({
@@ -346,6 +358,7 @@ export function setupAuth(app: Express) {
         requiresVerification: true,
       });
     } catch (error) {
+      console.log("error",error)
       next(error);
     }
   });
