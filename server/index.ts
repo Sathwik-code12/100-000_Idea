@@ -4,7 +4,8 @@ import { setupVite, serveStatic, log } from "./vite-setup.js";
 import { AdminAuthService } from "./admin-auth.js";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-
+import dotenv from "dotenv";
+dotenv.config();
 const app = express();
 
 AdminAuthService.initializeAdminUsers();
