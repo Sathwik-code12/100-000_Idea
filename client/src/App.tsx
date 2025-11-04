@@ -31,6 +31,7 @@ const InvestPage = lazy(() => import("@/pages/invest"));
 // Admin pages
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
+const AdminDashboardold = lazy(() => import("@/pages/admin-dashboardold"));
 const AdminNoAccess = lazy(() => import("@/pages/admin-no-access"));
 
 const NotFound = lazy(() => import("@/pages/not-found"));
@@ -852,6 +853,7 @@ function Router() {
         <Route path="/business-plan-template" component={() => <BusinessPlanTemplate />} />
         {/* /////// */}
         <Route path="/dashboard" component={Dashboard} />
+        
         <Route path="/start-campaign" component={StartCampaign} />
         <Route path="/campaign/:id/setup" component={CampaignSetup} />
         <Route path="/create-campaign" component={() => <CreateCampaignSimple />} />
@@ -859,7 +861,8 @@ function Router() {
         
         {/* Admin Routes */}
         <Route path="/admin" component={AdminLogin} />
-        <Route path="/admin/dashboard" component={AdminDashboard} />
+        <Route path="/admin/dashboardold" component={AdminDashboard} />
+        <Route path="/admin/dashboard" component={AdminDashboardold} />
         <Route path="/admin/no-access" component={AdminNoAccess} />
 
         <Route component={NotFound} />
