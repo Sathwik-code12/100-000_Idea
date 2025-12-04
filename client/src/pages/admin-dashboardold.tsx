@@ -970,14 +970,14 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/admin/logout", {
+      const response = await fetch("/api/logout", {
         method: "POST",
       });
 
       if (!response.ok) {
         throw new Error("Logout failed");
       }
-
+      setLocation("/admin");
       return response.json();
     },
     onSuccess: () => {

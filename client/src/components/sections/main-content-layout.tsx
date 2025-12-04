@@ -34,7 +34,7 @@ export default function MainContentLayout({ ideas, isSearchActive, totalDefaultI
           {/* Main Content */}
           <div className="flex-1 min-w-0">
             <HorizontalScrollCards featuredIdeas={featuredIdeas} />
-            <div className="text-3xl text-center font-bold mb-2">Community Ideas</div>
+            <div className="text-3xl text-center font-bold my-5">Community Ideas</div>
             <div className="text-lg text-center text-gray-600">discover innovative business ideas from our community members</div>
             <IdeaGrid ideas={ideas} isSearchActive={isSearchActive}
               totalDefaultIdeas={totalDefaultIdeas} />
