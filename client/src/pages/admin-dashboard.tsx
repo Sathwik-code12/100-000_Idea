@@ -576,7 +576,8 @@ export default function AdminDashboard() {
       if (!response.ok) {
         throw new Error("Logout failed");
       }
-
+      console.log("Logging out, redirecting to /admin");
+      setLocation("/admin");
       // return response.json();
     },
     onSuccess: () => {

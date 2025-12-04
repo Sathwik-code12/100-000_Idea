@@ -68,14 +68,21 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user: SchemaUser, done) => done(null, user.id));
-  passport.deserializeUser(async (id: string, done) => {
+  passport.deserializeUser(async (id:string, done) => {
     try {
       const user = await storage.getUser(id);
-      done(null, user);
+
+      if (!user) {
+        // user not found → destroy old session
+        return done(null, false);
+      }
+
+      return done(null, user);
     } catch (error) {
-      done(error);
+      return done(error);
     }
   });
+
 
   // app.post("/api/register", async (req, res, next) => {
   //   try {
@@ -277,19 +284,28 @@ export function setupAuth(app: Express) {
       next(error);
     }
   });
-  const transporter = nodemailer.createTransport(
-    {
-      host: "smtp.gmail.com",
-      port: parseInt("587"),
-      secure: false, // true for 465, false for other ports
-      auth: {
-        // user: process.env.EMAIL_USER,
-        // pass: process.env.EMAIL_PASS,
-        user:"jeeva.smiksystems@gmail.com",
-        pass:"hoag cgsp vbwr svdr"
-      },
-    }
-  );
+  // const transporter = nodemailer.createTransport(
+  //   {
+  //     host: "smtp.gmail.com",
+  //     port: parseInt("587"),
+  //     secure: false, // true for 465, false for other ports
+  //     auth: {
+  //       // user: process.env.EMAIL_USER,
+  //       // pass: process.env.EMAIL_PASS,
+  //       user:"jeeva.smiksystems@gmail.com",
+  //       pass:"hoag cgsp vbwr svdr"
+  //     },
+  //   }
+  // );
+  const transporter = nodemailer.createTransport({
+    host: "mail.10000ideas.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "info@10000ideas.com",
+      pass: "Ideas@7890",
+    },
+  });
   transporter.verify((error, success) => {
     if (error) {
       console.error("SMTP connection error:", error);
@@ -331,6 +347,7 @@ export function setupAuth(app: Express) {
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
+      console.log("existingUser", existingUser)
       if (existingUser) {
         return res.status(400).json({ message: "Email already registered" });
       }
@@ -358,7 +375,7 @@ export function setupAuth(app: Express) {
         requiresVerification: true,
       });
     } catch (error) {
-      console.log("error",error)
+      console.log("error", error)
       next(error);
     }
   });

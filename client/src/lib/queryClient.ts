@@ -33,7 +33,7 @@ export async function apiRequest(
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
-
+  console.log("API Request:", { method, url, data, status: res.status });
   await throwIfResNotOk(res);
   return res;
 }
