@@ -147,7 +147,9 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <Header />
       <CategoryNavigation />
-      <SearchHero />
+      <SearchHero ideas={ideas}
+        onSearchResults={handleSearchResults}
+        onClearSearch={handleClearSearch} />
       <MainHero />
       <MainContentLayout ideas={displayedIdeas}
         isSearchActive={isSearchActive}
