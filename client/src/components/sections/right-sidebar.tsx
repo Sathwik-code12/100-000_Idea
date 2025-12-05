@@ -1,6 +1,10 @@
-import { Clock, TrendingUp, FileText, Users, Target, BarChart3, Scale, UserCheck, Trophy, BookOpen, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Clock, TrendingUp, FileText, Users, Target, BarChart3, Scale, UserCheck, Trophy, BookOpen, ChevronRight, ChevronLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
+import { Button } from "../ui/button";
 export default function RightSidebar() {
+  const [currentSlide, setCurrentSlide] = useState(0);
   const classifieds = [
     {
       title: "New Business Opportunity",
@@ -71,6 +75,30 @@ export default function RightSidebar() {
     }
   ];
 
+    const { data: banner } = useQuery({
+    queryKey: ["/api/admin/banners"],
+  });
+
+
+    const nextSlide = () => {
+    if (!banner?.banners?.length) return;
+    setCurrentSlide((prev) => (prev + 1) % banner.banners.length);
+  };
+
+  const prevSlide = () => {
+    if (!banner?.banners?.length) return;
+    setCurrentSlide((prev) => (prev - 1 + banner.banners.length) % banner.banners.length);
+  };
+
+  useEffect(() => {
+    if (!banner?.banners?.length) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % banner.banners.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [banner?.banners?.length]);
   return (
     <div className="w-full space-y-4 lg:space-y-6">
       {/* Classifieds Section */}
@@ -124,7 +152,64 @@ export default function RightSidebar() {
           ))}
         </div>
       </div>
-    </div>
+
+      <div className="relative">
+             <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden min-h-[320px] flex flex-col justify-center">
+               {/* Decorative dots */}
+               <div className="absolute top-6 right-6 flex gap-1.5">
+                 {banner?.banners?.map((_: any, index: number) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-500 ${currentSlide === index ? 'bg-yellow-400 w-6' : 'bg-white/40 hover:bg-white/60'
+                      }`}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation arrows */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-300 z-10"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-300 z-10"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
+              {/* Decorative circles */}
+              <div className="absolute top-12 left-12 w-6 h-6 bg-yellow-400/20 rounded-full animate-pulse"></div>
+              <div className="absolute bottom-16 right-16 w-4 h-4 bg-yellow-400/20 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute bottom-12 left-20 w-3 h-3 bg-yellow-400/20 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute top-20 right-24 w-5 h-5 bg-yellow-400/20 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+
+              {/* Slide Content */}
+              <div className="text-center relative z-10 transition-all duration-500">
+                <div className="inline-flex items-center gap-2 bg-yellow-400 text-blue-900 px-5 py-2 rounded-full font-bold text-sm mb-6 shadow-lg">
+                  <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold">₿</div>
+                  {banner?.banners[currentSlide]?.imageUrl}
+                </div>
+
+                <h2 className="text-4xl font-bold mb-5 leading-tight">
+                  {banner?.banners[currentSlide]?.title}
+                </h2>
+
+                <p className="text-blue-100 mb-8 text-base leading-relaxed px-4">
+                  {banner?.banners[currentSlide]?.description}
+                </p>
+
+                <Button className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 px-7 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 text-base flex items-center gap-2 mx-auto">
+                  {banner?.banners[currentSlide]?.buttonText}
+                  <span className="text-lg">→</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
   );
 }
 // import { Lightbulb, Eye, MessageSquare, FileText, TrendingUp, BarChart3, Scale, UserCheck, BookOpen, ChevronRight, Users, Star } from "lucide-react";

@@ -216,21 +216,131 @@
 //   );
 // }
 
-
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import { apiRequestWithPage } from "@/lib/queryClient";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function SearchHero() {
+interface IdeaCard {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  category: string;
+  difficulty: string;
+  investment: string;
+  tags: string[];
+  profitability: string;
+  timeToMarket: string;
+  rating: number;
+  marketScore: number;
+  painPointScore: number;
+  timingScore: number;
+}
+
+interface SearchHeroProps {
+  ideas: IdeaCard[];
+  onSearchResults?: (ideas: IdeaCard[]) => void;
+  onClearSearch: () => void;
+}
+
+export default function SearchHero({ ideas, onSearchResults, onClearSearch }: SearchHeroProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+  const [showNoResults, setShowNoResults] = useState(false);
+
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState<string | null>(null);
+  const [usersPagination, setUsersPagination] = useState<any>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
+
+  const queryClient = useQueryClient();
+
+  const searchMutation = useMutation({
+    mutationFn: async ({ 
+      searchstr, 
+      category, 
+      location,
+      page = 1 
+    }: { 
+      searchstr: string; 
+      category: string; 
+      location: string;
+      page?: number;
+    }) => {
+      setUsersLoading(true);
+      setUsersError(null);
+      try {
+        const response: any = await apiRequestWithPage("GET", "/api/search", {
+          params: {
+            page: page,
+            pageSize: usersPagination.limit,
+            search: searchstr,
+            category: category,
+            location: location,
+          },
+        });
+        console.log('Fetched search response:', response.results);
+        
+        // Check if results are empty
+        const hasResults = response.results && response.results.length > 0;
+        setShowNoResults(!hasResults);
+        
+        // Update the parent component with search results
+        if (onSearchResults) {
+          onSearchResults(response.results || []);
+        }
+        
+        setHasSearched(true);
+        setUsersPagination(response.pagination);
+        return response;
+      } catch (err: any) {
+        setUsersError(err.message || "Failed to fetch search results");
+        setShowNoResults(false);
+        return null;
+      } finally {
+        setUsersLoading(false);
+      }
+    },
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Searching for:", { searchTerm, selectedCategory, selectedLocation });
+    
+    // Reset pagination to page 1 for new search
+    setUsersPagination(prev => ({ ...prev, page: 1 }));
+    
+    // Invalidate any previous search queries
+    queryClient.invalidateQueries({ queryKey: ["searchResults"] });
+    
+    // Execute search with current parameters
+    searchMutation.mutate({ 
+      searchstr: searchTerm, 
+      category: selectedCategory, 
+      location: selectedLocation,
+      page: 1
+    });
+  };
+
+  const handleClear = () => {
+    setSearchTerm("");
+    setSelectedCategory("");
+    setSelectedLocation("");
+    setHasSearched(false);
+    setShowNoResults(false);
+    onClearSearch();
   };
 
   return (
@@ -292,10 +402,35 @@ export default function SearchHero() {
           <Button 
             type="submit" 
             className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold px-6 lg:px-8 py-2.5 text-sm lg:text-base rounded-lg transition-colors"
+            disabled={usersLoading}
           >
-            Search
+            {usersLoading ? "Searching..." : "Search"}
           </Button>
+          
+          {hasSearched && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClear}
+              className="w-full sm:w-auto border-white text-black hover:bg-blue-700 px-4 lg:px-6 py-2.5 text-sm lg:text-base rounded-lg transition-colors"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Clear
+            </Button>
+          )}
         </form>
+
+        {/* No Results Alert */}
+        {showNoResults && (
+          <div className="mt-4">
+            <Alert variant="destructive" className="bg-yellow-50 border-yellow-200 text-yellow-800">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                No ideas found matching your search criteria. Try adjusting your search terms, category, or location.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
       </div>
     </section>
   );
