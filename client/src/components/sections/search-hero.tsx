@@ -215,7 +215,6 @@
 //     </section>
 //   );
 // }
-
 import { Search, ChevronDown, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -288,7 +287,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
             pageSize: usersPagination.limit,
             search: searchstr,
             category: category,
-            location: location,
+            // location: location,
           },
         });
         console.log('Fetched search response:', response.results);
@@ -358,7 +357,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
               className="pl-10 pr-3 py-2.5 text-sm lg:text-base border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
             />
           </div>
-          
+
           {/* Category Select */}
           <div className="w-full sm:w-48 lg:w-64">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -366,18 +365,18 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="technology">Technology</SelectItem>
-                <SelectItem value="food-beverage">Food & Beverage</SelectItem>
-                <SelectItem value="agriculture">Agriculture</SelectItem>
-                <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                <SelectItem value="ecommerce">E-commerce</SelectItem>
-                <SelectItem value="services">Services</SelectItem>
-                <SelectItem value="healthcare">Healthcare</SelectItem>
-                <SelectItem value="education">Education</SelectItem>
+                <SelectItem value="Technology">Technology</SelectItem>
+                <SelectItem value="Food & Beverage">Food & Beverage</SelectItem>
+                <SelectItem value="Agriculture">Agriculture</SelectItem>
+                <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                <SelectItem value="Ecommerce">E-commerce</SelectItem>
+                <SelectItem value="Services">Services</SelectItem>
+                <SelectItem value="Healthcare">Healthcare</SelectItem>
+                <SelectItem value="Education">Education</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
+
           {/* Location Select */}
           <div className="w-full sm:w-48 lg:w-64">
             <Select value={selectedLocation} onValueChange={setSelectedLocation}>
@@ -397,16 +396,15 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
               </SelectContent>
             </Select>
           </div>
-          
+
           {/* Search Button */}
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold px-6 lg:px-8 py-2.5 text-sm lg:text-base rounded-lg transition-colors"
             disabled={usersLoading}
           >
             {usersLoading ? "Searching..." : "Search"}
           </Button>
-          
           {hasSearched && (
             <Button
               type="button"
