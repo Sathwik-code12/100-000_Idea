@@ -18,7 +18,12 @@ import {
   AdminUser,
   aiGeneratedIdeas,
   type AiGeneratedIdea,
-  insertBannerSchema
+  insertBannerSchema,
+  insertMenuSchema,
+  insertFlatIconSchema,
+  insertClassifiedSchema,
+  insertResourceSchema,
+  insertHeroSchema
 } from '../shared/schema.js';
 import { db } from './db.js';
 import { eq, and, desc, asc, or, like, count, AnyColumn } from 'drizzle-orm';
@@ -587,7 +592,6 @@ router.put('/banners/:id', requireAdminAuth, async (req: Request, res: Response)
   try {
     const { id } = req.params;
     const updates = insertBannerSchema.partial().parse(req.body);
-
     const banner = await adminStorage.updateBanner(id, updates);
     if (!banner) {
       return res.status(404).json({ error: 'Banner not found' });
@@ -667,6 +671,258 @@ router.put('/platform-ideas/:id', requireAdminAuth, async (req: Request, res: Re
   } catch (error) {
     console.error('Update platform idea error:', error);
     res.status(400).json({ error: 'Invalid request data' });
+  }
+});
+
+
+/**
+ * GET /api/admin/menus
+ * Get menus with pagination
+ */
+router.get("/menus", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getMenus(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get menus error:", error);
+    res.status(500).json({ error: "Failed to fetch menus" });
+  }
+});
+/**
+ * POST /api/admin/menus
+ * Create a new menu
+ */
+router.post("/menus", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const admin = (req as any).admin;
+    const menuData = insertMenuSchema.parse(req.body);
+
+    const menu = await adminStorage.createMenu({
+      ...menuData,
+      createdBy: admin.id,
+    });
+
+    res.json(menu);
+  } catch (error) {
+    console.error("Create menu error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+/**
+ * PUT /api/admin/menus/:id
+ * Update a menu
+ */
+router.put("/menus/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertMenuSchema.partial().parse(req.body);
+
+    const menu = await adminStorage.updateMenu(id, updates);
+    if (!menu) {
+      return res.status(404).json({ error: "Menu not found" });
+    }
+
+    res.json(menu);
+  } catch (error) {
+    console.error("Update menu error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+/**
+ * DELETE /api/admin/menus/:id
+ * Delete a menu
+ */
+router.delete("/menus/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const success = await adminStorage.deleteMenu(id);
+    if (!success) {
+      return res.status(404).json({ error: "Menu not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete menu error:", error);
+    res.status(500).json({ error: "Failed to delete menu" });
+  }
+});
+
+
+// routes/admin/flat-icons.ts
+router.get("/flat-icons", async (req, res) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getFlatIcons(options);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch icons" });
+  }
+});
+
+router.post("/flat-icons", requireAdminAuth, async (req, res) => {
+  try {
+    const data = insertFlatIconSchema.parse(req.body);
+    const icon = await adminStorage.createFlatIcon(data);
+    res.json(icon);
+  } catch (err) {
+    res.status(400).json({ error: "Invalid data" });
+  }
+});
+
+router.put("/flat-icons/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const updates = insertFlatIconSchema.partial().parse(req.body);
+    const icon = await adminStorage.updateFlatIcon(req.params.id, updates);
+
+    if (!icon) return res.status(404).json({ error: "Not found" });
+    res.json(icon);
+  } catch {
+    res.status(400).json({ error: "Invalid data" });
+  }
+});
+
+router.delete("/flat-icons/:id", requireAdminAuth, async (req, res) => {
+  const success = await adminStorage.deleteFlatIcon(req.params.id);
+  if (!success) return res.status(404).json({ error: "Not found" });
+  res.json({ success: true });
+});
+
+
+router.get("/classifieds", async (req, res) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getAllClassifieds(options);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch classifieds" });
+  }
+});
+router.post("/classifieds", requireAdminAuth, async (req, res) => {
+  try {
+    const data = insertClassifiedSchema.parse(req.body);
+    const classifieds = await adminStorage.createClassified(data);
+    res.json(classifieds);
+  } catch (err) {
+    res.status(400).json({ error: "Invalid data" });
+  }
+});
+router.get("/classifieds/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const classifieds = await adminStorage.getClassifiedById(req.params.id); 
+    if (!classifieds) return res.status(404).json({ error: "Not found" });
+    res.json(classifieds);
+  } catch {
+    res.status(500).json({ error: "Failed to fetch classifieds" });
+  }
+});
+router.put("/classifieds/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const updates = insertClassifiedSchema.partial().parse(req.body);
+    const classifieds = await adminStorage.updateClassified(req.params.id, updates);
+    if (!classifieds) return res.status(404).json({ error: "Not found" });
+    res.json(classifieds);
+  } catch {
+    res.status(400).json({ error: "Invalid data" });
+  }
+});
+router.delete("/classifieds/:id", requireAdminAuth, async (req, res) => {
+  const success = await adminStorage.deleteClassified(req.params.id);
+  if (!success) return res.status(404).json({ error: "Not found" });
+  res.json({ success: true });
+});
+
+
+
+router.get("/resources", async (req, res) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getAllResources(options);
+    res.json(result);
+  } catch (err) {
+    console.log("error", err);
+    res.status(500).json({ error: "Failed to fetch resources" });
+  }
+});
+router.post("/resources", requireAdminAuth, async (req, res) => {
+  try {
+    const data = insertResourceSchema.parse(req.body);
+    const resources = await adminStorage.createResourses(data);
+    res.json(resources);
+  } catch (err) {
+    res.status(400).json({ error: "Invalid data" });
+  }
+});
+router.get("/resources/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const resources = await adminStorage.getResourseById(req.params.id); 
+    if (!resources) return res.status(404).json({ error: "Not found" });
+    res.json(resources);
+  } catch {
+    res.status(500).json({ error: "Failed to fetch resources" });
+  }
+});
+router.put("/resources/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const updates = insertResourceSchema.partial().parse(req.body);
+    const resources = await adminStorage.updateResourse(req.params.id, updates);
+    if (!resources) return res.status(404).json({ error: "Not found" });
+    res.json(resources);
+  } catch {
+    res.status(400).json({ error: "Invalid data" });
+  }
+});
+router.delete("/resources/:id", requireAdminAuth, async (req, res) => {
+  const success = await adminStorage.deleteResourse(req.params.id);
+  if (!success) return res.status(404).json({ error: "Not found" });
+  res.json({ success: true });
+});
+
+router.get("/heros", async (_req, res) => {
+  try {
+    const data = await adminStorage.getAllHero();
+    res.json({ hero: data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch hero data" });
+  }
+});
+router.get("/heros/active", async (_req, res) => {
+  try {
+    const hero = await adminStorage.getActiveHero();
+    res.json(hero);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch active hero" });
+  }
+});
+router.post("/heros", async (req, res) => {
+  try {
+    const data = insertHeroSchema.parse(req.body);
+    const hero = await adminStorage.createHero(data);
+    res.json(hero);
+  } catch (err) {
+    console.log("errorssss", err);
+    console.error(err);
+    res.status(400).json({ error: "Failed to create hero" });
+  }
+});
+router.put("/heros/:id", async (req, res) => {
+  try {
+    const data = insertHeroSchema.partial().parse(req.body);
+    const hero = await adminStorage.updateHero(req.params.id, data);
+    res.json(hero);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: "Failed to update hero" });
+  }
+});
+router.delete("/heros/:id", async (req, res) => {
+  try {
+    await adminStorage.deleteHero(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete hero" });
   }
 });
 export default router;

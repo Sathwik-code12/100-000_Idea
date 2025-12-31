@@ -20,7 +20,16 @@ import {
   users,
   banners,
   Banner,
-  InsertBanner
+  InsertBanner,
+  Menu,
+  menus,
+  InsertMenu,
+  flatIcons,
+  FlatIcon,
+  InsertFlatIcon,
+  classifieds,
+  resources,
+  hero
 } from '../shared/schema.js';
 
 export interface PaginationOptions {
@@ -817,6 +826,269 @@ export class AdminStorage {
     return Array.isArray(result) ? result.length > 0 : true;
   }
 
-}
+  async getMenus(options: PaginationOptions) {
+    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+    const offset = (page - 1) * limit;
 
+    const [totalCountResult, menusData] = await Promise.all([
+      db.select({ count: count() }).from(menus),
+      db
+        .select()
+        .from(menus)
+        .orderBy(
+          sortOrder === "asc"
+            ? asc(menus[sortBy as keyof typeof menus.$inferSelect] as AnyColumn)
+            : desc(menus[sortBy as keyof typeof menus.$inferSelect] as AnyColumn)
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    const totalMenus = totalCountResult[0].count;
+    const totalPages = Math.ceil(totalMenus / limit);
+
+    return {
+      menus: menusData,
+      pagination: {
+        page,
+        limit,
+        total: totalMenus,
+        totalPages,
+      },
+    };
+  }
+  async getMenuById(id: string): Promise<Menu | null> {
+    const [menu] = await db.select().from(menus).where(eq(menus.id, id));
+    return menu || null;
+  }
+  async createMenu(menuData: InsertMenu & { createdBy: string }): Promise<Menu> {
+    const dataWithId: any = {
+      ...menuData,
+      id: uuidv4(),
+    };
+
+    const [menu] = await db.insert(menus).values(dataWithId).returning();
+    return menu;
+  }
+  async updateMenu(id: string, updates: Partial<Menu>): Promise<Menu | null> {
+    const [menu] = await db
+      .update(menus)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(menus.id, id))
+      .returning();
+
+    return menu || null;
+  }
+  async deleteMenu(id: string): Promise<boolean> {
+    const result = await db.delete(menus).where(eq(menus.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+
+  // Flat Icons Management
+  async getFlatIcons(options: PaginationOptions) {
+    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+    const offset = (page - 1) * limit;
+
+    const [countResult, icons] = await Promise.all([
+      db.select({ count: count() }).from(flatIcons),
+      db
+        .select()
+        .from(flatIcons)
+        .orderBy(
+          sortOrder === "asc"
+            ? asc(flatIcons[sortBy as keyof FlatIcon])
+            : desc(flatIcons[sortBy as keyof FlatIcon])
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    return {
+      icons,
+      pagination: {
+        page,
+        limit,
+        total: countResult[0].count,
+        totalPages: Math.ceil(countResult[0].count / limit),
+      },
+    };
+  }
+
+  async getFlatIconById(id: string) {
+    const [icon] = await db.select().from(flatIcons).where(eq(flatIcons.id, id));
+    return icon || null;
+  }
+
+  async createFlatIcon(data: InsertFlatIcon) {
+    const [icon] = await db
+      .insert(flatIcons)
+      .values({ ...data, id: uuidv4() })
+      .returning();
+
+    return icon;
+  }
+
+  async updateFlatIcon(id: string, updates: Partial<FlatIcon>) {
+    const [icon] = await db
+      .update(flatIcons)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(flatIcons.id, id))
+      .returning();
+
+    return icon || null;
+  }
+
+  async deleteFlatIcon(id: string) {
+    const result = await db.delete(flatIcons).where(eq(flatIcons.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+
+  //classifieds management
+  async getAllClassifieds(options: PaginationOptions) {
+    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+    const offset = (page - 1) * limit;
+
+    const [countResult, icons] = await Promise.all([
+      db.select({ count: count() }).from(classifieds),
+      db
+        .select()
+        .from(classifieds)
+        .orderBy(
+          sortOrder === "asc"
+            ? asc(classifieds[sortBy as keyof typeof classifieds.$inferSelect] as AnyColumn)
+            : desc(classifieds[sortBy as keyof typeof classifieds.$inferSelect] as AnyColumn)
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+    return {
+      classifieds: icons,
+      pagination: {
+        page,
+        limit,
+        total: countResult[0].count,
+        totalPages: Math.ceil(countResult[0].count / limit),
+      },
+    };   
+  }
+  async getClassifiedById(id: string) {
+    const [classified] = await db.select().from(classifieds).where(eq(classifieds.id, id));
+    return classified || null;
+  }
+  async createClassified(data: any) {
+    const [classified] = await db
+      .insert(classifieds)
+      .values({ ...data, id: uuidv4() })
+      .returning();
+    return classified;
+  }
+  async updateClassified(id: string, updates: any) {
+    const [classified] = await db
+      .update(classifieds)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(classifieds.id, id))
+      .returning();
+    return classified || null;
+  }
+  async deleteClassified(id: string) {
+    const result = await db.delete(classifieds).where(eq(classifieds.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+
+  //resourse management can be added here later
+  async getAllResources(options: PaginationOptions) {
+    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+    const offset = (page - 1) * limit;
+
+    const [countResult, icons] = await Promise.all([
+      db.select({ count: count() }).from(resources),
+      db
+        .select()
+        .from(resources)
+        .orderBy(
+          sortOrder === "asc"
+            ? asc(resources[sortBy as keyof typeof resources.$inferSelect] as AnyColumn)
+            : desc(resources[sortBy as keyof typeof resources.$inferSelect] as AnyColumn)
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+    return {
+      resources: icons,
+      pagination: {
+        page,
+        limit,
+        total: countResult[0].count,
+        totalPages: Math.ceil(countResult[0].count / limit),
+      },
+    };   
+  }
+  async getResourseById(id: string) {
+    const [resource] = await db.select().from(resources).where(eq(resources.id, id));
+    return resource || null;
+  }
+  async createResourses(data: any) {
+    const [resource] = await db
+      .insert(resources)
+      .values({ ...data, id: uuidv4() })
+      .returning();
+    return resource;
+  }
+  async updateResourse(id: string, updates: any) {
+    const [resource] = await db
+      .update(resources)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(resources.id, id))
+      .returning();
+    return resource || null;
+  }
+  async deleteResourse(id: string) {
+    const result = await db.delete(resources).where(eq(resources.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+
+  // Additional admin storage methods can be added here
+  async getAllHero() {
+    return await db
+      .select()
+      .from(hero)
+      .orderBy(desc(hero.createdAt));
+  }
+  async getActiveHero() {
+    const result = await db
+      .select()
+      .from(hero)
+      .where(eq(hero.isActive, true))
+      .limit(1);
+
+    return result[0] ?? null;
+  }
+  async createHero(data: any) {
+    const [created] = await db
+      .insert(hero)
+      .values({
+        id: uuidv4(),
+        ...data,
+      })
+      .returning();
+
+    return created;
+  }
+  async updateHero(id: string, data: any) {
+    const [updated] = await db
+      .update(hero)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(hero.id, id))
+      .returning();
+
+    return updated;
+  }
+  async deleteHero(id: string) {
+    await db.delete(hero).where(eq(hero.id, id));
+    return true;
+  }
+}
 export const adminStorage = new AdminStorage();

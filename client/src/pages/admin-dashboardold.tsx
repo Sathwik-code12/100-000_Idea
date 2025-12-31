@@ -40,6 +40,9 @@ import {
   Tag,
   Plus
 } from "lucide-react";
+import path from "path";
+import { classifieds } from "@shared/schema";
+import { is } from "drizzle-orm";
 
 
 interface User {
@@ -148,6 +151,60 @@ interface Banner {
   displayOrder: number;
   isActive: boolean;
   imageUrl?: string;
+  backgroundColor: string;
+  textColor: string;
+  buttonColor: string;
+  createdAt: string;
+}
+interface Menu {
+  id: string;
+  label: string;
+  path: string;
+  displayOrder: number;
+  isActive: boolean;
+  parentId?: string;
+  createdAt: string;
+}
+interface FlatIcon {
+  id: string;
+  label: string;
+  iconUrl: string;
+  path: string;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+}
+interface Classified {
+  id: string;
+  title: string;
+  description: string;
+  iconUrl: string;
+  path: string;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+}
+interface Resources {
+  id: string;
+  title: string;
+  description: string;
+  iconUrl: string;
+  path: string;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+}
+interface Heros {
+  id: string;
+  title: string;
+  subtitle: string;
+  cta: {
+    label: string;
+    link: string;
+    backgroundColor: string;
+  };
+  backgroundColor: string;
+  isActive: boolean;
   createdAt: string;
 }
 export default function AdminDashboard() {
@@ -183,6 +240,16 @@ export default function AdminDashboard() {
   const [submittedIdeasSearch, setSubmittedIdeasSearch] = useState('');
   const [isBannerFormOpen, setIsBannerFormOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [isMenuFormOpen, setIsMenuFormOpen] = useState(false);
+  const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
+  const [isIconFormOpen, setIsIconFormOpen] = useState(false);
+  const [editingIcon, setEditingIcon] = useState<FlatIcon | null>(null);
+  const [isClassifiedFormOpen, setIsClassifiedFormOpen] = useState(false);
+  const [editingClassified, setEditingClassified] = useState<Classified | null>(null);
+  const [isResourceFormOpen, setIsResourceFormOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<Resources | null>(null);
+  const [isHeroFormOpen, setIsHeroFormOpen] = useState(false);
+  const [editingHero, setEditingHero] = useState<Heros | null>(null);
   const [isIdeaFormOpen, setIsIdeaFormOpen] = useState(false);
   const [editingIdea, setEditingIdea] = useState<PlatformIdea | null>(null);
 
@@ -249,8 +316,53 @@ export default function AdminDashboard() {
     redirectUrl: "",
     displayOrder: 0,
     isActive: true,
-    imageUrl: ""
+    imageUrl: "",
+    backgroundColor: "#ffffff",
+    textColor: "#000000",
+    buttonColor: "#ffc501",
   });
+  const [menuForm, setMenuForm] = useState({
+    label: "",
+    path: "",
+    displayOrder: 0,
+    isActive: true,
+    parentId: null as string | null,
+  });
+  const [iconForm, setIconForm] = useState({
+    label: "",
+    iconUrl: "",
+    path: "",
+    displayOrder: 0,
+    isActive: true,
+  });
+  const [classifiedForm, setClassifiedForm] = useState({
+    title: "",
+    description: "",
+    iconUrl: "",
+    path: "",
+    displayOrder: 0,
+    isActive: true,
+  });
+  const [resourceForm, setResourceForm] = useState({
+    title: "",
+    description: "",
+    iconUrl: "",
+    path: "",
+    displayOrder: 0,
+    isActive: true,
+  });
+  const [heroForm, setHeroForm] = useState({
+  title: "",
+  subtitle: "",
+  ctaLabel: "",
+  ctaLink: "",
+  ctaBackground: "#000000",
+  backgroundColor: "#ffffff",
+  isActive: true,
+});
+
+
+
   const [platformIdeasSearch, setPlatformIdeasSearch] = useState('');
   //const [subscribersList, setSubscribersList] = useState<any>([]);
   //const [subscribersListPagination, setSubscribersListPagination] = useState({
@@ -675,6 +787,7 @@ export default function AdminDashboard() {
     setIsBannerFormOpen(false);
     setEditingBanner(null);
   };
+
   const openBannerForm = (banner?: Banner) => {
     if (banner) {
       setEditingBanner(banner);
@@ -685,7 +798,10 @@ export default function AdminDashboard() {
         redirectUrl: banner.redirectUrl,
         displayOrder: banner.displayOrder,
         isActive: banner.isActive,
-        imageUrl: banner.imageUrl || ""
+        imageUrl: banner.imageUrl || "",
+        backgroundColor: banner.backgroundColor || "#ffffff",
+        textColor: banner.textColor || "#000000",
+        buttonColor: banner.buttonColor || "#ffc501",
       });
     } else {
       setEditingBanner(null);
@@ -696,12 +812,14 @@ export default function AdminDashboard() {
         redirectUrl: "",
         displayOrder: 0,
         isActive: true,
-        imageUrl: ""
+        imageUrl: "",
+        backgroundColor: "#ffffff",
+        textColor: "#000000",
+        buttonColor: "#ffc501",
       });
     }
     setIsBannerFormOpen(true);
   };
-  // Create/update banner mutation
   const saveBannerMutation = useMutation({
     mutationFn: async (banner: Partial<Banner>) => {
       const method = editingBanner ? "PUT" : "POST";
@@ -717,7 +835,7 @@ export default function AdminDashboard() {
         body: JSON.stringify(banner),
         credentials: "include",
       });
-
+      console.log('🧩 Banner save response:', response);
       if (!response.ok) {
         throw new Error("Failed to save banner");
       }
@@ -742,6 +860,552 @@ export default function AdminDashboard() {
       });
     },
   });
+
+  const deleteMenuMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/menus/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete menu");
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/menus"] });
+      toast({
+        title: "Success",
+        description: "Menu deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const handleMenuSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveMenuMutation.mutate(menuForm);
+  }
+  const closeMenuForm = () => {
+    setIsMenuFormOpen(false);
+    setEditingMenu(null);
+  };
+  const openMenuForm = (menu?: Menu) => {
+    if (menu) {
+      setEditingMenu(menu);
+      setMenuForm({
+        label: menu.label,
+        path: menu.path,
+        displayOrder: menu.displayOrder,
+        isActive: menu.isActive,
+        parentId: menu.parentId || null,
+      });
+    } else {
+      setEditingMenu(null);
+      setMenuForm({
+        label: "",
+        path: "",
+        displayOrder: 0,
+        isActive: true,
+        parentId: null,
+      });
+    }
+    setIsMenuFormOpen(true);
+  };
+  const saveMenuMutation = useMutation({
+    mutationFn: async (menu: Partial<Menu>) => {
+      const method = editingMenu ? "PUT" : "POST";
+      const url = editingMenu
+        ? `/api/admin/menus/${editingMenu.id}`
+        : "/api/admin/menus";
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(menu),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save menu");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/menus"] });
+      toast({
+        title: "Success",
+        description: editingMenu
+          ? "Menu updated successfully"
+          : "Menu created successfully",
+      });
+      closeMenuForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+
+  const deleteIconMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/flat-icons/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete icon");
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/flat-icons"] });
+      toast({
+        title: "Success",
+        description: "Icon deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const handleIconSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveIconMutation.mutate(iconForm);
+  }
+  const openIconForm = (icon?: FlatIcon) => {
+    if (icon) {
+      setEditingIcon(icon);
+      setIconForm({
+        label: icon.label,
+        iconUrl: icon.iconUrl,
+        path: icon.path,
+        displayOrder: icon.displayOrder ?? 0,
+        isActive: icon.isActive ?? true,
+      });
+    } else {
+      setEditingIcon(null);
+      setIconForm({
+        label: "",
+        iconUrl: "",
+        path: "",
+        displayOrder: 0,
+        isActive: true,
+      });
+    }
+    setIsIconFormOpen(true);
+  };
+  const saveIconMutation = useMutation({
+    mutationFn: async (icon: Partial<FlatIcon>) => {
+      const method = editingIcon ? "PUT" : "POST";
+      const url = editingIcon
+        ? `/api/admin/flat-icons/${editingIcon.id}`
+        : "/api/admin/flat-icons";
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(icon),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save icon");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/flat-icons"] });
+      toast({
+        title: "Success",
+        description: editingIcon
+          ? "Icon updated successfully"
+          : "Icon created successfully",
+      });
+      closeIconForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const closeIconForm = () => {
+    setIsIconFormOpen(false);
+    setEditingIcon(null);
+  };
+  const handleIconFormChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value, type, checked } = e.target;
+
+    setIconForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox"
+        ? checked
+        : name === "displayOrder"
+          ? Number(value)
+          : value,
+    }));
+  };
+
+  // classifieds management
+  const deleteClassifiedMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/classifieds/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete classified");
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/classifieds"] });
+      toast({
+        title: "Success",
+        description: "Classified deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const openClassifiedForm = (classified?: Classified) => {
+    if (classified) {
+      setEditingClassified(classified);
+      setClassifiedForm({
+        title: classified.title,
+        description: classified.description,
+        iconUrl: classified.iconUrl,
+        path: classified.path,
+        displayOrder: classified.displayOrder,
+        isActive: classified.isActive,
+      });
+    } else {
+      setEditingClassified(null);
+      setClassifiedForm({
+        title: "",
+        description: "",
+        iconUrl: "",
+        path: "",
+        displayOrder: 0,
+        isActive: true,
+      });
+    }
+    setIsClassifiedFormOpen(true);
+  }
+  const saveClassifiedMutation = useMutation({
+    mutationFn: async (classified: Partial<Classified>) => {
+      const method = editingClassified ? "PUT" : "POST";
+      const url = editingClassified
+        ? `/api/admin/classifieds/${editingClassified.id}`
+        : "/api/admin/classifieds";
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(classified),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save classified");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/classifieds"] });
+      toast({
+        title: "Success",
+        description: "Classified saved successfully",
+      });
+      closeClassifiedForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  const closeClassifiedForm = () => {
+    setIsClassifiedFormOpen(false);
+    setEditingClassified(null);
+  };
+  const handleClassifiedSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveClassifiedMutation.mutate(classifiedForm);
+  };
+  const handleClassifiedFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setClassifiedForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox"
+        ? checked
+        : name === "displayOrder"
+          ? Number(value)
+          : value,
+    }));
+  };
+
+  //resource management
+  const deleteResourceMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/resources/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete classified");
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/resources"] });
+      toast({
+        title: "Success",
+        description: "Resource deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const openResourceForm = (resources?: Resources) => {
+    if (resources) {
+      setEditingResource(resources);
+      setResourceForm({
+        title: resources.title,
+        description: resources.description,
+        iconUrl: resources.iconUrl,
+        path: resources.path,
+        displayOrder: resources.displayOrder,
+        isActive: resources.isActive,
+      });
+    } else {
+      setEditingResource(null);
+      setResourceForm({
+        title: "",
+        description: "",
+        iconUrl: "",
+        path: "",
+        displayOrder: 0,
+        isActive: true,
+      });
+    }
+    setIsResourceFormOpen(true);
+  }
+  const saveResourceMutation = useMutation({
+    mutationFn: async (resources: Partial<Resources>) => {
+      const method = editingResource ? "PUT" : "POST";
+      const url = editingResource
+        ? `/api/admin/resources/${editingResource.id}`
+        : "/api/admin/resources";
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(resources),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save classified");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/resources"] });
+      toast({
+        title: "Success",
+        description: "Resources saved successfully",
+      });
+      closeResourceForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  const closeResourceForm = () => {
+    setIsResourceFormOpen(false);
+    setEditingResource(null);
+  };
+  const handleResourceSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveResourceMutation.mutate(resourceForm);
+  };
+  const handleResourceFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setResourceForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox"
+        ? checked
+        : name === "displayOrder"
+          ? Number(value)
+          : value,
+    }));
+  };
+
+  //hero management
+  const deleteHeroMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/heros/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete hero");
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/heros"] });
+      toast({
+        title: "Success",
+        description: "Hero deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const openHeroForm = (hero?: Heros) => {
+  if (hero) {
+    setEditingHero(hero);
+    setHeroForm({
+      title: hero.title,
+      subtitle: hero.subtitle,
+      ctaLabel: hero.cta?.label || "",
+      ctaLink: hero.cta?.link || "",
+      ctaBackground: hero.cta?.backgroundColor || "#000000",
+      backgroundColor: hero.backgroundColor || "#ffffff",
+      isActive: hero.isActive,
+    });
+  } else {
+    setEditingHero(null);
+    setHeroForm({
+      title: "",
+      subtitle: "",
+      ctaLabel: "",
+      ctaLink: "",
+      ctaBackground: "#000000",
+      backgroundColor: "#ffffff",
+      isActive: true,
+    });
+  }
+  setIsHeroFormOpen(true);
+};
+
+  const saveHeroMutation = useMutation({
+    mutationFn: async (hero: Partial<Heros>) => {
+      const method = editingHero ? "PUT" : "POST";
+      const url = editingHero
+        ? `/api/admin/heros/${editingHero.id}`
+        : "/api/admin/heros";
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(hero),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save hero");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/heros"] });
+      toast({
+        title: "Success",
+        description: editingHero
+          ? "Hero updated successfully"
+          : "Hero created successfully",
+      });
+      closeHeroForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const closeHeroForm = () => {
+    setIsHeroFormOpen(false);
+    setEditingHero(null);
+  };
+  const handleHeroSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const payload = {
+    title: heroForm.title.trim(),
+    subtitle: heroForm.subtitle.trim(),
+    cta: {
+      label: heroForm.ctaLabel.trim(),
+      link: heroForm.ctaLink.trim(),
+      backgroundColor: heroForm.ctaBackground,
+    },
+    backgroundColor: heroForm.backgroundColor,
+    isActive: heroForm.isActive,
+  };
+
+  saveHeroMutation.mutate(payload);
+};
+
+  const handleHeroFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setHeroForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox"
+        ? checked
+        : value,
+    }));
+  };
+
+
   const handleIdeaFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const target = e.target;
     const name = target.name;
@@ -824,6 +1488,21 @@ export default function AdminDashboard() {
       case "banner":
         deleteBannerMutation.mutate(itemToDelete.id);
         break;
+      case "menu":
+        deleteMenuMutation.mutate(itemToDelete.id);
+        break;
+      case "icon":
+        deleteIconMutation.mutate(itemToDelete.id);
+        break;
+      case "classified":
+        deleteClassifiedMutation.mutate(itemToDelete.id);
+        break;
+      case "resource":
+        deleteResourceMutation.mutate(itemToDelete.id);
+        break;
+      case "hero":
+        deleteHeroMutation.mutate(itemToDelete.id);
+        break;
       default:
         break;
     }
@@ -837,9 +1516,29 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/me"],
     retry: false,
   });
-const { data: bannersData, isLoading: bannersLoading } = useQuery({
+  const { data: herosData, isLoading: herosLoading } = useQuery({
+    queryKey: ["/api/admin/heros"],
+    enabled: activeTab === "hero",
+  });
+  const { data: bannersData, isLoading: bannersLoading } = useQuery({
     queryKey: ["/api/admin/banners"],
     enabled: activeTab === "banner",
+  });
+  const { data: menusData, isLoading: menusLoading } = useQuery({
+    queryKey: ["/api/admin/menus"],
+    enabled: activeTab === "menu",
+  });
+  const { data: iconsData, isLoading: IconsLoading } = useQuery({
+    queryKey: ["/api/admin/flat-icons"],
+    enabled: activeTab === "icons",
+  });
+  const { data: classifiedsData, isLoading: classifiedsLoading } = useQuery({
+    queryKey: ["/api/admin/classifieds"],
+    enabled: activeTab === "classifieds",
+  });
+  const { data: resourcesData, isLoading: resourcesLoading } = useQuery({
+    queryKey: ["/api/admin/resources"],
+    enabled: activeTab === "resource",
   });
   // Fetch admin stats
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -964,7 +1663,23 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
 
     setBannerForm(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+    }));
+  };
+  const handleMenuFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+    // Convert displayOrder to number
+    if (name === "displayOrder") {
+      value = parseInt(value, 10) || 0;
+    }
+    else if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    }
+    setMenuForm(prev => ({
+      ...prev,
+      [name]: value,
     }));
   };
   // Logout mutation
@@ -1143,7 +1858,11 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
   }
   const ideas = ideasData?.ideas || [];
   const banners = bannersData?.banners || [];
-  // const banners = bannersData?.banners || [];
+  const menus = menusData?.menus || [];
+  const icons = iconsData?.icons || [];
+  const classifieds = classifiedsData?.classifieds || [];
+  const resources = resourcesData?.resources || [];
+  const heros = herosData?.hero || [];
   return (
     <div className="min-h-screen bg-gray-50 text-gray">
       {/* Header */}
@@ -1174,7 +1893,7 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
 
       <div className="container mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-gray-100 py-6">
+          <TabsList className="bg-gray-100 py-6 px-4 rounded-lg flex flex-wrap gap-2 justify-start h-full">
             <TabsTrigger value="overview" className="data-[state=active]:bg-white">
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
@@ -1182,6 +1901,26 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
             <TabsTrigger value="platform-ideas" className="data-[state=active]:bg-white">
               <FileText className="h-4 w-4 mr-2" />
               Platform Ideas
+            </TabsTrigger>
+            <TabsTrigger value="menu" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Menu Management
+            </TabsTrigger>
+            <TabsTrigger value="icons" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Icon Management
+            </TabsTrigger>
+            <TabsTrigger value="hero" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Hero Management
+            </TabsTrigger>
+            <TabsTrigger value="classifieds" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Classifieds Management
+            </TabsTrigger>
+            <TabsTrigger value="resource" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Resource Management
             </TabsTrigger>
             <TabsTrigger value="banner" className="data-[state=active]:bg-white">
               <FileText className="h-4 w-4 mr-2" />
@@ -2163,6 +2902,7 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
               </CardContent>
             </Card>
           </TabsContent>
+          {/* banner Management Tab */}
           <TabsContent value="banner" className="space-y-6">
             <Card className="bg-white ">
               <CardHeader>
@@ -2173,7 +2913,7 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">Banner Management</h2>
-                      <p className="text-sm text-gray-500 mt-1">Manage promotional banners for the homepage</p>
+                      <p className="text-sm text-gray-500 mt-1">Manage promotional banners for the homepagessaa</p>
                     </div>
                     <Button
                       className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
@@ -2298,6 +3038,49 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
                             Active
                           </label>
                         </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Background Color */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Background Color
+                            </label>
+                            <input
+                              type="color"
+                              name="backgroundColor"
+                              value={bannerForm.backgroundColor || "#ffffff"}
+                              onChange={handleBannerFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+
+                          {/* Text Color */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Text Color
+                            </label>
+                            <input
+                              type="color"
+                              name="textColor"
+                              value={bannerForm.textColor || "#000000"}
+                              onChange={handleBannerFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+
+                          {/* Button Color */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Button Color
+                            </label>
+                            <input
+                              type="color"
+                              name="buttonColor"
+                              value={bannerForm.buttonColor || "#ffc501"}
+                              onChange={handleBannerFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+                        </div>
 
                         <div className="flex justify-end gap-2 pt-4">
                           <Button
@@ -2367,6 +3150,1023 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
                                   size="sm"
                                   className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
                                   onClick={() => openDeleteDialog(banner.id, "banner", banner.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Menu Tab */}
+          <TabsContent value="menu" className="space-y-6">
+            <Card className="bg-white ">
+              <CardHeader>
+                <CardTitle className="text-gray">Menu Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Menu Management</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage navigation menus for the application</p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openMenuForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Menu
+                    </Button>
+                  </div>
+                  {isMenuFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingMenu ? "Edit Menu" : "Create New Menu"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeMenuForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+                      <form onSubmit={handleMenuSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Label
+                            </label>
+                            <Input
+                              name="label"
+                              value={menuForm.label}
+                              onChange={handleMenuFormChange}
+                              placeholder="Enter menu name"
+                              className="w-[300px]"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Path
+                            </label>
+                            <Input
+                              name="path"
+                              value={menuForm.path}
+                              onChange={handleMenuFormChange}
+                              placeholder="e.g. /ideas"
+                              className="w-[300px]"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Parent Menu ID (optional)
+                            </label>
+                            <select
+                              name="parentId"
+                              value={menuForm.parentId ?? ""}
+                              onChange={(e) =>
+                                setMenuForm((prev) => ({
+                                  ...prev,
+                                  parentId: e.target.value === "" ? null : e.target.value,
+                                }))
+                              }
+                              className="w-[300px] border rounded px-3 py-2"
+                            >
+                              <option value="">— No Parent (Top Level) —</option>
+
+                              {menus.map((menu) => (
+                                <option key={menu.id} value={menu.id}>
+                                  {menu.label}
+                                </option>
+                              ))}
+                            </select>
+
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={menuForm.displayOrder}
+                              onChange={handleMenuFormChange}
+                              className="w-[300px]"
+                              min="0"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={menuForm.isActive}
+                            onChange={handleMenuFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeMenuForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveMenuMutation.isPending}
+                          >
+                            {saveMenuMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingMenu ? "Update Menu" : "Create Menu"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Menus</p>
+                      {menusLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading menus...</div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {menus.map((menu: Menu) => (
+                            <div key={menu.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{menu.label}</h3>
+                                <div className="flex items-center gap-1">
+                                  {menu.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                Link: {menu.path}
+                              </p>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openMenuForm(menu)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(menu.id, "menu", menu.label)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          {/* Icon Management Tab */}
+          <TabsContent value="icons" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Icon Management</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <div className="space-y-6">
+
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">
+                        Icon Management
+                      </h2>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Manage flat icons (Flaticon) for homepage & sections
+                      </p>
+                    </div>
+
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openIconForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Icon
+                    </Button>
+                  </div>
+
+                  {/* FORM */}
+                  {isIconFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingIcon ? "Edit Icon" : "Create New Icon"}
+                        </h3>
+                        <Button variant="ghost" size="sm" onClick={closeIconForm}>
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      <form onSubmit={handleIconSubmit} className="space-y-4">
+
+                        {/* Label & Path */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Label
+                            </label>
+                            <Input
+                              name="label"
+                              value={iconForm.label}
+                              onChange={handleIconFormChange}
+                              placeholder="Enter icon label"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Path
+                            </label>
+                            <Input
+                              name="path"
+                              value={iconForm.path}
+                              onChange={handleIconFormChange}
+                              placeholder="/classifieds"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Icon URL */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Icon URL (Flaticon)
+                          </label>
+                          <Input
+                            name="iconUrl"
+                            value={iconForm.iconUrl}
+                            onChange={handleIconFormChange}
+                            placeholder="https://cdn-icons-png.flaticon.com/..."
+                            required
+                          />
+                        </div>
+
+                        {/* Preview */}
+                        {iconForm.iconUrl && (
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={iconForm.iconUrl}
+                              alt="Preview"
+                              className="w-10 h-10 object-contain"
+                            />
+                            <span className="text-sm text-gray-500">Preview</span>
+                          </div>
+                        )}
+
+                        {/* Order & Active */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={iconForm.displayOrder}
+                              onChange={handleIconFormChange}
+                              min="0"
+                            />
+                          </div>
+
+                          <div className="flex items-center mt-6">
+                            <input
+                              type="checkbox"
+                              name="isActive"
+                              checked={iconForm.isActive}
+                              onChange={handleIconFormChange}
+                              className="h-4 w-4 text-yellow-400"
+                            />
+                            <label className="ml-2 text-sm">Active</label>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button variant="outline" onClick={closeIconForm}>
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                          >
+                            {editingIcon ? "Update Icon" : "Create Icon"}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    /* LIST */
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {icons.map((icon: FlatIcon) => (
+                        <div
+                          key={icon.id}
+                          className="bg-white border rounded-lg p-6 hover:shadow-md"
+                        >
+                          <div className="flex items-center gap-4 mb-3">
+                            <img
+                              src={icon.iconUrl}
+                              alt={icon.label}
+                              className="w-10 h-10 object-contain"
+                            />
+                            <h3 className="font-semibold">{icon.label}</h3>
+                          </div>
+
+                          <p className="text-sm text-gray-500 mb-4">
+                            {icon.path}
+                          </p>
+
+                          <div className="flex gap-2 pt-4 border-t">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1"
+                              onClick={() => openIconForm(icon)}
+                            >
+                              <Edit className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 text-red-600 border-red-200"
+                              onClick={() =>
+                                openDeleteDialog(icon.id, "icon", icon.label)
+                              }
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          {/* hero section */}
+          <TabsContent value="hero" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Hero Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">
+                        Hero Management
+                      </h2>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Manage hero sections for homepage & sections
+                      </p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openHeroForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Hero
+                    </Button>
+                  </div>
+                  {isHeroFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingHero ? "Edit Hero" : "Create New Hero"}
+                        </h3>
+                        <Button variant="ghost" size="sm" onClick={closeHeroForm}>
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+                      <form onSubmit={handleHeroSubmit} className="space-y-4">
+                        {/* Title */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Title
+                          </label>
+                          <Input
+                            name="title"
+                            value={heroForm.title}
+                            onChange={handleHeroFormChange}
+                            placeholder="Enter hero title"
+                            required
+                          />
+                        </div>
+
+                        {/* Subtitle */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Subtitle
+                          </label>
+                          <textarea
+                            name="subtitle"
+                            value={heroForm.subtitle}
+                            onChange={handleHeroFormChange}
+                            placeholder="Enter hero subtitle"
+                            rows={3}
+                            className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-400"
+                            required
+                          />
+                        </div>
+
+                        {/* CTA Label */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              CTA Label
+                            </label>
+                            <Input
+                              name="ctaLabel"
+                              value={heroForm.ctaLabel}
+                              onChange={handleHeroFormChange}
+                              placeholder="Get Started"
+                              required
+                            />
+                          </div>
+
+                          {/* CTA Link */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              CTA Link
+                            </label>
+                            <Input
+                              name="ctaLink"
+                              value={heroForm.ctaLink}
+                              onChange={handleHeroFormChange}
+                              placeholder="/auth"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* CTA Background */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              CTA Background Color
+                            </label>
+                            <Input
+                              name="ctaBackground"
+                              type="color"
+                              value={heroForm.ctaBackground}
+                              onChange={handleHeroFormChange}
+                            />
+                          </div>
+
+                          {/* Hero Background */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Hero Background Color
+                            </label>
+                            <Input
+                              name="backgroundColor"
+                              type="color"
+                              value={heroForm.backgroundColor}
+                              onChange={handleHeroFormChange}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Active Toggle */}
+                        <div className="flex items-center gap-2 pt-2">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={heroForm.isActive}
+                            onChange={handleHeroFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded"
+                          />
+                          <label htmlFor="isActive" className="text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button type="button" variant="outline" onClick={closeHeroForm}>
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveHeroMutation.isPending}
+                          >
+                            {saveHeroMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingHero ? "Update Hero" : "Create Hero"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Heros</p>
+                      {herosLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading heros...</div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {heros.map((hero: Heros) => (
+                            <div key={hero.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{hero.title}</h3>
+                                <div className="flex items-center gap-1">
+                                  {hero.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                {hero.subtitle}
+                              </p>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openHeroForm(hero)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(hero.id, "hero", hero.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* classifieds Management Tab */}
+          <TabsContent value="classifieds" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Classified Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">
+                        Classifieds Management
+                      </h2>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Manage classifieds for homepage & sections
+                      </p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openClassifiedForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Classified
+                    </Button>
+                  </div>
+                  {isClassifiedFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingClassified ? "Edit Classified" : "Create New Classified"}
+                        </h3>
+                        <Button variant="ghost" size="sm" onClick={closeClassifiedForm}>
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+                      <form onSubmit={handleClassifiedSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Title
+                            </label>
+                            <Input
+                              name="title"
+                              value={classifiedForm.title}
+                              onChange={handleClassifiedFormChange}
+                              placeholder="Enter classified title"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Path
+                            </label>
+                            <Input
+                              name="path"
+                              value={classifiedForm.path}
+                              onChange={handleClassifiedFormChange}
+                              placeholder="e.g. /classifieds"
+                              className="w-[300px]"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            name="description"
+                            value={classifiedForm.description}
+                            onChange={handleClassifiedFormChange}
+                            placeholder="Enter classified description"
+                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Icon URL (Flaticon)
+                          </label>
+                          <Input
+                            name="iconUrl"
+                            value={classifiedForm.iconUrl}
+                            onChange={handleClassifiedFormChange}
+                            placeholder="https://cdn-icons-png.flaticon.com/..."
+                            required
+                          />
+                        </div>
+
+                        {/* Preview */}
+                        {classifiedForm.iconUrl && (
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={classifiedForm.iconUrl}
+                              alt="Preview"
+                              className="w-10 h-10 object-contain"
+                            />
+                            <span className="text-sm text-gray-500">Preview</span>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={classifiedForm.displayOrder}
+                              onChange={handleClassifiedFormChange}
+                              className="w-[300px]"
+                              min="0"
+                            />
+                          </div>
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id="isActive"
+                              name="isActive"
+                              checked={classifiedForm.isActive}
+                              onChange={handleClassifiedFormChange}
+                              className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                            />
+                            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                              Active
+                            </label>
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeClassifiedForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveClassifiedMutation.isPending}
+                          >
+                            {saveClassifiedMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingClassified ? "Update Classified" : "Create Classified"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Classifieds</p>
+                      {classifiedsLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading classifieds...</div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {classifieds.map((classified: Classified) => (
+                            <div key={classified.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center gap-4">
+                                  <img
+                                    src={classified.iconUrl}
+                                    alt={classified.title}
+                                    className="w-10 h-10 object-contain"
+                                  />
+                                  <h3 className="font-semibold text-gray-900 text-base">{classified.title}</h3>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {classified.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                {classified.description}
+                              </p>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openClassifiedForm(classified)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(classified.id, "classified", classified.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          {/* resourse Management Tab */}
+          <TabsContent value="resource" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Resource Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">
+                        Resource Management
+                      </h2>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Manage Resource for homepage & sections
+                      </p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openResourceForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Resource
+                    </Button>
+                  </div>
+                  {isResourceFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingResource ? "Edit Resource" : "Create New Resource"}
+                        </h3>
+                        <Button variant="ghost" size="sm" onClick={closeResourceForm}>
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+                      <form onSubmit={handleResourceSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Title
+                            </label>
+                            <Input
+                              name="title"
+                              value={resourceForm.title}
+                              onChange={handleResourceFormChange}
+                              placeholder="Enter resource title"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Path
+                            </label>
+                            <Input
+                              name="path"
+                              value={resourceForm.path}
+                              onChange={handleResourceFormChange}
+                              placeholder="e.g. /resource"
+                              className="w-[300px]"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            name="description"
+                            value={resourceForm.description}
+                            onChange={handleResourceFormChange}
+                            placeholder="Enter resource description"
+                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Icon URL (Flaticon)
+                          </label>
+                          <Input
+                            name="iconUrl"
+                            value={resourceForm.iconUrl}
+                            onChange={handleResourceFormChange}
+                            placeholder="https://cdn-icons-png.flaticon.com/..."
+                            required
+                          />
+                        </div>
+
+                        {/* Preview */}
+                        {resourceForm.iconUrl && (
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={resourceForm.iconUrl}
+                              alt="Preview"
+                              className="w-10 h-10 object-contain"
+                            />
+                            <span className="text-sm text-gray-500">Preview</span>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={resourceForm.displayOrder}
+                              onChange={handleResourceFormChange}
+                              className="w-[300px]"
+                              min="0"
+                            />
+                          </div>
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id="isActive"
+                              name="isActive"
+                              checked={resourceForm.isActive}
+                              onChange={handleResourceFormChange}
+                              className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                            />
+                            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                              Active
+                            </label>
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeClassifiedForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveResourceMutation.isPending}
+                          >
+                            {saveResourceMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingResource ? "Update Resource" : "Create Resource"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Resource</p>
+                      {resourcesLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading Resources...</div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {resources.map((resource: Resources) => (
+                            <div key={resource.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center gap-4">
+                                  <img
+                                    src={resource.iconUrl}
+                                    alt={resource.title}
+                                    className="w-10 h-10 object-contain"
+                                  />
+                                  <h3 className="font-semibold text-gray-900 text-base">{resource.title}</h3>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {resource.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                {resource.description}
+                              </p>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openResourceForm(resource)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(resource.id, "resource", resource.title)}
                                 >
                                   <Trash2 className="h-3 w-3 mr-1" />
                                   Delete
@@ -2490,6 +4290,7 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
               </CardContent>
             </Card>
           </TabsContent>
+
 
           {/* Upload Ideas Tab */}
           <TabsContent value="upload" className="space-y-6">
@@ -3319,24 +5120,37 @@ const { data: bannersData, isLoading: bannersLoading } = useQuery({
                   deleteUserMutation.isPending ||
                   deletePlatformIdeaMutation.isPending ||
                   deleteSubmittedIdeaMutation.isPending ||
-                  deleteBookmarkMutation.isPending
+                  deleteBookmarkMutation.isPending ||
+                  deleteBannerMutation.isPending ||
+                  deleteMenuMutation.isPending ||
+                  deleteIconMutation.isPending ||
+                  deleteClassifiedMutation.isPending ||
+                  deleteResourceMutation.isPending ||
+                  deleteHeroMutation.isPending
                 }
               >
                 {deleteSubscriberMutation.isPending ||
                   deleteUserMutation.isPending ||
                   deletePlatformIdeaMutation.isPending ||
                   deleteSubmittedIdeaMutation.isPending ||
-                  deleteBookmarkMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </>
-                )}
+                  deleteBookmarkMutation.isPending ||
+                  deleteBannerMutation.isPending ||
+                  deleteMenuMutation.isPending ||
+                  deleteIconMutation.isPending ||
+                  deleteClassifiedMutation.isPending ||
+                  deleteResourceMutation.isPending ||
+                  deleteHeroMutation.isPending
+                  ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </>
+                  )}
               </Button>
             </div>
           </div>

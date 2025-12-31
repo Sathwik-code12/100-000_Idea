@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { int } from "drizzle-orm/mysql-core";
-import { pgTable, text, varchar, timestamp, json, index, boolean, integer, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, json, index, boolean, integer, numeric, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -615,6 +615,9 @@ export const banners = pgTable("banners", {
   displayOrder: integer("display_order").default(0),
   isActive: boolean("is_active").default(true),
   imageUrl: text("image_url"),
+  backgroundColor: varchar("background_color", { length: 20 }).default("#ffffff"),
+  textColor: varchar("text_color", { length: 20 }).default("#000000"),
+  buttonColor: varchar("button_color", { length: 20 }).default("#ffc501"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
@@ -629,6 +632,20 @@ export const insertBannerSchema = createInsertSchema(banners, {
   buttonText: z.string().min(1, "Button text is required"),
   redirectUrl: z.string().min(1, "Redirect URL is required"), // Removed .url() validation
   displayOrder: z.number().min(0, "Display order must be a positive number"),
+  backgroundColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Invalid background color")
+    .optional(),
+
+  textColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Invalid text color")
+    .optional(),
+
+  buttonColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Invalid button color")
+    .optional(),
 }).omit({ id: true, createdAt: true, updatedAt: true });
 
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
@@ -660,3 +677,178 @@ export const insertIdeaReviewSchema = createInsertSchema(ideaReviews, {
 // Types
 export type InsertIdeaReview = z.infer<typeof insertIdeaReviewSchema>;
 export type IdeaReview = typeof ideaReviews.$inferSelect;
+
+
+export const menus = pgTable(
+  "menus",
+  {
+    id: varchar("id").primaryKey(),
+    label: text("label").notNull(),          // Menu name (Home, Classifieds)
+    path: text("path").notNull(),            // /classifieds, /resources
+    displayOrder: integer("display_order").default(0),
+    isActive: boolean("is_active").default(true),
+    // 🔹 Optional (future dropdown support)
+    parentId: varchar("parent_id"),          // self reference (nullable)
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    orderIdx: index("menus_display_order_idx").on(table.displayOrder),
+    activeIdx: index("menus_active_idx").on(table.isActive),
+  })
+);
+
+export const insertMenuSchema = createInsertSchema(menus, {
+  label: z.string().min(1, "Menu label is required"),
+  path: z.string().min(1, "Path is required"),
+  displayOrder: z.number().min(0, "Display order must be positive"),
+  parentId: z.string().nullable().optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMenu = z.infer<typeof insertMenuSchema>;
+export type Menu = typeof menus.$inferSelect;
+
+
+
+export const flatIcons = pgTable(
+  "flat_icons",
+  {
+    id: varchar("id").primaryKey(),
+    label: text("label").notNull(),
+    iconUrl: text("icon_url").notNull(),
+    path: text("path").notNull(),
+    displayOrder: integer("display_order").default(0),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    orderIdx: index("flat_icons_order_idx").on(table.displayOrder),
+    activeIdx: index("flat_icons_active_idx").on(table.isActive),
+  })
+);
+
+
+
+export const insertFlatIconSchema = createInsertSchema(flatIcons, {
+  label: z.string().min(1, "Label is required"),
+  iconUrl: z.string().url("Invalid icon URL"),
+  path: z.string().min(1, "Path is required"),
+  displayOrder: z.number().min(0),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertFlatIcon = z.infer<typeof insertFlatIconSchema>;
+export type FlatIcon = typeof flatIcons.$inferSelect;
+
+
+
+
+export const classifieds = pgTable(
+  "classifieds",
+  {
+    id: varchar("id").primaryKey(),
+    title: varchar("title", { length: 255 }).notNull(),
+    description: text("description").notNull(),
+    iconUrl: text("icon_url"),
+    path: varchar("path", { length: 255 }).notNull(),
+    displayOrder: integer("display_order").default(0),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    orderIdx: index("classifieds_display_order_idx").on(table.displayOrder),
+    activeIdx: index("classifieds_active_idx").on(table.isActive),
+  })
+);
+export const insertClassifiedSchema = createInsertSchema(classifieds, {
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  iconUrl: z.string().url("Invalid icon URL").optional(),
+  displayOrder: z.number().min(0, "Display order must be positive"),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertClassified = z.infer<typeof insertClassifiedSchema>;
+export type Classified = typeof classifieds.$inferSelect;
+
+
+export const resources = pgTable(
+  "resources",
+  {
+    id: varchar("id").primaryKey(),
+    title: varchar("title", { length: 255 }).notNull(),
+    description: text("description").notNull(),
+    iconUrl: text("icon_url"),
+    path: varchar("path", { length: 255 }).notNull(),
+    displayOrder: integer("display_order").default(0),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    orderIdx: index("resources_display_order_idx").on(table.displayOrder),
+    activeIdx: index("resources_active_idx").on(table.isActive),
+  })
+);
+export const insertResourceSchema = createInsertSchema(resources, {
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  iconUrl: z.string().url("Invalid icon URL").optional(),
+  displayOrder: z.number().min(0, "Display order must be positive"),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertResource = z.infer<typeof insertResourceSchema>;
+export type Resources = typeof resources.$inferSelect;
+
+
+export const hero = pgTable("hero", {
+  id: varchar("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  subtitle: text("subtitle").notNull(),
+  cta: jsonb("cta").$type<{
+    label: string;
+    link: string;
+    backgroundColor?: string;
+  }>(),
+  backgroundColor: varchar("background_color", { length: 50 }).default("#ffffff"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertHeroSchema = createInsertSchema(hero, {
+  title: z.string().min(1, "Title is required"),
+  subtitle: z.string().min(1, "Subtitle is required"),
+
+  cta: z.object({
+    label: z.string().min(1),
+    link: z.string().min(1),
+    backgroundColor: z.string().optional(),
+  }),
+
+  backgroundColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Invalid background color")
+    .optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertHero = z.infer<typeof insertHeroSchema>;
+export type Hero = typeof hero.$inferSelect;
