@@ -75,12 +75,31 @@ export default function RightSidebar() {
     }
   ];
 
-    const { data: banner } = useQuery({
+  const {data: classifiedsData} = useQuery({
+    queryKey: ["/api/admin/classifieds"],
+  }) as { data?: { classifieds: any[] } };
+  
+  console.log("Classifieds Data:", classifiedsData);
+
+  const timeAgo = (date: string) => {
+    const diff = Date.now() - new Date(date).getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours < 1) return "Just now";
+    if (hours < 24) return `${hours} hours ago`;
+    return `${Math.floor(hours / 24)} days ago`;
+  };
+  const {data: resourcesData} = useQuery({
+    queryKey: ["/api/admin/resources"],
+  }) as { data?: { resources: any[] } };
+  
+  console.log("resourcesData Data:", resourcesData);
+
+  const { data: banner } = useQuery({
     queryKey: ["/api/admin/banners"],
   });
 
 
-    const nextSlide = () => {
+  const nextSlide = () => {
     if (!banner?.banners?.length) return;
     setCurrentSlide((prev) => (prev + 1) % banner.banners.length);
   };
@@ -99,6 +118,8 @@ export default function RightSidebar() {
 
     return () => clearInterval(interval);
   }, [banner?.banners?.length]);
+
+  
   return (
     <div className="w-full space-y-4 lg:space-y-6">
       {/* Classifieds Section */}
@@ -109,24 +130,54 @@ export default function RightSidebar() {
           </h3>
         </div>
         <div className="p-4 space-y-4">
-          {classifieds.map((item, index) => (
-            <div key={index} className="border-b border-gray-100 last:border-b-0 pb-3 last:pb-0">
+        
+        {classifiedsData?.classifieds?.length === 0 ? (
+          <p className="text-gray-500 text-sm">No classifieds yet. Stay tuned!</p>
+        ) : (
+          classifiedsData?.classifieds?.map((item: any) => (
+            <div
+              key={item.id}
+              className="border-b border-gray-100 last:border-b-0 pb-3 last:pb-0"
+            >
               <div className="flex items-start space-x-3">
-                {item.icon}
+
+                {/* ✅ Flaticon icon */}
+                {item.iconUrl && (
+                  <img
+                    src={item.iconUrl}
+                    alt={item.title}
+                    className="w-4 h-4 mt-1 object-contain"
+                  />
+                )}
+
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 text-sm">{item.title}</h4>
-                  <p className="text-gray-600 text-xs mt-1">{item.description}</p>
+                  <h4 className="font-medium text-gray-900 text-sm">
+                    {item.title}
+                  </h4>
+
+                  <p className="text-gray-600 text-xs mt-1">
+                    {item.description}
+                  </p>
+
                   <div className="flex items-center mt-2">
                     <Clock className="w-3 h-3 text-gray-400 mr-1" />
-                    <span className="text-gray-400 text-xs">{item.timeAgo}</span>
+                    <span className="text-gray-400 text-xs">
+                      {timeAgo(item.createdAt)}
+                    </span>
                   </div>
                 </div>
-                <Link href={item.link}>
-                <ChevronRight className="w-4 h-4 text-gray-400" /></Link>
+
+                {/* ✅ Path from API */}
+                <Link href={item.path}>
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </Link>
+
               </div>
             </div>
-          ))}
-        </div>
+          ))
+        )}
+      </div>
+
       </div>
 
       {/* Resources Section */}
@@ -137,24 +188,52 @@ export default function RightSidebar() {
           </h3>
         </div>
         <div className="p-4 space-y-4">
-          {resources.map((item, index) => (
-            <div key={index} className="border-b border-gray-100 last:border-b-0 pb-3 last:pb-0">
-              <div className="flex items-start space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded -m-2 transition-colors">
-                {item.icon}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 text-sm">{item.title}</h4>
-                  <p className="text-gray-600 text-xs mt-1">{item.description}</p>
+          {resourcesData?.resources?.length === 0 ? (
+              <p className="text-gray-500 text-sm">No Resources yet. Stay tuned!</p>
+            ) : (
+              resourcesData?.resources.map((item: any) => (
+              <div
+                key={item?.id}
+                className="border-b border-gray-100 last:border-b-0 pb-3 last:pb-0"
+              >
+                <div className="flex items-start space-x-3">
+
+                  {/* ✅ Flaticon icon */}
+                  <img
+                    src={item?.iconUrl}
+                    alt={item?.title}
+                    className="w-4 h-4 mt-1 object-contain"
+                  />
+
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-gray-900 text-sm">
+                      {item?.title}
+                    </h4>
+
+                    <p className="text-gray-600 text-xs mt-1">
+                      {item?.description}
+                    </p>
+                  </div>
+
+                  {/* ✅ Use `path` from API */}
+                  <Link href={item?.path}>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </Link>
+
                 </div>
-                <Link href={item.link}>
-                <ChevronRight className="w-4 h-4 text-gray-400" /></Link>
               </div>
-            </div>
-          ))}
+              ))
+            )}
         </div>
       </div>
 
       <div className="relative">
-             <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden min-h-[320px] flex flex-col justify-center">
+             <div className="rounded-3xl p-10 shadow-2xl relative overflow-hidden min-h-[320px] flex flex-col justify-center transition-all duration-500"
+                style={{
+                  backgroundColor: banner?.banners[currentSlide]?.backgroundColor || "#ffffff",
+                  color: banner?.banners[currentSlide]?.textColor || "#000000",
+                }}
+              >
                {/* Decorative dots */}
                <div className="absolute top-6 right-6 flex gap-1.5">
                  {banner?.banners?.map((_: any, index: number) => (
@@ -194,22 +273,22 @@ export default function RightSidebar() {
                   {banner?.banners[currentSlide]?.imageUrl}
                 </div>
 
-                <h2 className="text-4xl font-bold mb-5 leading-tight">
+                <h2 className="text-4xl font-bold mb-5 leading-tight" style={{ color: banner?.banners[currentSlide]?.textColor }}>
                   {banner?.banners[currentSlide]?.title}
                 </h2>
 
-                <p className="text-blue-100 mb-8 text-base leading-relaxed px-4">
+                <p className="mb-8 text-base leading-relaxed px-4" style={{ color: banner?.banners[currentSlide]?.textColor }}>
                   {banner?.banners[currentSlide]?.description}
                 </p>
 
-                <Button className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 px-7 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 text-base flex items-center gap-2 mx-auto">
+                <Button className=" px-7 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 text-base flex items-center gap-2 mx-auto" style={{backgroundColor: banner?.banners[currentSlide]?.buttonColor || "#ffc501",color: banner?.banners[currentSlide]?.textColor || "#000000",}}>
                   {banner?.banners[currentSlide]?.buttonText}
                   <span className="text-lg">→</span>
                 </Button>
               </div>
             </div>
-          </div>
-        </div>
+      </div>
+    </div>
   );
 }
 // import { Lightbulb, Eye, MessageSquare, FileText, TrendingUp, BarChart3, Scale, UserCheck, BookOpen, ChevronRight, Users, Star } from "lucide-react";
