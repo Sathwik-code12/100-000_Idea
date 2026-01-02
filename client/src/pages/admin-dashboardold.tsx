@@ -334,6 +334,8 @@ export default function AdminDashboard() {
     path: "",
     displayOrder: 0,
     isActive: true,
+    iconFile: null,
+    previewUrl: "",
   });
   const [classifiedForm, setClassifiedForm] = useState({
     title: "",
@@ -352,14 +354,14 @@ export default function AdminDashboard() {
     isActive: true,
   });
   const [heroForm, setHeroForm] = useState({
-  title: "",
-  subtitle: "",
-  ctaLabel: "",
-  ctaLink: "",
-  ctaBackground: "#000000",
-  backgroundColor: "#ffffff",
-  isActive: true,
-});
+    title: "",
+    subtitle: "",
+    ctaLabel: "",
+    ctaLink: "",
+    ctaBackground: "#000000",
+    backgroundColor: "#ffffff",
+    isActive: true,
+  });
 
 
 
@@ -998,6 +1000,8 @@ export default function AdminDashboard() {
         path: icon.path,
         displayOrder: icon.displayOrder ?? 0,
         isActive: icon.isActive ?? true,
+        iconFile: null,
+        previewUrl: icon.iconUrl,
       });
     } else {
       setEditingIcon(null);
@@ -1007,24 +1011,42 @@ export default function AdminDashboard() {
         path: "",
         displayOrder: 0,
         isActive: true,
+        iconFile: null,
+        previewUrl: "",
       });
     }
     setIsIconFormOpen(true);
   };
   const saveIconMutation = useMutation({
     mutationFn: async (icon: Partial<FlatIcon>) => {
+      const formData = new FormData();
+
+      // Add all form fields to FormData
+      formData.append('label', icon.label || '');
+      formData.append('path', icon.path || '');
+      formData.append('displayOrder', String(icon.displayOrder || 0));
+      formData.append('isActive', String(icon.isActive || true));
+
+      // If there's a file, append it
+      if (icon.iconFile) {
+        formData.append('iconUrl', icon.iconFile);
+      } else if (icon.iconUrl) {
+        // If no file but there's a URL, send it
+        formData.append('iconUrl', icon.iconUrl);
+      }
+
       const method = editingIcon ? "PUT" : "POST";
       const url = editingIcon
         ? `/api/admin/flat-icons/${editingIcon.id}`
         : "/api/admin/flat-icons";
+
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(icon),
+        body: formData, // Send FormData instead of JSON
         credentials: "include",
+        // Don't set Content-Type header when sending FormData
       });
+
       if (!response.ok) {
         throw new Error("Failed to save icon");
       }
@@ -1049,22 +1071,39 @@ export default function AdminDashboard() {
     },
   });
   const closeIconForm = () => {
+    if (iconForm.previewUrl && iconForm.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(iconForm.previewUrl);
+    }
     setIsIconFormOpen(false);
     setEditingIcon(null);
   };
   const handleIconFormChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
 
-    setIconForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox"
-        ? checked
-        : name === "displayOrder"
-          ? Number(value)
-          : value,
-    }));
+    // Handle file upload
+    if (type === "file" && files && files.length > 0) {
+      const file = files[0];
+
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+
+      setIconForm((prev) => ({
+        ...prev,
+        iconFile: file,
+        previewUrl: previewUrl,
+      }));
+    } else {
+      setIconForm((prev) => ({
+        ...prev,
+        [name]: type === "checkbox"
+          ? checked
+          : name === "displayOrder"
+            ? Number(value)
+            : value,
+      }));
+    }
   };
 
   // classifieds management
@@ -1310,31 +1349,31 @@ export default function AdminDashboard() {
     },
   });
   const openHeroForm = (hero?: Heros) => {
-  if (hero) {
-    setEditingHero(hero);
-    setHeroForm({
-      title: hero.title,
-      subtitle: hero.subtitle,
-      ctaLabel: hero.cta?.label || "",
-      ctaLink: hero.cta?.link || "",
-      ctaBackground: hero.cta?.backgroundColor || "#000000",
-      backgroundColor: hero.backgroundColor || "#ffffff",
-      isActive: hero.isActive,
-    });
-  } else {
-    setEditingHero(null);
-    setHeroForm({
-      title: "",
-      subtitle: "",
-      ctaLabel: "",
-      ctaLink: "",
-      ctaBackground: "#000000",
-      backgroundColor: "#ffffff",
-      isActive: true,
-    });
-  }
-  setIsHeroFormOpen(true);
-};
+    if (hero) {
+      setEditingHero(hero);
+      setHeroForm({
+        title: hero.title,
+        subtitle: hero.subtitle,
+        ctaLabel: hero.cta?.label || "",
+        ctaLink: hero.cta?.link || "",
+        ctaBackground: hero.cta?.backgroundColor || "#000000",
+        backgroundColor: hero.backgroundColor || "#ffffff",
+        isActive: hero.isActive,
+      });
+    } else {
+      setEditingHero(null);
+      setHeroForm({
+        title: "",
+        subtitle: "",
+        ctaLabel: "",
+        ctaLink: "",
+        ctaBackground: "#000000",
+        backgroundColor: "#ffffff",
+        isActive: true,
+      });
+    }
+    setIsHeroFormOpen(true);
+  };
 
   const saveHeroMutation = useMutation({
     mutationFn: async (hero: Partial<Heros>) => {
@@ -1378,22 +1417,22 @@ export default function AdminDashboard() {
     setEditingHero(null);
   };
   const handleHeroSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const payload = {
-    title: heroForm.title.trim(),
-    subtitle: heroForm.subtitle.trim(),
-    cta: {
-      label: heroForm.ctaLabel.trim(),
-      link: heroForm.ctaLink.trim(),
-      backgroundColor: heroForm.ctaBackground,
-    },
-    backgroundColor: heroForm.backgroundColor,
-    isActive: heroForm.isActive,
+    const payload = {
+      title: heroForm.title.trim(),
+      subtitle: heroForm.subtitle.trim(),
+      cta: {
+        label: heroForm.ctaLabel.trim(),
+        link: heroForm.ctaLink.trim(),
+        backgroundColor: heroForm.ctaBackground,
+      },
+      backgroundColor: heroForm.backgroundColor,
+      isActive: heroForm.isActive,
+    };
+
+    saveHeroMutation.mutate(payload);
   };
-
-  saveHeroMutation.mutate(payload);
-};
 
   const handleHeroFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -3431,29 +3470,56 @@ export default function AdminDashboard() {
                           </div>
                         </div>
 
-                        {/* Icon URL */}
                         <div>
                           <label className="block text-sm font-medium mb-1">
-                            Icon URL (Flaticon)
+                            Icon Image
                           </label>
-                          <Input
-                            name="iconUrl"
-                            value={iconForm.iconUrl}
-                            onChange={handleIconFormChange}
-                            placeholder="https://cdn-icons-png.flaticon.com/..."
-                            required
-                          />
+                          <div className="space-y-3">
+                            <Input
+                              name="iconUrl"
+                              value={iconForm.iconUrl}
+                              onChange={handleIconFormChange}
+                              placeholder="https://cdn-icons-png.flaticon.com/..."
+                              disabled={!!iconForm.iconFile} // Disable if file is selected
+                            />
+
+                            <div className="text-sm text-gray-500">OR</div>
+
+                            <Input
+                              name="iconFile"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleIconFormChange}
+                            />
+                          </div>
                         </div>
 
                         {/* Preview */}
-                        {iconForm.iconUrl && (
+                        {(iconForm.previewUrl || iconForm.iconUrl) && (
                           <div className="flex items-center gap-3">
                             <img
-                              src={iconForm.iconUrl}
+                              src={iconForm.previewUrl || iconForm.iconUrl}
                               alt="Preview"
                               className="w-10 h-10 object-contain"
                             />
                             <span className="text-sm text-gray-500">Preview</span>
+                            {iconForm.iconFile && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  URL.revokeObjectURL(iconForm.previewUrl);
+                                  setIconForm(prev => ({
+                                    ...prev,
+                                    iconFile: null,
+                                    previewUrl: "",
+                                  }));
+                                }}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            )}
                           </div>
                         )}
 

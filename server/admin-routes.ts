@@ -760,25 +760,56 @@ router.get("/flat-icons", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch icons" });
   }
 });
-
-router.post("/flat-icons", requireAdminAuth, async (req, res) => {
+const uploads = multer({ 
+  storage: multer.memoryStorage(), // Store files in memory
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
+});
+router.post("/flat-icons", requireAdminAuth, uploads.single('iconUrl'), async (req, res) => {
   try {
-    const data = insertFlatIconSchema.parse(req.body);
-    const icon = await adminStorage.createFlatIcon(data);
+    // Extract data from the form
+    const data = {
+      label: req.body.label,
+      path: req.body.path,
+      displayOrder: parseInt(req.body.displayOrder),
+      isActive: req.body.isActive === 'true',
+      iconUrl: req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : req.body.iconUrl,
+    };
+    
+    // Validate the data
+    const validatedData = insertFlatIconSchema.parse(data);
+    
+    // Create the icon
+    const icon = await adminStorage.createFlatIcon(validatedData);
     res.json(icon);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: "Invalid data" });
   }
 });
 
-router.put("/flat-icons/:id", requireAdminAuth, async (req, res) => {
+router.put("/flat-icons/:id", requireAdminAuth, uploads.single('iconUrl'), async (req, res) => {
   try {
-    const updates = insertFlatIconSchema.partial().parse(req.body);
-    const icon = await adminStorage.updateFlatIcon(req.params.id, updates);
-
-    if (!icon) return res.status(404).json({ error: "Not found" });
+    const { id } = req.params;
+    
+    // Extract data from the form
+    const data = {
+      label: req.body.label,
+      path: req.body.path,
+      displayOrder: parseInt(req.body.displayOrder),
+      isActive: req.body.isActive === 'true',
+      iconUrl: req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : req.body.iconUrl,
+    };
+    
+    // Validate the data
+    const validatedData = insertFlatIconSchema.parse(data);
+    
+    // Update the icon
+    const icon = await adminStorage.updateFlatIcon(id, validatedData);
     res.json(icon);
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.status(400).json({ error: "Invalid data" });
   }
 });
