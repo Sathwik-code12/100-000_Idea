@@ -74,16 +74,16 @@
 //           },
 //         });
 //         console.log('Fetched search response:', response.results);
-        
+
 //         // Check if results are empty
 //         const hasResults = response.results && response.results.length > 0;
 //         setShowNoResults(!hasResults);
-        
+
 //         // Update the parent component with search results
 //         if (onSearchResults) {
 //           onSearchResults(response.results || []);
 //         }
-        
+
 //         setHasSearched(true);
 //         setUsersPagination(response.pagination);
 //         return response;
@@ -100,13 +100,13 @@
 //   const handleSearch = (e: React.FormEvent) => {
 //     e.preventDefault();
 //     console.log("Searching for:", { searchTerm, selectedCategory, selectedLocation });
-    
+
 //     // Reset pagination to page 1 for new search
 //     setUsersPagination(prev => ({ ...prev, page: 1 }));
-    
+
 //     // Invalidate any previous search queries
 //     queryClient.invalidateQueries({ queryKey: ["searchResults"] });
-    
+
 //     // Execute search with current parameters
 //     searchMutation.mutate({ 
 //       searchstr: searchTerm, 
@@ -254,6 +254,8 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
   const [selectedLocation, setSelectedLocation] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [showNoResults, setShowNoResults] = useState(false);
+  const [suggestions, setSuggestions] = useState<IdeaCard[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
@@ -267,14 +269,14 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
   const queryClient = useQueryClient();
 
   const searchMutation = useMutation({
-    mutationFn: async ({ 
-      searchstr, 
-      category, 
+    mutationFn: async ({
+      searchstr,
+      category,
       location,
-      page = 1 
-    }: { 
-      searchstr: string; 
-      category: string; 
+      page = 1
+    }: {
+      searchstr: string;
+      category: string;
       location: string;
       page?: number;
     }) => {
@@ -291,16 +293,16 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
           },
         });
         console.log('Fetched search response:', response.results);
-        
+
         // Check if results are empty
         const hasResults = response.results && response.results.length > 0;
         setShowNoResults(!hasResults);
-        
+
         // Update the parent component with search results
         if (onSearchResults) {
           onSearchResults(response.results || []);
         }
-        
+
         setHasSearched(true);
         setUsersPagination(response.pagination);
         return response;
@@ -317,17 +319,17 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Searching for:", { searchTerm, selectedCategory, selectedLocation });
-    
+
     // Reset pagination to page 1 for new search
     setUsersPagination(prev => ({ ...prev, page: 1 }));
-    
+
     // Invalidate any previous search queries
     queryClient.invalidateQueries({ queryKey: ["searchResults"] });
-    
+
     // Execute search with current parameters
-    searchMutation.mutate({ 
-      searchstr: searchTerm, 
-      category: selectedCategory, 
+    searchMutation.mutate({
+      searchstr: searchTerm,
+      category: selectedCategory,
       location: selectedLocation,
       page: 1
     });
@@ -341,6 +343,29 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
     setShowNoResults(false);
     onClearSearch();
   };
+  const fetchSuggestions = async (value: string) => {
+    if (!value.trim()) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    try {
+      const res: any = await apiRequestWithPage("GET", "/api/search", {
+        params: {
+          search: value,
+          page: 1,
+          pageSize: 5, // 👈 only few suggestions
+        },
+      });
+
+      setSuggestions(res.results || []);
+      setShowSuggestions(true);
+    } catch (err) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
 
   return (
     <section className="bg-blue-600 py-3">
@@ -353,9 +378,42 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
               type="text"
               placeholder="Search ideas..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchTerm(value);
+                fetchSuggestions(value); // 👈 autosuggest call
+              }}
+              onFocus={() => suggestions.length && setShowSuggestions(true)}
               className="pl-10 pr-3 py-2.5 text-sm lg:text-base border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
             />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+                <ul className="max-h-60 overflow-y-auto">
+                  {suggestions.map((item) => (
+                    <li
+                      key={item.id}
+                      className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
+                      onClick={() => {
+                        setSearchTerm(item.title);
+                        setShowSuggestions(false);
+
+                        searchMutation.mutate({
+                          searchstr: item.title,
+                          category: selectedCategory,
+                          location: selectedLocation,
+                          page: 1,
+                        });
+                      }}
+                    >
+                      <div className="font-medium">{item.title}</div>
+                      <div className="text-xs text-gray-500">
+                        {item.category} • {item.difficulty}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Category Select */}
@@ -429,6 +487,9 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
             </Alert>
           </div>
         )}
+
+
+
       </div>
     </section>
   );

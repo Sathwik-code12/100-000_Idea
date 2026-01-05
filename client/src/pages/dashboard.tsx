@@ -26,7 +26,8 @@ import {
   Edit,
   X,
   Check,
-  Lock
+  Lock,
+  Link
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -310,7 +311,9 @@ export default function EnhancedDashboard() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Please Sign In</h1>
           <p className="text-gray-600 mb-8">You need to be logged in to access the dashboard.</p>
-          <Button>Sign In</Button>
+          
+              <Button><a href="/auth">Sign In</a></Button>
+          
         </div>
       </div>
     );
