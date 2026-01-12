@@ -98,7 +98,7 @@ export default function CategoryNavigation() {
     // </section>
     <section className="bg-gradient-to-r from-gray-50 to-white py-4 border-b border-gray-200 w-full relative z-0">
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-        <div className="flex justify-center space-x-4 sm:space-x-8 overflow-x-auto">
+        <div className="flex justify-center space-x-8 sm:space-x-8 overflow-x-auto">
 
           {icons.length === 0 ? (
             <p className="text-sm text-gray-500">
@@ -120,18 +120,19 @@ export default function CategoryNavigation() {
                   >
                     {/* Icon circle */}
                     <div
-                      className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full
-                      ${bgClass}
-                      border flex items-center justify-center
-                      shadow-md group-hover:shadow-lg
-                      transition-all duration-300
-                      group-hover:scale-105`}
+                    // className="w-14 h-14"
+                      // className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full
+                      // ${bgClass}
+                      // border flex items-center justify-center
+                      // shadow-md group-hover:shadow-lg
+                      // transition-all duration-300
+                      // group-hover:scale-105`}
                     >
                       {/* Flaticon Image */}
                       <img
                         src={icon.iconUrl}
                         alt={icon.label}
-                        className="w-7 h-7 sm:w-9 sm:h-9 object-contain"
+                        className="!w-14 !h-14 sm:w-9 sm:h-9 object-contain"
                         loading="lazy"
                       />
                     </div>

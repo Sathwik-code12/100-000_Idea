@@ -262,7 +262,7 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
   return (
     <section className="pt-4 pb-0 bg-gray-50">
       <div className="w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {ideas?.map((idea) => (
             <Link key={idea.id} href={`/idea/${idea.id}`}>
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col">

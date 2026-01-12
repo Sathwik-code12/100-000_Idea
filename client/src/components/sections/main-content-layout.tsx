@@ -30,10 +30,14 @@ export default function MainContentLayout({ ideas, isSearchActive, totalDefaultI
   return (
     <div className="bg-gray-50 py-4">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+        <div className="flex flex-col lg:flex-row  gap-4 lg:gap-6">
           {/* Main Content */}
-          <div className="flex-1 min-w-0">
-            <HorizontalScrollCards featuredIdeas={featuredIdeas} />
+          <div className="basis-full lg:basis-[75%] min-w-0">
+            {/* <HorizontalScrollCards featuredIdeas={featuredIdeas} /> */}
+            <HorizontalScrollCards 
+  title="Featured Images" 
+  subtitle="Explore our curated collection of images" 
+/>
             {/* <div className="text-3xl text-center font-bold my-5">Community Ideas</div>
             <div className="text-lg text-center text-gray-600">discover innovative business ideas from our community members</div> */}
             <IdeaGrid ideas={ideas} isSearchActive={isSearchActive}
@@ -41,7 +45,7 @@ export default function MainContentLayout({ ideas, isSearchActive, totalDefaultI
           </div>
 
           {/* Right Sidebar - Fixed width and responsive */}
-          <div className="w-full lg:w-80 xl:w-96 lg:flex-shrink-0">
+          <div className="basis-full lg:basis-[25%] min-w-0">
             <div className="lg:sticky lg:top-24">
               <RightSidebar />
             </div>

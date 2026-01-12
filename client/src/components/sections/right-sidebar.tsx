@@ -119,11 +119,22 @@ export default function RightSidebar() {
     return () => clearInterval(interval);
   }, [banner?.banners?.length]);
 
-  
+//   const [activeTab, setActiveTab] = useState<"latest" | "popular">("latest");
+
+// const filteredClassifieds =
+//   classifiedsData?.classifieds?.filter((item: any) =>
+//     activeTab === "latest" ? true : item.isPopular
+//   );
+const latestItems =
+  classifiedsData?.classifieds?.filter((i: any) => i.title === "latest") || [];
+
+const popularItems =
+  classifiedsData?.classifieds?.filter((i: any) => i.title === "popular") || [];
+
   return (
     <div className="w-full space-y-4 lg:space-y-6">
       {/* Classifieds Section */}
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      {/* <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="bg-blue-600 text-white px-4 py-3">
           <h3 className="font-bold text-lg flex items-center">
             📊 Classifieds
@@ -141,7 +152,6 @@ export default function RightSidebar() {
             >
               <div className="flex items-start space-x-3">
 
-                {/* ✅ Flaticon icon */}
                 {item.iconUrl && (
                   <img
                     src={item.iconUrl}
@@ -167,7 +177,6 @@ export default function RightSidebar() {
                   </div>
                 </div>
 
-                {/* ✅ Path from API */}
                 <Link href={item.path}>
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 </Link>
@@ -178,11 +187,50 @@ export default function RightSidebar() {
         )}
       </div>
 
-      </div>
+      </div> */}
+
+        {/* Trending Gadgets & Topics */}
+<div className="bg-white rounded-lg shadow-lg overflow-hidden">
+  {/* Header */}
+  <div className="bg-red-800 text-white px-4 py-2 font-bold text-sm">
+    TRENDING GADGETS AND TOPICS
+  </div>
+
+  {/* Table */}
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm">
+      <thead className="bg-gray-100 text-gray-600">
+        <tr>
+          <th className="text-left font-bold text-lg px-4 py-2">Latest</th>
+          <th className="text-center font-bold text-lg px-4 py-2">Popular</th>
+        </tr>
+      </thead>
+
+      <tbody className="divide-y">
+  {Array.from({
+    length: Math.max(latestItems.length, popularItems.length),
+  }).map((_, index) => (
+    <tr key={index} className="hover:bg-gray-50">
+      {/* Latest column */}
+      <td className="px-4  py-3 text-gray-800">
+        {latestItems[index]?.description ?? ""}
+      </td>
+
+      {/* Popular column */}
+      <td className="px-4 py-3 text-gray-800 text-center">
+        {popularItems[index]?.description ?? ""}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
+    </table>
+  </div>
+</div>
 
       {/* Resources Section */}
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="bg-green-600 text-white px-4 py-3">
+        <div className="bg-green-800 text-white px-4 py-3">
           <h3 className="font-bold text-lg flex items-center">
             📚 Resources
           </h3>

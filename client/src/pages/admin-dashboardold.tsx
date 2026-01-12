@@ -38,11 +38,13 @@ import {
   Calendar,
   DollarSign,
   Tag,
-  Plus
+  Plus,
+  Image
 } from "lucide-react";
 import path from "path";
 import { classifieds } from "@shared/schema";
 import { is } from "drizzle-orm";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 interface User {
@@ -207,6 +209,22 @@ interface Heros {
   isActive: boolean;
   createdAt: string;
 }
+// Update the Submenu interface
+interface Submenu {
+  id: string;
+  label: string;
+  path: string;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+}
+interface ImagePosition {
+  id: string;
+  imageUrl: string;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+}
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("users");
@@ -252,6 +270,328 @@ export default function AdminDashboard() {
   const [editingHero, setEditingHero] = useState<Heros | null>(null);
   const [isIdeaFormOpen, setIsIdeaFormOpen] = useState(false);
   const [editingIdea, setEditingIdea] = useState<PlatformIdea | null>(null);
+  const [isSubmenuFormOpen, setIsSubmenuFormOpen] = useState(false);
+  const [editingSubmenu, setEditingSubmenu] = useState<Submenu | null>(null);
+  // Update the submenuForm initial state
+  const [submenuForm, setSubmenuForm] = useState({
+    label: "",
+    path: "",
+    displayOrder: 0,
+    isActive: true,
+  });
+  const [isImagePositionFormOpen, setIsImagePositionFormOpen] = useState(false);
+  const [editingImagePosition, setEditingImagePosition] = useState<ImagePosition | null>(null);
+  const [imagePositionForm, setImagePositionForm] = useState({
+    imageUrl: "",
+    displayOrder: 0,
+    isActive: true,
+    imageFile: null as File | null,
+    previewUrl: "",
+  });
+  const { data: imagePositionsData, isLoading: imagePositionsLoading } = useQuery({
+    queryKey: ["/api/admin/image-positions"],
+    enabled: activeTab === "imagePositions",
+  });
+  const deleteImagePositionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/image-positions/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete image");
+      }
+
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/image-positions"] });
+      toast({
+        title: "Success",
+        description: "Image deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveImagePositionMutation = useMutation({
+    mutationFn: async (imagePosition: Partial<ImagePosition>) => {
+      const method = editingImagePosition ? "PUT" : "POST";
+      const url = editingImagePosition
+        ? `/api/admin/image-positions/${editingImagePosition.id}`
+        : "/api/admin/image-positions";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(imagePosition),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save image");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/image-positions"] });
+      toast({
+        title: "Success",
+        description: editingImagePosition
+          ? "Image updated successfully"
+          : "Image added successfully",
+      });
+      closeImagePositionForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const openImagePositionForm = (imagePosition?: ImagePosition) => {
+    // Clean up previous preview if it exists
+    if (imagePositionForm.previewUrl && imagePositionForm.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePositionForm.previewUrl);
+    }
+
+    if (imagePosition) {
+      setEditingImagePosition(imagePosition);
+      setImagePositionForm({
+        imageUrl: imagePosition.imageUrl,
+        displayOrder: imagePosition.displayOrder,
+        isActive: imagePosition.isActive,
+        imageFile: null,
+        previewUrl: imagePosition.imageUrl, // Set preview URL if it's a URL
+      });
+    } else {
+      setEditingImagePosition(null);
+      setImagePositionForm({
+        imageUrl: "",
+        displayOrder: 0,
+        isActive: true,
+        imageFile: null,
+        previewUrl: "",
+      });
+    }
+    setIsImagePositionFormOpen(true);
+  };
+
+  // Update
+
+  const closeImagePositionForm = () => {
+    // Clean up preview URL if it exists
+    if (imagePositionForm.previewUrl && imagePositionForm.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePositionForm.previewUrl);
+    }
+    setIsImagePositionFormOpen(false);
+    setEditingImagePosition(null);
+  };
+
+  const handleImagePositionFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const target = e.target;
+    const name = target.name;
+
+    if (name === "imageFile" && target.files && target.files.length > 0) {
+      const file = target.files[0];
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePositionForm(prev => ({
+        ...prev,
+        imageFile: file,
+        previewUrl: previewUrl,
+        imageUrl: prev.imageUrl // Keep existing URL if no file is selected
+      }));
+    } else if (name === "displayOrder") {
+      const value = parseInt(target.value, 10) || 0;
+      setImagePositionForm(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    } else if (target.type === "checkbox") {
+      setImagePositionForm(prev => ({
+        ...prev,
+        [name]: target.checked
+      }));
+    } else {
+      setImagePositionForm(prev => ({
+        ...prev,
+        [name]: target.value
+      }));
+    }
+  };
+
+
+  const handleImagePositionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // If a file is uploaded, convert it to base64
+    if (imagePositionForm.imageFile) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        setImagePositionForm(prev => ({
+          ...prev,
+          imageUrl: base64String,
+          imageFile: null,
+          previewUrl: ""
+        }));
+
+        // Submit after the base64 conversion is complete
+        saveImagePositionMutation.mutate({
+          imageUrl: base64String,
+          displayOrder: imagePositionForm.displayOrder,
+          isActive: imagePositionForm.isActive,
+        });
+      };
+      reader.readAsDataURL(imagePositionForm.imageFile);
+    } else {
+      // Submit with URL directly
+      saveImagePositionMutation.mutate({
+        imageUrl: imagePositionForm.imageUrl,
+        displayOrder: imagePositionForm.displayOrder,
+        isActive: imagePositionForm.isActive,
+      });
+    }
+  };
+
+  // Update the openImag
+  // Add these mutations with your other mutations
+  const deleteSubmenuMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/submenus/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete submenu");
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/submenus"] });
+      toast({
+        title: "Success",
+        description: "Submenu deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveSubmenuMutation = useMutation({
+    mutationFn: async (submenu: Partial<Submenu>) => {
+      const method = editingSubmenu ? "PUT" : "POST";
+      const url = editingSubmenu
+        ? `/api/admin/submenus/${editingSubmenu.id}`
+        : "/api/admin/submenus";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submenu),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save submenu");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/submenus"] });
+      toast({
+        title: "Success",
+        description: editingSubmenu
+          ? "Submenu updated successfully"
+          : "Submenu created successfully",
+      });
+      closeSubmenuForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add these functions with your other form handlers
+  const openSubmenuForm = (submenu?: Submenu) => {
+    if (submenu) {
+      setEditingSubmenu(submenu);
+      setSubmenuForm({
+        label: submenu.label,
+        path: submenu.path,
+        displayOrder: submenu.displayOrder,
+        isActive: submenu.isActive,
+      });
+    } else {
+      setEditingSubmenu(null);
+      setSubmenuForm({
+        label: "",
+        path: "",
+        displayOrder: 0,
+        isActive: true,
+      });
+    }
+    setIsSubmenuFormOpen(true);
+  };
+
+  const closeSubmenuForm = () => {
+    setIsSubmenuFormOpen(false);
+    setEditingSubmenu(null);
+  };
+
+  const handleSubmenuSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveSubmenuMutation.mutate(submenuForm);
+  };
+
+  const handleSubmenuFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+
+    if (name === "displayOrder") {
+      value = parseInt(value, 10) || 0;
+    } else if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    }
+
+    setSubmenuForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  // Add this query with your other queries
+  const { data: submenusData, isLoading: submenusLoading } = useQuery({
+    queryKey: ["/api/admin/submenus"],
+    enabled: activeTab === "submenu",
+  });
+
 
   const [platformIdeas, setPlatformIdeas] = useState<PlatformIdea[]>([]);
   const [platformIdeasPagination, setPlatformIdeasPagination] = useState({
@@ -1542,11 +1882,17 @@ export default function AdminDashboard() {
       case "hero":
         deleteHeroMutation.mutate(itemToDelete.id);
         break;
+      case "submenu":
+        deleteSubmenuMutation.mutate(itemToDelete.id);
+        break;
+      case "imagePosition":
+        deleteImagePositionMutation.mutate(itemToDelete.id);
+        break;
       default:
         break;
     }
   };
-
+  const imagePositions = imagePositionsData?.imagePositions || [];
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1902,6 +2248,113 @@ export default function AdminDashboard() {
   const classifieds = classifiedsData?.classifieds || [];
   const resources = resourcesData?.resources || [];
   const heros = herosData?.hero || [];
+  const latestClassifieds = classifieds.filter(
+    (c) => c.title === "latest"
+  )
+
+  const popularClassifieds = classifieds.filter(
+    (c) => c.title === "popular"
+  )
+
+  const ClassifiedTable = ({
+    title,
+    data,
+  }: {
+    title: string
+    data: Classified[]
+  }) => (
+    <div className="mb-8">
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        {title}
+      </h2>
+
+      <table className="w-full border border-gray-200 rounded-lg overflow-hidden">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+              Title
+            </th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+              Description
+            </th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+              Status
+            </th>
+            <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">
+              Actions
+            </th>
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-gray-100 bg-white">
+          {data.length === 0 ? (
+            <tr>
+              <td
+                colSpan={4}
+                className="px-4 py-6 text-center text-sm text-gray-400"
+              >
+                No records found
+              </td>
+            </tr>
+          ) : (
+            data.map((classified) => (
+              <tr key={classified.id} className="hover:bg-gray-50">
+                <td className="px-4 py-3 text-sm font-medium text-gray-900 capitalize">
+                  {classified.title}
+                </td>
+
+                <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
+                  {classified.description}
+                </td>
+
+                <td className="px-4 py-3">
+                  {classified.isActive ? (
+                    <span className="inline-flex items-center gap-2 text-green-600 text-sm">
+                      <span className="w-2 h-2 bg-green-500 rounded-full" />
+                      Active
+                    </span>
+                  ) : (
+                    <span className="text-gray-400 text-sm">
+                      Inactive
+                    </span>
+                  )}
+                </td>
+
+                <td className="px-4 py-3 text-right space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      openClassifiedForm(classified)
+                    }
+                  >
+                    Edit
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 border-red-200 hover:bg-red-50"
+                    onClick={() =>
+                      openDeleteDialog(
+                        classified.id,
+                        "classified",
+                        classified.title
+                      )
+                    }
+                  >
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray">
       {/* Header */}
@@ -1996,6 +2449,14 @@ export default function AdminDashboard() {
             <TabsTrigger value="profile" className="data-[state=active]:bg-white">
               <User className="h-4 w-4 mr-2" />
               Profile
+            </TabsTrigger>
+            <TabsTrigger value="submenu" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Submenu Management
+            </TabsTrigger>
+            <TabsTrigger value="imagePositions" className="data-[state=active]:bg-white">
+              <Image className="h-4 w-4 mr-2" />
+              Image Positions
             </TabsTrigger>
           </TabsList>
 
@@ -3869,15 +4330,27 @@ export default function AdminDashboard() {
                             <label className="block text-sm font-medium mb-1">
                               Title
                             </label>
-                            <Input
-                              name="title"
+
+                            <Select
                               value={classifiedForm.title}
-                              onChange={handleClassifiedFormChange}
-                              placeholder="Enter classified title"
-                              required
-                            />
+                              onValueChange={(value) =>
+                                handleClassifiedFormChange({
+                                  target: { name: "title", value },
+                                })
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select classified title" />
+                              </SelectTrigger>
+
+                              <SelectContent>
+                                <SelectItem value="latest">Latest</SelectItem>
+                                <SelectItem value="popular">Popular</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
-                          <div>
+
+                          {/* <div>
                             <label className="block text-sm font-medium mb-1">
                               Path
                             </label>
@@ -3887,9 +4360,9 @@ export default function AdminDashboard() {
                               onChange={handleClassifiedFormChange}
                               placeholder="e.g. /classifieds"
                               className="w-[300px]"
-                              required
+                              // required
                             />
-                          </div>
+                          </div> */}
                         </div>
                         <div>
                           <label className="block text-sm font-medium mb-1">
@@ -3904,7 +4377,7 @@ export default function AdminDashboard() {
                             required
                           />
                         </div>
-                        <div>
+                        {/* <div>
                           <label className="block text-sm font-medium mb-1">
                             Icon URL (Flaticon)
                           </label>
@@ -3913,9 +4386,9 @@ export default function AdminDashboard() {
                             value={classifiedForm.iconUrl}
                             onChange={handleClassifiedFormChange}
                             placeholder="https://cdn-icons-png.flaticon.com/..."
-                            required
+                            // required
                           />
-                        </div>
+                        </div> */}
 
                         {/* Preview */}
                         {classifiedForm.iconUrl && (
@@ -3987,16 +4460,16 @@ export default function AdminDashboard() {
                       {classifiedsLoading ? (
                         <div className="text-center py-12 text-gray-500">Loading classifieds...</div>
                       ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {classifieds.map((classified: Classified) => (
+                        <div className="gap-6">
+                          {/* {classifieds.map((classified: Classified) => (
                             <div key={classified.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
                               <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-4">
-                                  <img
+                                  {/* <img
                                     src={classified.iconUrl}
                                     alt={classified.title}
                                     className="w-10 h-10 object-contain"
-                                  />
+                                  /> 
                                   <h3 className="font-semibold text-gray-900 text-base">{classified.title}</h3>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -4029,7 +4502,18 @@ export default function AdminDashboard() {
                                 </Button>
                               </div>
                             </div>
-                          ))}
+                          ))} */}
+
+                          <ClassifiedTable
+                            title="Latest Classifieds"
+                            data={latestClassifieds}
+                          />
+
+                          <ClassifiedTable
+                            title="Popular Classifieds"
+                            data={popularClassifieds}
+                          />
+
                         </div>
                       )}
                     </div>
@@ -4959,6 +5443,385 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          {/* Submenu Management Tab */}
+          <TabsContent value="submenu" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Submenu Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Submenu Management</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage navigation submenus for the application</p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openSubmenuForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Submenu
+                    </Button>
+                  </div>
+
+                  {isSubmenuFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingSubmenu ? "Edit Submenu" : "Create New Submenu"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeSubmenuForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+                      <form onSubmit={handleSubmenuSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Label
+                            </label>
+                            <Input
+                              name="label"
+                              value={submenuForm.label}
+                              onChange={handleSubmenuFormChange}
+                              placeholder="Enter submenu name"
+                              className="w-[300px]"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Path
+                            </label>
+                            <Input
+                              name="path"
+                              value={submenuForm.path}
+                              onChange={handleSubmenuFormChange}
+                              placeholder="e.g. /ideas/technology"
+                              className="w-[300px]"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Display Order
+                          </label>
+                          <Input
+                            name="displayOrder"
+                            type="number"
+                            value={submenuForm.displayOrder}
+                            onChange={handleSubmenuFormChange}
+                            className="w-[300px]"
+                            min="0"
+                          />
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={submenuForm.isActive}
+                            onChange={handleSubmenuFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeSubmenuForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveSubmenuMutation.isPending}
+                          >
+                            {saveSubmenuMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingSubmenu ? "Update Submenu" : "Create Submenu"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Submenus</p>
+                      {submenusLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading submenus...</div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {submenusData?.submenus?.map((submenu: Submenu) => (
+                            <div key={submenu.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{submenu.label}</h3>
+                                <div className="flex items-center gap-1">
+                                  {submenu.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                Link: {submenu.path}
+                              </p>
+                              <div className="text-xs text-gray-500 mb-4">
+                                Order: {submenu.displayOrder}
+                              </div>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openSubmenuForm(submenu)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(submenu.id, "submenu", submenu.label)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          {/* Image Positions Tab */}
+          <TabsContent value="imagePositions" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Image Positions Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Image Positions</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage images for your platform</p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openImagePositionForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Image
+                    </Button>
+                  </div>
+
+                  {isImagePositionFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingImagePosition ? "Edit Image" : "Add New Image"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeImagePositionForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      <form onSubmit={handleImagePositionSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Image URL or Upload
+                          </label>
+                          <div className="space-y-3">
+                            <Input
+                              name="imageUrl"
+                              value={imagePositionForm.imageUrl}
+                              onChange={handleImagePositionFormChange}
+                              placeholder="Enter image URL"
+                              className="w-full"
+                              disabled={!!imagePositionForm.imageFile} // Disable if file is selected
+                            />
+                            <div className="text-sm text-gray-500">OR</div>
+                            <Input
+                              name="imageFile"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImagePositionFormChange}
+                              className="w-full"
+                            />
+                          </div>
+
+                          {/* Preview */}
+                          {(imagePositionForm.previewUrl || imagePositionForm.imageUrl) && (
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={imagePositionForm.previewUrl || imagePositionForm.imageUrl}
+                                alt="Preview"
+                                className="w-24 h-24 object-contain rounded border border-gray-200"
+                              />
+                              <span className="text-sm text-gray-500">Preview</span>
+                              {imagePositionForm.imageFile && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (imagePositionForm.previewUrl && imagePositionForm.previewUrl.startsWith('blob:')) {
+                                      URL.revokeObjectURL(imagePositionForm.previewUrl);
+                                      setImagePositionForm(prev => ({
+                                        ...prev,
+                                        imageFile: null,
+                                        previewUrl: "",
+                                        imageUrl: prev.imageUrl // Keep existing URL if no file is selected
+                                      }));
+                                    }
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Display Order
+                          </label>
+                          <Input
+                            name="displayOrder"
+                            type="number"
+                            value={imagePositionForm.displayOrder}
+                            onChange={handleImagePositionFormChange}
+                            className="w-full"
+                            min="0"
+                          />
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={imagePositionForm.isActive}
+                            onChange={handleImagePositionFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeImagePositionForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveImagePositionMutation.isPending}
+                          >
+                            {saveImagePositionMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingImagePosition ? "Update Image" : "Add Image"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Images ({imagePositions.length})</p>
+                      {imagePositionsLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading images...</div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {imagePositions.map((imagePosition: ImagePosition) => (
+                            <div key={imagePosition.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                              <div className="aspect-video bg-gray-100">
+                                <img
+                                  src={imagePosition.imageUrl}
+                                  alt="Image"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.src = "https://via.placeholder.com/300x200?text=Image+Not+Found";
+                                  }}
+                                />
+                              </div>
+                              <div className="p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-1">
+                                    {imagePosition.isActive && (
+                                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    )}
+                                    <span className="text-sm text-gray-500">Order: {imagePosition.displayOrder}</span>
+                                  </div>
+                                </div>
+
+                                <div className="flex gap-2 pt-2 border-t border-gray-100">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1 text-xs"
+                                    onClick={() => openImagePositionForm(imagePosition)}
+                                  >
+                                    <Edit className="h-3 w-3 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => openDeleteDialog(imagePosition.id, "imagePosition", "Image")}
+                                  >
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
