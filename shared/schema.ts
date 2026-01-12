@@ -771,7 +771,7 @@ export const classifieds = pgTable(
 export const insertClassifiedSchema = createInsertSchema(classifieds, {
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  iconUrl: z.string().url("Invalid icon URL").optional(),
+  // iconUrl: z.string().url("Invalid icon URL").optional(),
   displayOrder: z.number().min(0, "Display order must be positive"),
 }).omit({
   id: true,
@@ -852,3 +852,61 @@ export const insertHeroSchema = createInsertSchema(hero, {
 });
 export type InsertHero = z.infer<typeof insertHeroSchema>;
 export type Hero = typeof hero.$inferSelect;
+// Add this to your schema.ts file
+
+export const submenus = pgTable(
+  "submenus",
+  {
+    id: varchar("id").primaryKey(),
+    label: text("label").notNull(),
+    path: text("path").notNull(),
+    displayOrder: integer("display_order").default(0),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    orderIdx: index("submenus_display_order_idx").on(table.displayOrder),
+    activeIdx: index("submenus_active_idx").on(table.isActive),
+  })
+);
+
+export const insertSubmenuSchema = createInsertSchema(submenus, {
+  label: z.string().min(1, "Submenu label is required"),
+  path: z.string().min(1, "Path is required"),
+  displayOrder: z.number().min(0, "Display order must be positive"),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSubmenu = z.infer<typeof insertSubmenuSchema>;
+export type Submenu = typeof submenus.$inferSelect;
+
+
+// Add this to your schema.ts file
+
+export const imagePositions = pgTable("image_positions", {
+  id: varchar("id").primaryKey(),
+  imageUrl: text("image_url").notNull(),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  activeIdx: index("image_positions_active_idx").on(table.isActive),
+  orderIdx: index("image_positions_order_idx").on(table.displayOrder),
+}));
+
+export const insertImagePositionSchema = createInsertSchema(imagePositions, {
+  imageUrl: z.string().url("Invalid image URL"),
+  displayOrder: z.number().min(0, "Display order must be positive"),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertImagePosition = z.infer<typeof insertImagePositionSchema>;
+export type ImagePosition = typeof imagePositions.$inferSelect;

@@ -321,19 +321,142 @@
 // }
 
 
+// // horizontal-scroll-cards.tsx
+// import { ChevronLeft, ChevronRight } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { Link } from "wouter";
+// import { useRef } from "react";
+
+// // Add prop interface
+// interface HorizontalScrollCardsProps {
+//   featuredIdeas: IdeaCard[];
+// }
+
+// export default function HorizontalScrollCards({ featuredIdeas }: HorizontalScrollCardsProps) {
+//   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+//   const scrollLeft = () => {
+//     if (scrollContainerRef.current) {
+//       scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+//     }
+//   };
+
+//   const scrollRight = () => {
+//     if (scrollContainerRef.current) {
+//       scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+//     }
+//   };
+
+//   // Helper functions to parse data
+//   const parseCategory = (category: string) => {
+//     try {
+//       const parsed = JSON.parse(category);
+//       return Array.isArray(parsed) ? parsed.join(', ') : category;
+//     } catch (e) {
+//       return category;
+//     }
+//   };
+
+//   const parseInvestment = (investment: any) => {
+//     if (typeof investment === 'string') {
+//       try {
+//         const parsed = JSON.parse(investment);
+//         return parsed.display || investment;
+//       } catch (e) {
+//         return investment;
+//       }
+//     }
+//     return investment.display || '₹0';
+//   };
+
+//   return (
+//     <section className="bg-white">
+//       <div className="max-w-full">
+//         <div className="relative">
+//           {/* Left Arrow - Hidden on mobile */}
+//           <Button
+//             variant="ghost"
+//             size="icon"
+//             className="hidden lg:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center"
+//             onClick={scrollLeft}
+//           >
+//             <ChevronLeft className="h-5 w-5" />
+//           </Button>
+
+//           {/* Right Arrow - Hidden on mobile */}
+//           <Button
+//             variant="ghost"
+//             size="icon"
+//             className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center"
+//             onClick={scrollRight}
+//           >
+//             <ChevronRight className="h-5 w-5" />
+//           </Button>
+
+//           {/* Scrollable Container */}
+//           <div
+//             ref={scrollContainerRef}
+//             className="flex gap-4 lg:gap-6 overflow-x-auto scrollbar-hide px-4"
+//             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+//           >
+//             {featuredIdeas.map((idea, index) => (
+//               <Link key={idea.id} href={`/idea/${idea.id}`}>
+//                 <div className="flex-shrink-0 w-80 sm:w-96 lg:w-80 bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+//                   <div className="relative">
+//                     <img
+//                       src={idea.images?.[0] || '/placeholder-image.jpg'}
+//                       alt={idea.title}
+//                       className="w-full h-48 object-cover"
+//                     />
+//                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+//                       <h3 className="text-white font-bold text-xl mb-2">{idea.title}</h3>
+//                       <span className="inline-block bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium">
+//                         {parseCategory(idea.category)}
+//                       </span>
+//                     </div>
+//                   </div>
+//                   {/* <div className="p-4 mt-2 h-24">
+//                     <p className="text-gray-600">{idea.description}</p>
+//                   </div> */}
+//                 </div>
+//               </Link>
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
+
 // horizontal-scroll-cards.tsx
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 // Add prop interface
 interface HorizontalScrollCardsProps {
-  featuredIdeas: IdeaCard[];
+  title?: string;
+  subtitle?: string;
+  linkTo?: string; // Optional link to navigate when clicking on an image
 }
 
-export default function HorizontalScrollCards({ featuredIdeas }: HorizontalScrollCardsProps) {
+export default function HorizontalScrollCards({ title, subtitle, linkTo }: HorizontalScrollCardsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Fetch image positions from API
+  const { data: imagePositionsData, isLoading, error } = useQuery({
+    queryKey: ["/api/admin/image-positions"],
+    staleTime: 60000, // Cache for 1 minute
+  });
+  
+  const imagePositions = imagePositionsData?.imagePositions || [];
+  
+  // Sort by display order and filter only active images
+  const sortedImagePositions = [...imagePositions]
+    .filter(position => position.isActive)
+    .sort((a, b) => a.displayOrder - b.displayOrder);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -347,51 +470,80 @@ export default function HorizontalScrollCards({ featuredIdeas }: HorizontalScrol
     }
   };
 
-  // Helper functions to parse data
-  const parseCategory = (category: string) => {
-    try {
-      const parsed = JSON.parse(category);
-      return Array.isArray(parsed) ? parsed.join(', ') : category;
-    } catch (e) {
-      return category;
-    }
-  };
+  // Show loading state
+  if (isLoading) {
+    return (
+      <section className="bg-white py-12">
+        <div className="max-w-full">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
-  const parseInvestment = (investment: any) => {
-    if (typeof investment === 'string') {
-      try {
-        const parsed = JSON.parse(investment);
-        return parsed.display || investment;
-      } catch (e) {
-        return investment;
-      }
-    }
-    return investment.display || '₹0';
-  };
+  // Show error state
+  if (error) {
+    return (
+      <section className="bg-white py-12">
+        <div className="max-w-full">
+          <div className="text-center">
+            <p className="text-red-500">Failed to load images</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Show empty state
+  if (sortedImagePositions.length === 0) {
+    return (
+      <section className="bg-white py-12">
+        <div className="max-w-full">
+          <div className="text-center">
+            <p className="text-gray-500">No images available</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="bg-white">
+    <section className="bg-white py-12">
       <div className="max-w-full">
+        {/* Optional header */}
+        {(title || subtitle) && (
+          <div className="text-center mb-8">
+            {title && <h2 className="text-3xl font-bold mb-2">{title}</h2>}
+            {subtitle && <p className="text-gray-600">{subtitle}</p>}
+          </div>
+        )}
+        
         <div className="relative">
           {/* Left Arrow - Hidden on mobile */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden lg:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center"
-            onClick={scrollLeft}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+          {sortedImagePositions.length > 3 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center"
+              onClick={scrollLeft}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+          )}
 
           {/* Right Arrow - Hidden on mobile */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center"
-            onClick={scrollRight}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+          {sortedImagePositions.length > 3 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center"
+              onClick={scrollRight}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          )}
 
           {/* Scrollable Container */}
           <div
@@ -399,28 +551,47 @@ export default function HorizontalScrollCards({ featuredIdeas }: HorizontalScrol
             className="flex gap-4 lg:gap-6 overflow-x-auto scrollbar-hide px-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {featuredIdeas.map((idea, index) => (
-              <Link key={idea.id} href={`/idea/${idea.id}`}>
-                <div className="flex-shrink-0 w-80 sm:w-96 lg:w-80 bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+            {sortedImagePositions.map((imagePosition, index) => {
+              // Create a wrapper element to handle the click
+              const CardContent = () => (
+                <div className="flex-shrink-0 w-80 sm:w-96 lg:w-40 h-20 bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
                   <div className="relative">
                     <img
-                      src={idea.images?.[0] || '/placeholder-image.jpg'}
-                      alt={idea.title}
-                      className="w-full h-48 object-cover"
+                      src={imagePosition.imageUrl}
+                      alt={`Image ${index + 1}`}
+                      className="w-full h-30 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://via.placeholder.com/300x200?text=Image+Not+Found";
+                      }}
                     />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-                      <h3 className="text-white font-bold text-xl mb-2">{idea.title}</h3>
+                    {/* <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                      <h3 className="text-white font-bold text-xl mb-2">
+                        {imagePosition.title || `Image ${index + 1}`}
+                      </h3>
                       <span className="inline-block bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium">
-                        {parseCategory(idea.category)}
+                        Order: {imagePosition.displayOrder}
                       </span>
-                    </div>
+                    </div> */}
                   </div>
-                  {/* <div className="p-4 mt-2 h-24">
-                    <p className="text-gray-600">{idea.description}</p>
+                  {/* <div className="p-4">
+                    <p className="text-gray-600 text-sm">
+                      {imagePosition.description || `Image position ${imagePosition.displayOrder}`}
+                    </p>
                   </div> */}
                 </div>
-              </Link>
-            ))}
+              );
+
+              // If linkTo is provided, wrap in Link, otherwise just return the card
+              return linkTo ? (
+                <Link key={imagePosition.id} href={`${linkTo}/${imagePosition.id}`}>
+                  <CardContent />
+                </Link>
+              ) : (
+                <div key={imagePosition.id}>
+                  <CardContent />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

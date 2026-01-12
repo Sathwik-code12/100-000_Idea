@@ -91,6 +91,7 @@ import MainContentLayout from "@/components/sections/main-content-layout";
 import SubscribeSection from "@/components/sections/subscribe-section";
 import NewFooter from "@/components/sections/new-footer";
 import { useEffect, useState } from "react";
+import SubmenuSection from "@/components/sections/submenu-section";
 interface IdeaCard {
   id: string;
   title: string;
@@ -146,6 +147,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <Header />
+      <SubmenuSection />
       <CategoryNavigation />
       <SearchHero ideas={ideas}
         onSearchResults={handleSearchResults}

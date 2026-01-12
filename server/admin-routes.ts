@@ -23,7 +23,9 @@ import {
   insertFlatIconSchema,
   insertClassifiedSchema,
   insertResourceSchema,
-  insertHeroSchema
+  insertHeroSchema,
+  insertSubmenuSchema,
+  insertImagePositionSchema
 } from '../shared/schema.js';
 import { db } from './db.js';
 import { eq, and, desc, asc, or, like, count, AnyColumn } from 'drizzle-orm';
@@ -552,7 +554,7 @@ router.get('/all-users', requireAdminAuth, async (req: Request, res: Response) =
  * GET /api/admin/banners
  * Get banners with pagination
  */
-router.get('/banners',  async (req: Request, res: Response) => {
+router.get('/banners', async (req: Request, res: Response) => {
   try {
     const options = paginationSchema.parse(req.query);
     const result = await adminStorage.getBanners(options);
@@ -661,7 +663,7 @@ router.put('/platform-ideas/:id', requireAdminAuth, async (req: Request, res: Re
   try {
     const { id } = req.params;
     const updates = insertPlatformIdeaSchema.partial().parse(req.body);
-    
+
     const idea = await adminStorage.updatePlatformIdea(id, updates);
     if (!idea) {
       return res.status(404).json({ error: 'Idea not found' });
@@ -760,7 +762,7 @@ router.get("/flat-icons", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch icons" });
   }
 });
-const uploads = multer({ 
+const uploads = multer({
   storage: multer.memoryStorage(), // Store files in memory
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
@@ -776,10 +778,10 @@ router.post("/flat-icons", requireAdminAuth, uploads.single('iconUrl'), async (r
       isActive: req.body.isActive === 'true',
       iconUrl: req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : req.body.iconUrl,
     };
-    
+
     // Validate the data
     const validatedData = insertFlatIconSchema.parse(data);
-    
+
     // Create the icon
     const icon = await adminStorage.createFlatIcon(validatedData);
     res.json(icon);
@@ -792,7 +794,7 @@ router.post("/flat-icons", requireAdminAuth, uploads.single('iconUrl'), async (r
 router.put("/flat-icons/:id", requireAdminAuth, uploads.single('iconUrl'), async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Extract data from the form
     const data = {
       label: req.body.label,
@@ -801,10 +803,10 @@ router.put("/flat-icons/:id", requireAdminAuth, uploads.single('iconUrl'), async
       isActive: req.body.isActive === 'true',
       iconUrl: req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : req.body.iconUrl,
     };
-    
+
     // Validate the data
     const validatedData = insertFlatIconSchema.parse(data);
-    
+
     // Update the icon
     const icon = await adminStorage.updateFlatIcon(id, validatedData);
     res.json(icon);
@@ -836,12 +838,13 @@ router.post("/classifieds", requireAdminAuth, async (req, res) => {
     const classifieds = await adminStorage.createClassified(data);
     res.json(classifieds);
   } catch (err) {
+    console.log("eror", err)
     res.status(400).json({ error: "Invalid data" });
   }
 });
 router.get("/classifieds/:id", requireAdminAuth, async (req, res) => {
   try {
-    const classifieds = await adminStorage.getClassifiedById(req.params.id); 
+    const classifieds = await adminStorage.getClassifiedById(req.params.id);
     if (!classifieds) return res.status(404).json({ error: "Not found" });
     res.json(classifieds);
   } catch {
@@ -887,7 +890,7 @@ router.post("/resources", requireAdminAuth, async (req, res) => {
 });
 router.get("/resources/:id", requireAdminAuth, async (req, res) => {
   try {
-    const resources = await adminStorage.getResourseById(req.params.id); 
+    const resources = await adminStorage.getResourseById(req.params.id);
     if (!resources) return res.status(404).json({ error: "Not found" });
     res.json(resources);
   } catch {
@@ -956,4 +959,199 @@ router.delete("/heros/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete hero" });
   }
 });
+
+// Add these routes to your admin router in admin.ts
+
+/**
+ * GET /api/admin/submenus
+ * Get submenus with pagination
+ */
+router.get("/submenus", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getSubmenus(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get submenus error:", error);
+    res.status(500).json({ error: "Failed to fetch submenus" });
+  }
+});
+
+/**
+ * GET /api/admin/submenus/:id
+ * Get a single submenu by ID
+ */
+router.get("/submenus/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const submenu = await adminStorage.getSubmenuById(id);
+
+    if (!submenu) {
+      return res.status(404).json({ error: "Submenu not found" });
+    }
+
+    res.json(submenu);
+  } catch (error) {
+    console.error("Get submenu error:", error);
+    res.status(500).json({ error: "Failed to fetch submenu" });
+  }
+});
+
+/**
+ * POST /api/admin/submenus
+ * Create a new submenu
+ */
+router.post("/submenus", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const admin = (req as any).admin;
+    const submenuData = insertSubmenuSchema.parse(req.body);
+
+    const submenu = await adminStorage.createSubmenu({
+      ...submenuData,
+      createdBy: admin.id,
+    });
+
+    res.json(submenu);
+  } catch (error) {
+    console.error("Create submenu error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/submenus/:id
+ * Update a submenu
+ */
+router.put("/submenus/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertSubmenuSchema.partial().parse(req.body);
+
+    const submenu = await adminStorage.updateSubmenu(id, updates);
+    if (!submenu) {
+      return res.status(404).json({ error: "Submenu not found" });
+    }
+
+    res.json(submenu);
+  } catch (error) {
+    console.error("Update submenu error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * DELETE /api/admin/submenus/:id
+ * Delete a submenu
+ */
+router.delete("/submenus/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const success = await adminStorage.deleteSubmenu(id);
+    if (!success) {
+      return res.status(404).json({ error: "Submenu not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete submenu error:", error);
+    res.status(500).json({ error: "Failed to delete submenu" });
+  }
+  });
+
+  /**
+   * GET /api/admin/image-positions
+   * Get image positions with pagination
+   */
+  router.get("/image-positions", async (req: Request, res: Response) => {
+    try {
+      const options = paginationSchema.parse(req.query);
+      const result = await adminStorage.getImagePositions(options);
+      res.json(result);
+    } catch (error) {
+      console.error("Get image positions error:", error);
+      res.status(500).json({ error: "Failed to fetch image positions" });
+    }
+  });
+
+  /**
+   * GET /api/admin/image-positions/:id
+   * Get a single image position by ID
+   */
+  router.get("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const imagePosition = await adminStorage.getImagePositionById(id);
+
+      if (!imagePosition) {
+        return res.status(404).json({ error: "Image position not found" });
+      }
+
+      res.json(imagePosition);
+    } catch (error) {
+      console.error("Get image position error:", error);
+      res.status(500).json({ error: "Failed to fetch image position" });
+    }
+  });
+
+  /**
+   * POST /api/admin/image-positions
+   * Create a new image position
+   */
+  router.post("/image-positions", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const admin = (req as any).admin;
+      const imageData = insertImagePositionSchema.parse(req.body);
+
+      const imagePosition = await adminStorage.createImagePosition({
+        ...imageData,
+      });
+
+      res.json(imagePosition);
+    } catch (error) {
+      console.error("Create image position error:", error);
+      res.status(400).json({ error: "Invalid request data" });
+    }
+  });
+
+  /**
+   * PUT /api/admin/image-positions/:id
+   * Update an image position
+   */
+  router.put("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req?.params;
+      const updates = insertImagePositionSchema.partial().parse(req.body);
+
+      const imagePosition = await adminStorage.updateImagePosition(id, updates);
+      if (!imagePosition) {
+        return res.status(404).json({ error: "Image position not found" });
+      }
+
+      res.json(imagePosition);
+    } catch (error) {
+      console.error("Update image position error:", error);
+      res.status(400).json({ error: "Invalid request data" });
+    }
+  });
+
+  /**
+   * DELETE /api/admin/image-positions/:id
+   * Delete an image position
+   */
+  router.delete("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const success = await adminStorage.deleteImagePosition(id);
+      if (!success) {
+        return res.status(404).json({ error: "Image position not found" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete image position error:", error);
+      res.status(500).json({ error: "Failed to delete image position" });
+    }
+  });
 export default router;

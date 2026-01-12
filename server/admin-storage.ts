@@ -29,7 +29,13 @@ import {
   InsertFlatIcon,
   classifieds,
   resources,
-  hero
+  hero,
+  submenus,
+  Submenu,
+  InsertSubmenu,
+  imagePositions,
+  ImagePosition,
+  InsertImagePosition
 } from '../shared/schema.js';
 
 export interface PaginationOptions {
@@ -969,7 +975,7 @@ export class AdminStorage {
         total: countResult[0].count,
         totalPages: Math.ceil(countResult[0].count / limit),
       },
-    };   
+    };
   }
   async getClassifiedById(id: string) {
     const [classified] = await db.select().from(classifieds).where(eq(classifieds.id, id));
@@ -1021,7 +1027,7 @@ export class AdminStorage {
         total: countResult[0].count,
         totalPages: Math.ceil(countResult[0].count / limit),
       },
-    };   
+    };
   }
   async getResourseById(id: string) {
     const [resource] = await db.select().from(resources).where(eq(resources.id, id));
@@ -1089,6 +1095,133 @@ export class AdminStorage {
   async deleteHero(id: string) {
     await db.delete(hero).where(eq(hero.id, id));
     return true;
+  }
+  // Add these methods to your AdminStorage class in admin-storage.ts
+
+  // Submenu Management
+  async getSubmenus(options: PaginationOptions) {
+    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+    const offset = (page - 1) * limit;
+
+    const [totalCountResult, submenusData] = await Promise.all([
+      db.select({ count: count() }).from(submenus),
+      db
+        .select()
+        .from(submenus)
+        .orderBy(
+          sortOrder === "asc"
+            ? asc(submenus[sortBy as keyof typeof submenus.$inferSelect] as AnyColumn)
+            : desc(submenus[sortBy as keyof typeof submenus.$inferSelect] as AnyColumn)
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    const totalSubmenus = totalCountResult[0].count;
+    const totalPages = Math.ceil(totalSubmenus / limit);
+
+    return {
+      submenus: submenusData,
+      pagination: {
+        page,
+        limit,
+        total: totalSubmenus,
+        totalPages,
+      },
+    };
+  }
+
+  async getSubmenuById(id: string): Promise<Submenu | null> {
+    const [submenu] = await db.select().from(submenus).where(eq(submenus.id, id));
+    return submenu || null;
+  }
+
+  async createSubmenu(submenuData: InsertSubmenu & { createdBy?: string }): Promise<Submenu> {
+    const dataWithId: any = {
+      ...submenuData,
+      id: uuidv4(),
+    };
+
+    const [submenu] = await db.insert(submenus).values(dataWithId).returning();
+    return submenu;
+  }
+
+  async updateSubmenu(id: string, updates: Partial<Submenu>): Promise<Submenu | null> {
+    const [submenu] = await db
+      .update(submenus)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(submenus.id, id))
+      .returning();
+
+    return submenu || null;
+  }
+
+  async deleteSubmenu(id: string): Promise<boolean> {
+    const result = await db.delete(submenus).where(eq(submenus.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+  // Image Positions Management
+  async getImagePositions(options: PaginationOptions) {
+    console.log("comming here")
+    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+    const offset = (page - 1) * limit;
+
+    const [totalCountResult, imagePositionsData] = await Promise.all([
+      db.select({ count: count() }).from(imagePositions),
+      db
+        .select()
+        .from(imagePositions)
+        .orderBy(
+          sortOrder === "asc"
+            ? asc(imagePositions[sortBy as keyof typeof imagePositions.$inferSelect] as AnyColumn)
+            : desc(imagePositions[sortBy as keyof typeof imagePositions.$inferSelect] as AnyColumn)
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    const totalImagePositions = totalCountResult[0].count;
+    const totalPages = Math.ceil(totalImagePositions / limit);
+
+    return {
+      imagePositions: imagePositionsData,
+      pagination: {
+        page,
+        limit,
+        total: totalImagePositions,
+        totalPages,
+      },
+    };
+  }
+
+  async getImagePositionById(id: string): Promise<ImagePosition | null> {
+    const [imagePosition] = await db.select().from(imagePositions).where(eq(imagePositions.id, id));
+    return imagePosition || null;
+  }
+
+  async createImagePosition(imageData: InsertImagePosition): Promise<ImagePosition> {
+    const dataWithId: any = {
+      ...imageData,
+      id: uuidv4(),
+    };
+
+    const [imagePosition] = await db.insert(imagePositions).values(dataWithId).returning();
+    return imagePosition;
+  }
+
+  async updateImagePosition(id: string, updates: Partial<ImagePosition>): Promise<ImagePosition | null> {
+    const [imagePosition] = await db
+      .update(imagePositions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(imagePositions.id, id))
+      .returning();
+
+    return imagePosition || null;
+  }
+
+  async deleteImagePosition(id: string): Promise<boolean> {
+    const result = await db.delete(imagePositions).where(eq(imagePositions.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
   }
 }
 export const adminStorage = new AdminStorage();
