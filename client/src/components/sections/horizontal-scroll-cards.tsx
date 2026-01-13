@@ -440,10 +440,19 @@ interface HorizontalScrollCardsProps {
   title?: string;
   subtitle?: string;
   linkTo?: string; // Optional link to navigate when clicking on an image
+  autoScroll?: boolean; // New prop to control auto-scroll
+  scrollSpeed?: number; // New prop to control scroll speed (in milliseconds)
 }
 
-export default function HorizontalScrollCards({ title, subtitle, linkTo }: HorizontalScrollCardsProps) {
+export default function HorizontalScrollCards({ 
+  title, 
+  subtitle, 
+  linkTo, 
+  autoScroll = true, // Default to true
+  scrollSpeed = 3000 // Default to 3 seconds
+}: HorizontalScrollCardsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
   
   // Fetch image positions from API
   const { data: imagePositionsData, isLoading, error } = useQuery({
@@ -469,6 +478,45 @@ export default function HorizontalScrollCards({ title, subtitle, linkTo }: Horiz
       scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
     }
   };
+
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (!autoScroll || sortedImagePositions.length <= 1) return;
+    
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+    
+    let scrollInterval: NodeJS.Timeout;
+    
+    const startAutoScroll = () => {
+      scrollInterval = setInterval(() => {
+        if (!isPaused && scrollContainer) {
+          // Check if we've reached the end
+          const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
+          
+          if (scrollLeft + clientWidth >= scrollWidth - 5) {
+            // If at the end, scroll back to the beginning
+            scrollContainer.scrollTo({
+              left: 0,
+              behavior: 'smooth'
+            });
+          } else {
+            // Otherwise, scroll to the right
+            scrollContainer.scrollBy({
+              left: 300,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, scrollSpeed);
+    };
+    
+    startAutoScroll();
+    
+    return () => {
+      clearInterval(scrollInterval);
+    };
+  }, [autoScroll, isPaused, sortedImagePositions.length, scrollSpeed]);
 
   // Show loading state
   if (isLoading) {
@@ -510,19 +558,19 @@ export default function HorizontalScrollCards({ title, subtitle, linkTo }: Horiz
   }
 
   return (
-    <section className="bg-white py-12">
+    <section className="bg-white">
       <div className="max-w-full">
         {/* Optional header */}
-        {(title || subtitle) && (
+        {/* {(title || subtitle) && (
           <div className="text-center mb-8">
             {title && <h2 className="text-3xl font-bold mb-2">{title}</h2>}
             {subtitle && <p className="text-gray-600">{subtitle}</p>}
           </div>
-        )}
+        )} */}
         
         <div className="relative">
           {/* Left Arrow - Hidden on mobile */}
-          {sortedImagePositions.length > 3 && (
+          {/* {sortedImagePositions.length > 3 && (
             <Button
               variant="ghost"
               size="icon"
@@ -531,10 +579,10 @@ export default function HorizontalScrollCards({ title, subtitle, linkTo }: Horiz
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
-          )}
+          )} */}
 
           {/* Right Arrow - Hidden on mobile */}
-          {sortedImagePositions.length > 3 && (
+          {/* {sortedImagePositions.length > 3 && (
             <Button
               variant="ghost"
               size="icon"
@@ -543,23 +591,25 @@ export default function HorizontalScrollCards({ title, subtitle, linkTo }: Horiz
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
-          )}
+          )} */}
 
           {/* Scrollable Container */}
           <div
             ref={scrollContainerRef}
-            className="flex gap-4 lg:gap-6 overflow-x-auto scrollbar-hide px-4"
+            className="flex gap-4 lg:gap-2 overflow-x-auto scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
           >
             {sortedImagePositions.map((imagePosition, index) => {
               // Create a wrapper element to handle the click
               const CardContent = () => (
-                <div className="flex-shrink-0 w-80 sm:w-96 lg:w-40 h-20 bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div className="w-80 sm:w-96 lg:w-40 h-30 rounded-xl overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
                   <div className="relative">
                     <img
                       src={imagePosition.imageUrl}
                       alt={`Image ${index + 1}`}
-                      className="w-full h-30 object-cover"
+                      className="w-full h-full object-contain rounded"
                       onError={(e) => {
                         e.currentTarget.src = "https://via.placeholder.com/300x200?text=Image+Not+Found";
                       }}

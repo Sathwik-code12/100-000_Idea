@@ -5775,11 +5775,11 @@ export default function AdminDashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {imagePositions.map((imagePosition: ImagePosition) => (
                             <div key={imagePosition.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                              <div className="aspect-video bg-gray-100">
+                              <div className="flex  justify-center items-center">
                                 <img
                                   src={imagePosition.imageUrl}
                                   alt="Image"
-                                  className="w-full h-full object-cover"
+                                  className="w-24 h-24 object-cover rounded"
                                   onError={(e) => {
                                     e.currentTarget.src = "https://via.placeholder.com/300x200?text=Image+Not+Found";
                                   }}
