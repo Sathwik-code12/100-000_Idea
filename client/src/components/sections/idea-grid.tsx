@@ -260,7 +260,7 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
   };
 
   return (
-    <section className="pt-4 pb-0 bg-gray-50">
+    <section className="pt-1 pb-0 bg-gray-50">
       <div className="w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {ideas?.map((idea) => (
