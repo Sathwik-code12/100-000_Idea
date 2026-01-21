@@ -35,7 +35,16 @@ import {
   InsertSubmenu,
   imagePositions,
   ImagePosition,
-  InsertImagePosition
+  InsertImagePosition,
+  ResumeBuilder,
+  resumeBuilder,
+  InsertResumeBuilder,
+  careerGuideFeatures,
+  CareerGuideFeature,
+  InsertCareerGuideFeature,
+  careerGuide,
+  CareerGuide,
+  InsertCareerGuide
 } from '../shared/schema.js';
 
 export interface PaginationOptions {
@@ -1221,6 +1230,183 @@ export class AdminStorage {
 
   async deleteImagePosition(id: string): Promise<boolean> {
     const result = await db.delete(imagePositions).where(eq(imagePositions.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+  // Add to AdminStorage class in admin-storage.ts
+  async getResumeBuilders(options: PaginationOptions) {
+    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+    const offset = (page - 1) * limit;
+
+    const [totalCountResult, resumeBuildersData] = await Promise.all([
+      db.select({ count: count() }).from(resumeBuilder),
+      db
+        .select()
+        .from(resumeBuilder)
+        .orderBy(
+          sortOrder === "asc"
+            ? asc(resumeBuilder[sortBy as keyof typeof resumeBuilder.$inferSelect] as AnyColumn)
+            : desc(resumeBuilder[sortBy as keyof typeof resumeBuilder.$inferSelect] as AnyColumn)
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    const totalResumeBuilders = totalCountResult[0].count;
+    const totalPages = Math.ceil(totalResumeBuilders / limit);
+
+    return {
+      resumeBuilders: resumeBuildersData,
+      pagination: {
+        page,
+        limit,
+        total: totalResumeBuilders,
+        totalPages,
+      },
+    };
+  }
+
+  async getResumeBuilderById(id: string): Promise<ResumeBuilder | null> {
+    const [ResumeBuilderrow] = await db.select().from(resumeBuilder).where(eq(resumeBuilder.id, id));
+    return ResumeBuilderrow || null;
+  }
+
+  async createResumeBuilder(resumeBuilderData: InsertResumeBuilder): Promise<ResumeBuilder> {
+    const dataWithId: any = {
+      ...resumeBuilderData,
+      id: uuidv4(),
+    };
+
+    const [ResumeBuilderrow] = await db.insert(resumeBuilder).values(dataWithId).returning();
+    return ResumeBuilderrow;
+  }
+
+  async updateResumeBuilder(id: string, updates: Partial<ResumeBuilder>): Promise<ResumeBuilder | null> {
+    const [ResumeBuilderrow] = await db
+      .update(resumeBuilder)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(resumeBuilder.id, id))
+      .returning();
+
+    return ResumeBuilderrow || null;
+  }
+
+  async deleteResumeBuilder(id: string): Promise<boolean> {
+    const result = await db.delete(resumeBuilder).where(eq(resumeBuilder.id, id));
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+
+  // Add these methods to your AdminStorage class
+
+  // Career Guide Management
+  async getCareerGuide(): Promise<CareerGuide | null> {
+    const [careerGuiderow] = await db
+      .select()
+      .from(careerGuide)
+      .where(eq(careerGuide.isActive, true))
+      .limit(1);
+
+    return careerGuiderow || null;
+  }
+
+  async createOrUpdateCareerGuide(data: InsertCareerGuide): Promise<CareerGuide> {
+    // Check if a career guide already exists
+    const existingGuide = await this.getCareerGuide();
+
+    if (existingGuide) {
+      // Update existing guide
+      const [updatedGuide] = await db
+        .update(careerGuide)
+        .set({
+          ...data,
+          updatedAt: new Date(),
+          titleIconUrl: data.titleIconUrl || null
+        })
+        .where(eq(careerGuide.id, existingGuide.id))
+        .returning();
+
+      return updatedGuide;
+    } else {
+      // Create new guide
+      const dataWithId: any = {
+        ...data,
+        id: uuidv4(),
+        titleIconUrl: data.titleIconUrl || null
+      };
+
+      const [newGuide] = await db.insert(careerGuide).values(dataWithId).returning();
+      return newGuide;
+    }
+  }
+
+  async updateCareerGuide(id: string, updates: Partial<CareerGuide>): Promise<CareerGuide | null> {
+    const [careerGuiderow] = await db
+      .update(careerGuide)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+        titleIconUrl: updates.titleIconUrl || null
+      })
+      .where(eq(careerGuide.id, id))
+      .returning();
+
+    return careerGuiderow || null;
+  }
+
+  // Career Guide Features Management
+  async getCareerGuideFeatures(options: PaginationOptions) {
+    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+    const offset = (page - 1) * limit;
+
+    const [totalCountResult, featuresData] = await Promise.all([
+      db.select({ count: count() }).from(careerGuideFeatures),
+      db
+        .select()
+        .from(careerGuideFeatures)
+        .orderBy(
+          sortOrder === "asc"
+            ? asc(careerGuideFeatures[sortBy as keyof typeof careerGuideFeatures.$inferSelect] as AnyColumn)
+            : desc(careerGuideFeatures[sortBy as keyof typeof careerGuideFeatures.$inferSelect] as AnyColumn)
+        )
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    const totalFeatures = totalCountResult[0].count;
+    const totalPages = Math.ceil(totalFeatures / limit);
+
+    return {
+      features: featuresData,
+      pagination: {
+        page,
+        limit,
+        total: totalFeatures,
+        totalPages,
+      },
+    };
+  }
+
+  async createCareerGuideFeature(data: any & { careerGuideId: string }): Promise<CareerGuideFeature> {
+    const dataWithId: any = {
+      ...data,
+      id: uuidv4(),
+    };
+
+    const [feature] = await db.insert(careerGuideFeatures).values(dataWithId).returning();
+    return feature;
+  }
+
+  async updateCareerGuideFeature(id: string, updates: Partial<CareerGuideFeature>): Promise<CareerGuideFeature | null> {
+    const [feature] = await db
+      .update(careerGuideFeatures)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(careerGuideFeatures.id, id))
+      .returning();
+
+    return feature || null;
+  }
+
+  async deleteCareerGuideFeature(id: string): Promise<boolean> {
+    const result = await db.delete(careerGuideFeatures).where(eq(careerGuideFeatures.id, id));
     return Array.isArray(result) ? result.length > 0 : true;
   }
 }

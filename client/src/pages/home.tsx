@@ -92,6 +92,8 @@ import SubscribeSection from "@/components/sections/subscribe-section";
 import NewFooter from "@/components/sections/new-footer";
 import { useEffect, useState } from "react";
 import SubmenuSection from "@/components/sections/submenu-section";
+import ResumeBuilderSection from "@/components/sections/resumeBuilderSection";
+import CareerGuidePage from "@/components/sections/careerGuidePage";
 interface IdeaCard {
   id: string;
   title: string;
@@ -156,6 +158,8 @@ export default function Home() {
       <MainContentLayout ideas={displayedIdeas}
         isSearchActive={isSearchActive}
         totalDefaultIdeas={ideas.length} />
+      <ResumeBuilderSection />
+      <CareerGuidePage />
       <SubscribeSection />
       <NewFooter />
     </div>

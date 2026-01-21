@@ -910,3 +910,123 @@ export const insertImagePositionSchema = createInsertSchema(imagePositions, {
 
 export type InsertImagePosition = z.infer<typeof insertImagePositionSchema>;
 export type ImagePosition = typeof imagePositions.$inferSelect;
+
+// Add to schema.ts
+export const resumeBuilder = pgTable("resume_builder", {
+  id: varchar("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  subtitle: text("subtitle").notNull(),
+  ctaText: varchar("cta_text", { length: 100 }).notNull(),
+  ctaLink: varchar("cta_link", { length: 255 }).notNull(),
+  backgroundColor: varchar("background_color", { length: 20 }).default("#ffffff"),
+  textColor: varchar("text_color", { length: 20 }).default("#000000"),
+  buttonColor: varchar("button_color", { length: 20 }).default("#007bff"),
+  imageUrl: text("image_url"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  orderIdx: index("resume_builder_order_idx").on(table.displayOrder),
+  activeIdx: index("resume_builder_active_idx").on(table.isActive),
+}));
+
+export const insertResumeBuilderSchema = createInsertSchema(resumeBuilder, {
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  subtitle: z.string().min(1, "Subtitle is required"),
+  ctaText: z.string().min(1, "CTA text is required"),
+  ctaLink: z.string().min(1, "CTA link is required"),
+  backgroundColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color")
+    .default("#ffffff"),
+  textColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color")
+    .default("#000000"),
+  buttonColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color")
+    .default("#007bff"),
+  displayOrder: z.number().min(0, "Display order must be positive"),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertResumeBuilder = z.infer<typeof insertResumeBuilderSchema>;
+export type ResumeBuilder = typeof resumeBuilder.$inferSelect;
+
+// Add these tables to your schema.ts file
+
+export const careerGuide = pgTable("career_guide", {
+  id: varchar("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  subtitle: varchar("subtitle", { length: 500 }).notNull(),
+  description: text("description").notNull(),
+  titleIconUrl: text("title_icon_url"), // Icon for the title
+  backgroundImage: text("background_image"),
+  backgroundColor: varchar("background_color", { length: 20 }).default("#ffffff"),
+  textColor: varchar("text_color", { length: 20 }).default("#000000"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  activeIdx: index("career_guide_active_idx").on(table.isActive),
+}));
+
+export const careerGuideFeatures = pgTable("career_guide_features", {
+  id: varchar("id").primaryKey(),
+  careerGuideId: varchar("career_guide_id").notNull().references(() => careerGuide.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  iconUrl: text("icon_url"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  careerGuideIdIdx: index("career_guide_features_career_guide_id_idx").on(table.careerGuideId),
+  orderIdx: index("career_guide_features_order_idx").on(table.displayOrder),
+  activeIdx: index("career_guide_features_active_idx").on(table.isActive),
+}));
+
+// Schema validation
+export const insertCareerGuideSchema = createInsertSchema(careerGuide, {
+  title: z.string().min(1, "Title is required"),
+  subtitle: z.string().min(1, "Subtitle is required"),
+  description: z.string().min(1, "Description is required"),
+  titleIconUrl: z.string().url("Invalid icon URL").optional(),
+  backgroundColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color")
+    .default("#ffffff"),
+  textColor: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color")
+    .default("#000000"),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCareerGuideFeatureSchema = createInsertSchema(careerGuideFeatures, {
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  displayOrder: z.number().min(0, "Display order must be positive"),
+}).omit({
+  id: true,
+  careerGuideId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types
+export type InsertCareerGuide = z.infer<typeof insertCareerGuideSchema>;
+export type CareerGuide = typeof careerGuide.$inferSelect;
+export type InsertCareerGuideFeature = z.infer<typeof insertCareerGuideFeatureSchema>;
+export type CareerGuideFeature = typeof careerGuideFeatures.$inferSelect;

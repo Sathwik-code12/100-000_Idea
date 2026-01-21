@@ -25,7 +25,10 @@ import {
   insertResourceSchema,
   insertHeroSchema,
   insertSubmenuSchema,
-  insertImagePositionSchema
+  insertImagePositionSchema,
+  insertResumeBuilderSchema,
+  insertCareerGuideSchema,
+  insertCareerGuideFeatureSchema
 } from '../shared/schema.js';
 import { db } from './db.js';
 import { eq, and, desc, asc, or, like, count, AnyColumn } from 'drizzle-orm';
@@ -1057,101 +1060,299 @@ router.delete("/submenus/:id", requireAdminAuth, async (req: Request, res: Respo
     console.error("Delete submenu error:", error);
     res.status(500).json({ error: "Failed to delete submenu" });
   }
-  });
+});
 
-  /**
-   * GET /api/admin/image-positions
-   * Get image positions with pagination
-   */
-  router.get("/image-positions", async (req: Request, res: Response) => {
-    try {
-      const options = paginationSchema.parse(req.query);
-      const result = await adminStorage.getImagePositions(options);
-      res.json(result);
-    } catch (error) {
-      console.error("Get image positions error:", error);
-      res.status(500).json({ error: "Failed to fetch image positions" });
+/**
+ * GET /api/admin/image-positions
+ * Get image positions with pagination
+ */
+router.get("/image-positions", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getImagePositions(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get image positions error:", error);
+    res.status(500).json({ error: "Failed to fetch image positions" });
+  }
+});
+
+/**
+ * GET /api/admin/image-positions/:id
+ * Get a single image position by ID
+ */
+router.get("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const imagePosition = await adminStorage.getImagePositionById(id);
+
+    if (!imagePosition) {
+      return res.status(404).json({ error: "Image position not found" });
     }
-  });
 
-  /**
-   * GET /api/admin/image-positions/:id
-   * Get a single image position by ID
-   */
-  router.get("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const imagePosition = await adminStorage.getImagePositionById(id);
+    res.json(imagePosition);
+  } catch (error) {
+    console.error("Get image position error:", error);
+    res.status(500).json({ error: "Failed to fetch image position" });
+  }
+});
 
-      if (!imagePosition) {
-        return res.status(404).json({ error: "Image position not found" });
-      }
+/**
+ * POST /api/admin/image-positions
+ * Create a new image position
+ */
+router.post("/image-positions", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const admin = (req as any).admin;
+    const imageData = insertImagePositionSchema.parse(req.body);
 
-      res.json(imagePosition);
-    } catch (error) {
-      console.error("Get image position error:", error);
-      res.status(500).json({ error: "Failed to fetch image position" });
+    const imagePosition = await adminStorage.createImagePosition({
+      ...imageData,
+    });
+
+    res.json(imagePosition);
+  } catch (error) {
+    console.error("Create image position error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/image-positions/:id
+ * Update an image position
+ */
+router.put("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req?.params;
+    const updates = insertImagePositionSchema.partial().parse(req.body);
+
+    const imagePosition = await adminStorage.updateImagePosition(id, updates);
+    if (!imagePosition) {
+      return res.status(404).json({ error: "Image position not found" });
     }
-  });
 
-  /**
-   * POST /api/admin/image-positions
-   * Create a new image position
-   */
-  router.post("/image-positions", requireAdminAuth, async (req: Request, res: Response) => {
-    try {
-      const admin = (req as any).admin;
-      const imageData = insertImagePositionSchema.parse(req.body);
+    res.json(imagePosition);
+  } catch (error) {
+    console.error("Update image position error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
 
-      const imagePosition = await adminStorage.createImagePosition({
-        ...imageData,
-      });
+/**
+ * DELETE /api/admin/image-positions/:id
+ * Delete an image position
+ */
+router.delete("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
 
-      res.json(imagePosition);
-    } catch (error) {
-      console.error("Create image position error:", error);
-      res.status(400).json({ error: "Invalid request data" });
+    const success = await adminStorage.deleteImagePosition(id);
+    if (!success) {
+      return res.status(404).json({ error: "Image position not found" });
     }
-  });
 
-  /**
-   * PUT /api/admin/image-positions/:id
-   * Update an image position
-   */
-  router.put("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
-    try {
-      const { id } = req?.params;
-      const updates = insertImagePositionSchema.partial().parse(req.body);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete image position error:", error);
+    res.status(500).json({ error: "Failed to delete image position" });
+  }
+});
 
-      const imagePosition = await adminStorage.updateImagePosition(id, updates);
-      if (!imagePosition) {
-        return res.status(404).json({ error: "Image position not found" });
-      }
 
-      res.json(imagePosition);
-    } catch (error) {
-      console.error("Update image position error:", error);
-      res.status(400).json({ error: "Invalid request data" });
+// Add to admin-router.ts
+/**
+ * GET /api/admin/resume-builder
+ * Get resume builders with pagination
+ */
+router.get("/resume-builder", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getResumeBuilders(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get resume builders error:", error);
+    res.status(500).json({ error: "Failed to fetch resume builders" });
+  }
+});
+
+/**
+ * POST /api/admin/resume-builder
+ * Create a new resume builder
+ */
+router.post("/resume-builder", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const resumeBuilderData = insertResumeBuilderSchema.parse(req.body);
+    const resumeBuilder = await adminStorage.createResumeBuilder(resumeBuilderData);
+    res.json(resumeBuilder);
+  } catch (error) {
+    console.error("Create resume builder error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/resume-builder/:id
+ * Update a resume builder
+ */
+router.put("/resume-builder/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertResumeBuilderSchema.partial().parse(req.body);
+    const resumeBuilder = await adminStorage.updateResumeBuilder(id, updates);
+
+    if (!resumeBuilder) {
+      return res.status(404).json({ error: "Resume builder not found" });
     }
-  });
 
-  /**
-   * DELETE /api/admin/image-positions/:id
-   * Delete an image position
-   */
-  router.delete("/image-positions/:id", requireAdminAuth, async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
+    res.json(resumeBuilder);
+  } catch (error) {
+    console.error("Update resume builder error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
 
-      const success = await adminStorage.deleteImagePosition(id);
-      if (!success) {
-        return res.status(404).json({ error: "Image position not found" });
-      }
+/**
+ * DELETE /api/admin/resume-builder/:id
+ * Delete a resume builder
+ */
+router.delete("/resume-builder/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const success = await adminStorage.deleteResumeBuilder(id);
 
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Delete image position error:", error);
-      res.status(500).json({ error: "Failed to delete image position" });
+    if (!success) {
+      return res.status(404).json({ error: "Resume builder not found" });
     }
-  });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete resume builder error:", error);
+    res.status(500).json({ error: "Failed to delete resume builder" });
+  }
+});
+
+// Career Guide Management Routes
+
+/**
+ * GET /api/admin/career-guide
+ * Get career guide data
+ */
+router.get("/career-guide", async (req: Request, res: Response) => {
+  try {
+    const careerGuideData = await adminStorage.getCareerGuide();
+    res.json(careerGuideData);
+  } catch (error) {
+    console.error("Get career guide error:", error);
+    res.status(500).json({ error: "Failed to fetch career guide data" });
+  }
+});
+
+/**
+ * POST /api/admin/career-guide
+ * Create or update career guide
+ */
+router.post("/career-guide", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const careerGuideData = insertCareerGuideSchema.parse(req.body);
+    const careerGuide = await adminStorage.createOrUpdateCareerGuide(careerGuideData);
+    res.json(careerGuide);
+  } catch (error) {
+    console.error("Create/update career guide error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/career-guide/:id
+ * Update career guide
+ */
+router.put("/career-guide/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertCareerGuideSchema.partial().parse(req.body);
+    const careerGuide = await adminStorage.updateCareerGuide(id, updates);
+
+    if (!careerGuide) {
+      return res.status(404).json({ error: "Career guide not found" });
+    }
+
+    res.json(careerGuide);
+  } catch (error) {
+    console.error("Update career guide error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * GET /api/admin/career-guide-features
+ * Get career guide features
+ */
+router.get("/career-guide-features", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getCareerGuideFeatures(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get career guide features error:", error);
+    res.status(500).json({ error: "Failed to fetch career guide features" });
+  }
+});
+
+/**
+ * POST /api/admin/career-guide-features
+ * Create a new career guide feature
+ */
+router.post("/career-guide-features", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const featureData = insertCareerGuideFeatureSchema.parse(req.body);
+    const feature = await adminStorage.createCareerGuideFeature(featureData);
+    res.json(feature);
+  } catch (error) {
+    console.error("Create career guide feature error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/career-guide-features/:id
+ * Update a career guide feature
+ */
+router.put("/career-guide-features/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req?.params;
+    const updates = insertCareerGuideFeatureSchema.partial().parse(req.body);
+    const feature = await adminStorage.updateCareerGuideFeature(id, updates);
+
+    if (!feature) {
+      return res.status(404).json({ error: "Career guide feature not found" });
+    }
+
+    res.json(feature);
+  } catch (error) {
+    console.error("Update career guide feature error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * DELETE /api/admin/career-guide-features/:id
+ * Delete a career guide feature
+ */
+router.delete("/career-guide-features/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const success = await adminStorage.deleteCareerGuideFeature(id);
+
+    if (!success) {
+      return res.status(404).json({ error: "Career guide feature not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete career guide feature error:", error);
+    res.status(500).json({ error: "Failed to delete career guide feature" });
+  }
+});
+
+
 export default router;
