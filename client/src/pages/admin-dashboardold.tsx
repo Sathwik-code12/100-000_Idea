@@ -225,6 +225,50 @@ interface ImagePosition {
   isActive: boolean;
   createdAt: string;
 }
+
+// Add these interfaces
+interface ResumeBuilder {
+  id: string;
+  title: string;
+  description: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+  backgroundColor: string;
+  textColor: string;
+  buttonColor: string;
+  imageUrl?: string;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+// Add these interfaces at the top with your other interfaces
+interface CareerGuide {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  titleIconUrl?: string;
+  backgroundImage?: string;
+  backgroundColor: string;
+  textColor: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface CareerGuideFeature {
+  id: string;
+  careerGuideId: string;
+  title: string;
+  description: string;
+  iconUrl?: string;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("users");
@@ -287,6 +331,422 @@ export default function AdminDashboard() {
     isActive: true,
     imageFile: null as File | null,
     previewUrl: "",
+  });
+  const [resumeBuilders, setResumeBuilders] = useState<ResumeBuilder[]>([]);
+  const [isResumeBuilderFormOpen, setIsResumeBuilderFormOpen] = useState(false);
+  const [editingResumeBuilder, setEditingResumeBuilder] = useState<ResumeBuilder | null>(null);
+  const [resumeBuilderForm, setResumeBuilderForm] = useState({
+    title: "",
+    description: "",
+    subtitle: "",
+    ctaText: "",
+    ctaLink: "",
+    backgroundColor: "#ffffff",
+    textColor: "#000000",
+    buttonColor: "#007bff",
+    imageUrl: "",
+    displayOrder: 0,
+    isActive: true,
+  });
+
+  // Add these state variables with your other state variables
+  const [careerGuide, setCareerGuide] = useState<CareerGuide | null>(null);
+  const [careerGuideFeatures, setCareerGuideFeatures] = useState<CareerGuideFeature[]>([]);
+  const [isCareerGuideFormOpen, setIsCareerGuideFormOpen] = useState(false);
+  const [isCareerGuideFeatureFormOpen, setIsCareerGuideFeatureFormOpen] = useState(false);
+  const [editingCareerGuide, setEditingCareerGuide] = useState<CareerGuide | null>(null);
+  const [editingCareerGuideFeature, setEditingCareerGuideFeature] = useState<CareerGuideFeature | null>(null);
+
+  const [careerGuideForm, setCareerGuideForm] = useState({
+    title: "",
+    subtitle: "",
+    description: "",
+    titleIconUrl: "",
+    backgroundImage: "",
+    backgroundColor: "#ffffff",
+    textColor: "#000000",
+    isActive: true,
+  });
+
+  const [careerGuideFeatureForm, setCareerGuideFeatureForm] = useState({
+    careerGuideId: "",
+    title: "",
+    description: "",
+    iconUrl: "",
+    displayOrder: 0,
+    isActive: true,
+  });
+
+
+  // Add these queries with your other queries
+  const { data: careerGuideData, isLoading: careerGuideLoading } = useQuery({
+    queryKey: ["/api/admin/career-guide"],
+    enabled: activeTab === "career-guide",
+  });
+
+  const { data: careerGuideFeaturesData, isLoading: careerGuideFeaturesLoading } = useQuery({
+    queryKey: ["/api/admin/career-guide-features"],
+    enabled: activeTab === "career-guide",
+  });
+
+  // Add these mutations with your other mutations
+  const saveCareerGuideMutation = useMutation({
+    mutationFn: async (careerGuide: Partial<CareerGuide>) => {
+      const method = editingCareerGuide ? "PUT" : "POST";
+      const url = editingCareerGuide
+        ? `/api/admin/career-guide/${editingCareerGuide.id}`
+        : "/api/admin/career-guide";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(careerGuide),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save career guide");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/career-guide"] });
+      toast({
+        title: "Success",
+        description: editingCareerGuide
+          ? "Career guide updated successfully"
+          : "Career guide created successfully",
+      });
+      closeCareerGuideForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveCareerGuideFeatureMutation = useMutation({
+    mutationFn: async (feature: Partial<CareerGuideFeature>) => {
+      const method = editingCareerGuideFeature ? "PUT" : "POST";
+      const url = editingCareerGuideFeature
+        ? `/api/admin/career-guide-features/${editingCareerGuideFeature.id}`
+        : "/api/admin/career-guide-features";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(feature),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save career guide feature");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/career-guide-features"] });
+      toast({
+        title: "Success",
+        description: editingCareerGuideFeature
+          ? "Career guide feature updated successfully"
+          : "Career guide feature created successfully",
+      });
+      closeCareerGuideFeatureForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteCareerGuideFeatureMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/career-guide-features/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete career guide feature");
+      }
+
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/career-guide-features"] });
+      toast({
+        title: "Success",
+        description: "Career guide feature deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add these functions with your other functions
+  const openCareerGuideForm = (guide?: CareerGuide) => {
+    if (guide) {
+      setEditingCareerGuide(guide);
+      setCareerGuideForm({
+        title: guide.title,
+        subtitle: guide.subtitle,
+        description: guide.description,
+        titleIconUrl: guide.titleIconUrl || "",
+        backgroundImage: guide.backgroundImage || "",
+        backgroundColor: guide.backgroundColor || "#ffffff",
+        textColor: guide.textColor || "#000000",
+        isActive: guide.isActive,
+      });
+    } else {
+      setEditingCareerGuide(null);
+      setCareerGuideForm({
+        title: "",
+        subtitle: "",
+        description: "",
+        titleIconUrl: "",
+        backgroundImage: "",
+        backgroundColor: "#ffffff",
+        textColor: "#000000",
+        isActive: true,
+      });
+    }
+    setIsCareerGuideFormOpen(true);
+  };
+
+  const closeCareerGuideForm = () => {
+    setIsCareerGuideFormOpen(false);
+    setEditingCareerGuide(null);
+  };
+
+  const handleCareerGuideFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    }
+
+    setCareerGuideForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCareerGuideSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveCareerGuideMutation.mutate(careerGuideForm);
+  };
+
+  const openCareerGuideFeatureForm = (feature?: CareerGuideFeature) => {
+    if (feature) {
+      setEditingCareerGuideFeature(feature);
+      setCareerGuideFeatureForm({
+        careerGuideId: feature.careerGuideId,
+        title: feature.title,
+        description: feature.description,
+        iconUrl: feature.iconUrl || "",
+        displayOrder: feature.displayOrder,
+        isActive: feature.isActive,
+      });
+    } else {
+      setEditingCareerGuideFeature(null);
+      setCareerGuideFeatureForm({
+        careerGuideId: careerGuide?.id || "",
+        title: "",
+        description: "",
+        iconUrl: "",
+        displayOrder: 0,
+        isActive: true,
+      });
+    }
+    setIsCareerGuideFeatureFormOpen(true);
+  };
+
+  const closeCareerGuideFeatureForm = () => {
+    setIsCareerGuideFeatureFormOpen(false);
+    setEditingCareerGuideFeature(null);
+  };
+
+  const handleCareerGuideFeatureFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+
+    if (name === "displayOrder") {
+      value = parseInt(value, 10) || 0;
+    } else if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    }
+
+    setCareerGuideFeatureForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCareerGuideFeatureSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveCareerGuideFeatureMutation.mutate(careerGuideFeatureForm);
+  };
+  const deleteResumeBuilderMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/resume-builder/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete resume builder");
+      }
+
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/resume-builder"] });
+      toast({
+        title: "Success",
+        description: "Resume builder deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveResumeBuilderMutation = useMutation({
+    mutationFn: async (resumeBuilder: Partial<ResumeBuilder>) => {
+      const method = editingResumeBuilder ? "PUT" : "POST";
+      const url = editingResumeBuilder
+        ? `/api/admin/resume-builder/${editingResumeBuilder.id}`
+        : "/api/admin/resume-builder";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(resumeBuilder),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save resume builder");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/resume-builder"] });
+      toast({
+        title: "Success",
+        description: editingResumeBuilder
+          ? "Resume builder updated successfully"
+          : "Resume builder created successfully",
+      });
+      closeResumeBuilderForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add these functions
+  const openResumeBuilderForm = (resumeBuilder?: ResumeBuilder) => {
+    if (resumeBuilder) {
+      setEditingResumeBuilder(resumeBuilder);
+      setResumeBuilderForm({
+        title: resumeBuilder.title,
+        description: resumeBuilder.description,
+        subtitle: resumeBuilder.subtitle,
+        ctaText: resumeBuilder.ctaText,
+        ctaLink: resumeBuilder.ctaLink,
+        backgroundColor: resumeBuilder.backgroundColor || "#ffffff",
+        textColor: resumeBuilder.textColor || "#000000",
+        buttonColor: resumeBuilder.buttonColor || "#007bff",
+        imageUrl: resumeBuilder.imageUrl || "",
+        displayOrder: resumeBuilder.displayOrder,
+        isActive: resumeBuilder.isActive,
+      });
+    } else {
+      setEditingResumeBuilder(null);
+      setResumeBuilderForm({
+        title: "",
+        description: "",
+        subtitle: "",
+        ctaText: "",
+        ctaLink: "",
+        backgroundColor: "#ffffff",
+        textColor: "#000000",
+        buttonColor: "#007bff",
+        imageUrl: "",
+        displayOrder: 0,
+        isActive: true,
+      });
+    }
+    setIsResumeBuilderFormOpen(true);
+  };
+
+
+  const closeResumeBuilderForm = () => {
+    setIsResumeBuilderFormOpen(false);
+    setEditingResumeBuilder(null);
+  };
+
+  const handleResumeBuilderFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+
+    if (name === "displayOrder") {
+      value = parseInt(value, 10) || 0;
+    } else if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    }
+
+    setResumeBuilderForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleResumeBuilderSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveResumeBuilderMutation.mutate(resumeBuilderForm);
+  };
+
+  // Add this query
+  const { data: resumeBuildersData, isLoading: resumeBuildersLoading } = useQuery({
+    queryKey: ["/api/admin/resume-builder"],
+    enabled: activeTab === "resume-builder",
   });
   const { data: imagePositionsData, isLoading: imagePositionsLoading } = useQuery({
     queryKey: ["/api/admin/image-positions"],
@@ -1888,6 +2348,12 @@ export default function AdminDashboard() {
       case "imagePosition":
         deleteImagePositionMutation.mutate(itemToDelete.id);
         break;
+      case "resume-builder":
+        deleteResumeBuilderMutation.mutate(itemToDelete.id);
+        break;
+      case "career-guide-feature":
+        deleteCareerGuideFeatureMutation.mutate(itemToDelete.id);
+        break;
       default:
         break;
     }
@@ -2458,6 +2924,15 @@ export default function AdminDashboard() {
               <Image className="h-4 w-4 mr-2" />
               Image Positions
             </TabsTrigger>
+            <TabsTrigger value="resume-builder" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Resume Builder
+            </TabsTrigger>
+            <TabsTrigger value="career-guide" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Career Guide
+            </TabsTrigger>
+
           </TabsList>
 
           {/* Overview Tab */}
@@ -5826,6 +6301,723 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
+          <TabsContent value="resume-builder" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Resume Builder Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Resume Builder</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage resume builder sections</p>
+                    </div>
+                    {/* {!resumeBuilderForm && */}
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openResumeBuilderForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Section
+                    </Button>
+                    {/* }  */}
+                  </div>
+
+                  {isResumeBuilderFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingResumeBuilder ? "Edit Resume Builder Section" : "Create New Resume Builder Section"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeResumeBuilderForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      <form onSubmit={handleResumeBuilderSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Title
+                          </label>
+                          <Input
+                            name="title"
+                            value={resumeBuilderForm.title}
+                            onChange={handleResumeBuilderFormChange}
+                            placeholder="Enter title"
+                            className="w-full"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Subtitle
+                          </label>
+                          <Input
+                            name="subtitle"
+                            value={resumeBuilderForm.subtitle}
+                            onChange={handleResumeBuilderFormChange}
+                            placeholder="Enter subtitle"
+                            className="w-full"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            name="description"
+                            value={resumeBuilderForm.description}
+                            onChange={handleResumeBuilderFormChange}
+                            placeholder="Enter description"
+                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            required
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              CTA Text
+                            </label>
+                            <Input
+                              name="ctaText"
+                              value={resumeBuilderForm.ctaText}
+                              onChange={handleResumeBuilderFormChange}
+                              placeholder="e.g. Create resume"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              CTA Link
+                            </label>
+                            <Input
+                              name="ctaLink"
+                              value={resumeBuilderForm.ctaLink}
+                              onChange={handleResumeBuilderFormChange}
+                              placeholder="e.g. /resume-builder"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Image URL
+                          </label>
+                          <Input
+                            name="imageUrl"
+                            value={resumeBuilderForm.imageUrl}
+                            onChange={handleResumeBuilderFormChange}
+                            placeholder="Enter image URL"
+                            className="w-full"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Display Order
+                          </label>
+                          <Input
+                            name="displayOrder"
+                            type="number"
+                            value={resumeBuilderForm.displayOrder}
+                            onChange={handleResumeBuilderFormChange}
+                            className="w-full"
+                            min="0"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Background Color
+                            </label>
+                            <input
+                              type="color"
+                              name="backgroundColor"
+                              value={resumeBuilderForm.backgroundColor || "#ffffff"}
+                              onChange={handleResumeBuilderFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Text Color
+                            </label>
+                            <input
+                              type="color"
+                              name="textColor"
+                              value={resumeBuilderForm.textColor || "#000000"}
+                              onChange={handleResumeBuilderFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Button Color
+                            </label>
+                            <input
+                              type="color"
+                              name="buttonColor"
+                              value={resumeBuilderForm.buttonColor || "#007bff"}
+                              onChange={handleResumeBuilderFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={resumeBuilderForm.isActive}
+                            onChange={handleResumeBuilderFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeResumeBuilderForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveResumeBuilderMutation.isPending}
+                          >
+                            {saveResumeBuilderMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingResumeBuilder ? "Update Section" : "Create Section"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Resume Builder Sections</p>
+                      {resumeBuildersLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading resume builder sections...</div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {resumeBuildersData?.resumeBuilders?.map((resumeBuilder: ResumeBuilder) => (
+                            <div key={resumeBuilder.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{resumeBuilder.title}</h3>
+                                <div className="flex items-center gap-1">
+                                  {resumeBuilder.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                {resumeBuilder.description}
+                              </p>
+                              <div className="space-y-2 mb-4 text-xs text-gray-500">
+                                <div>Subtitle: {resumeBuilder.subtitle}</div>
+                                <div>CTA: {resumeBuilder.ctaText}</div>
+                                <div>Order: {resumeBuilder.displayOrder}</div>
+                              </div>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openResumeBuilderForm(resumeBuilder)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(resumeBuilder.id, "resume-builder", resumeBuilder.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="career-guide" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Career Guide Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Career Guide</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage the career guide page content</p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openCareerGuideForm(careerGuide || undefined)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      {careerGuide ? "Edit Career Guide" : "Create Career Guide"}
+                    </Button>
+                  </div>
+
+                  {isCareerGuideFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingCareerGuide ? "Edit Career Guide" : "Create Career Guide"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeCareerGuideForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      <form onSubmit={handleCareerGuideSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Title
+                          </label>
+                          <Input
+                            name="title"
+                            value={careerGuideForm.title}
+                            onChange={handleCareerGuideFormChange}
+                            placeholder="Enter career guide title"
+                            className="w-full"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Title Icon URL
+                          </label>
+                          <Input
+                            name="titleIconUrl"
+                            value={careerGuideForm.titleIconUrl}
+                            onChange={handleCareerGuideFormChange}
+                            placeholder="Enter title icon URL"
+                            className="w-full"
+                          />
+                          {careerGuideForm.titleIconUrl && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <img
+                                src={careerGuideForm.titleIconUrl}
+                                alt="Title icon preview"
+                                className="w-12 h-12 object-contain"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                              <span className="text-xs text-gray-500">Icon preview</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Subtitle
+                          </label>
+                          <Input
+                            name="subtitle"
+                            value={careerGuideForm.subtitle}
+                            onChange={handleCareerGuideFormChange}
+                            placeholder="Enter career guide subtitle"
+                            className="w-full"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            name="description"
+                            value={careerGuideForm.description}
+                            onChange={handleCareerGuideFormChange}
+                            placeholder="Enter career guide description"
+                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Background Image URL
+                          </label>
+                          <Input
+                            name="backgroundImage"
+                            value={careerGuideForm.backgroundImage}
+                            onChange={handleCareerGuideFormChange}
+                            placeholder="Enter background image URL"
+                            className="w-full"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Background Color
+                            </label>
+                            <input
+                              type="color"
+                              name="backgroundColor"
+                              value={careerGuideForm.backgroundColor || "#ffffff"}
+                              onChange={handleCareerGuideFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Text Color
+                            </label>
+                            <input
+                              type="color"
+                              name="textColor"
+                              value={careerGuideForm.textColor || "#000000"}
+                              onChange={handleCareerGuideFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={careerGuideForm.isActive}
+                            onChange={handleCareerGuideFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeCareerGuideForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveCareerGuideMutation.isPending}
+                          >
+                            {saveCareerGuideMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingCareerGuide ? "Update Career Guide" : "Create Career Guide"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      {careerGuideLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading career guide...</div>
+                      ) : careerGuide ? (
+                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                          <div className="flex items-start gap-4 mb-3">
+                            {careerGuide.titleIconUrl && (
+                              <img
+                                src={careerGuide.titleIconUrl}
+                                alt="Career guide icon"
+                                className="w-16 h-16 object-contain"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 text-base">{careerGuide.title}</h3>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {careerGuide.isActive && (
+                                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-4">{careerGuide.subtitle}</p>
+                          <p className="text-sm text-gray-600 mb-4">{careerGuide.description}</p>
+                          <div className="space-y-2 mb-4 text-xs text-gray-500">
+                            <div>Background Color: {careerGuide.backgroundColor}</div>
+                            <div>Text Color: {careerGuide.textColor}</div>
+                            {careerGuide.titleIconUrl && (
+                              <div>Title Icon: {careerGuide.titleIconUrl}</div>
+                            )}
+                            {careerGuide.backgroundImage && (
+                              <div>Background Image: {careerGuide.backgroundImage}</div>
+                            )}
+                          </div>
+                          <div className="flex gap-2 pt-4 border-t border-gray-100">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-xs"
+                              onClick={() => openCareerGuideForm(careerGuide)}
+                            >
+                              <Edit className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 text-gray-500">No career guide found. Create one to get started.</div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="mt-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Career Guide Features</h3>
+                      <Button
+                        className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                        onClick={() => openCareerGuideFeatureForm()}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Feature
+                      </Button>
+                    </div>
+
+                    {isCareerGuideFeatureFormOpen ? (
+                      <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {editingCareerGuideFeature ? "Edit Feature" : "Create New Feature"}
+                          </h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={closeCareerGuideFeatureForm}
+                          >
+                            <X className="h-5 w-5" />
+                          </Button>
+                        </div>
+
+                        <form onSubmit={handleCareerGuideFeatureSubmit} className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Title
+                            </label>
+                            <Input
+                              name="title"
+                              value={careerGuideFeatureForm.title}
+                              onChange={handleCareerGuideFeatureFormChange}
+                              placeholder="Enter feature title"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Description
+                            </label>
+                            <textarea
+                              name="description"
+                              value={careerGuideFeatureForm.description}
+                              onChange={handleCareerGuideFeatureFormChange}
+                              placeholder="Enter feature description"
+                              className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Icon URL
+                            </label>
+                            <Input
+                              name="iconUrl"
+                              value={careerGuideFeatureForm.iconUrl}
+                              onChange={handleCareerGuideFeatureFormChange}
+                              placeholder="Enter icon URL"
+                              className="w-full"
+                            />
+                            {careerGuideFeatureForm.iconUrl && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <img
+                                  src={careerGuideFeatureForm.iconUrl}
+                                  alt="Feature icon preview"
+                                  className="w-8 h-8 object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                                <span className="text-xs text-gray-500">Icon preview</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={careerGuideFeatureForm.displayOrder}
+                              onChange={handleCareerGuideFeatureFormChange}
+                              className="w-full"
+                              min="0"
+                            />
+                          </div>
+
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id="isActive"
+                              name="isActive"
+                              checked={careerGuideFeatureForm.isActive}
+                              onChange={handleCareerGuideFeatureFormChange}
+                              className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                            />
+                            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                              Active
+                            </label>
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-4">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={closeCareerGuideFeatureForm}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="submit"
+                              className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                              disabled={saveCareerGuideFeatureMutation.isPending}
+                            >
+                              {saveCareerGuideFeatureMutation.isPending ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Saving...
+                                </>
+                              ) : (
+                                editingCareerGuideFeature ? "Update Feature" : "Create Feature"
+                              )}
+                            </Button>
+                          </div>
+                        </form>
+                      </div>
+                    ) : (
+                      <div className="mt-6">
+                        {careerGuideFeaturesLoading ? (
+                          <div className="text-center py-12 text-gray-500">Loading features...</div>
+                        ) : careerGuideFeatures.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {careerGuideFeatures.map((feature: CareerGuideFeature) => (
+                              <div key={feature.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex items-center gap-3">
+                                    {feature.iconUrl ? (
+                                      <img
+                                        src={feature.iconUrl}
+                                        alt={feature.title}
+                                        className="w-8 h-8 object-contain"
+                                      />
+                                    ) : (
+                                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <Check className="w-5 h-5 text-white" />
+                                      </div>
+                                    )}
+                                    <h3 className="font-semibold text-gray-900 text-base">{feature.title}</h3>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    {feature.isActive && (
+                                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    )}
+                                  </div>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{feature.description}</p>
+                                <div className="text-xs text-gray-500 mb-4">Order: {feature.displayOrder}</div>
+                                <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1 text-xs"
+                                    onClick={() => openCareerGuideFeatureForm(feature)}
+                                  >
+                                    <Edit className="h-3 w-3 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => openDeleteDialog(feature.id, "career-guide-feature", feature.title)}
+                                  >
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-12 text-gray-500">No features found. Add some features to get started.</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+
+
         </Tabs>
       </div>
 
