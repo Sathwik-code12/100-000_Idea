@@ -1,165 +1,154 @@
+// Update CareerGuideSection.tsx
 import { useState, useEffect } from "react";
-import { Check } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface CareerGuide {
   id: string;
   title: string;
   subtitle: string;
   description: string;
-  titleIconUrl?: string;
-  backgroundImage?: string;
+  titleIconUrl: string;
+  items: CareerGuideItem[];
   backgroundColor: string;
-  textColor: string;
+  titleColor: string;
+  subtitleColor: string;
+  descriptionColor: string;
+  titleIconColor: string;
   isActive: boolean;
   createdAt: string;
 }
 
-interface CareerGuideFeature {
+interface CareerGuideItem {
   id: string;
-  careerGuideId: string;
   title: string;
   description: string;
-  iconUrl?: string;
-  displayOrder: number;
-  isActive: boolean;
-  createdAt: string;
+  iconUrl: string;
+  backgroundColor: string;
+  textColor: string;
+  iconColor: string;
 }
 
-export default function CareerGuidePage() {
-  const [careerGuide, setCareerGuide] = useState<CareerGuide | null>(null);
-  const [features, setFeatures] = useState<CareerGuideFeature[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCareerGuideData = async () => {
-      try {
-        // Fetch career guide data
-        const guideResponse = await fetch("/api/admin/career-guide");
-        if (guideResponse.ok) {
-          const guideData = await guideResponse.json();
-          setCareerGuide(guideData);
-        }
-
-        // Fetch career guide features
-        const featuresResponse = await fetch("/api/admin/career-guide-features");
-        if (featuresResponse.ok) {
-          const featuresData = await featuresResponse.json();
-          setFeatures(featuresData.features || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch career guide data:", error);
-      } finally {
-        setLoading(false);
+const CareerGuideSection = () => {
+  const { data: careerGuideData, isLoading } = useQuery({
+    queryKey: ["/api/admin/career-guide"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/career-guide");
+      if (!response.ok) {
+        throw new Error("Failed to fetch career guide items");
       }
-    };
+      return response.json();
+    },
+  });
 
-    fetchCareerGuideData();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
-  if (!careerGuide) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">Career guide not found.</div>
-      </div>
-    );
+  const activeSection = careerGuideData?.careerGuide?.find((section: CareerGuide) => section.isActive);
+
+  if (!activeSection) {
+    return null;
   }
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{ 
-        backgroundColor: careerGuide.backgroundColor,
-        backgroundImage: careerGuide.backgroundImage ? `url(${careerGuide.backgroundImage})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
+    <section
+      className="py-16 px-8"
+      style={{ backgroundColor: activeSection.backgroundColor }}
     >
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex items-center justify-center mb-6">
-            {careerGuide.titleIconUrl && (
-              <img 
-                src={careerGuide.titleIconUrl} 
-                alt="Career guide icon" 
-                className="w-20 h-20 object-contain mr-6"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            )}
-            <h1 
-              className="text-4xl md:text-5xl font-bold"
-              style={{ color: careerGuide.textColor }}
-            >
-              {careerGuide.title}
-            </h1>
-          </div>
-          
-          <h2 
-            className="text-xl md:text-2xl mb-8"
-            style={{ color: careerGuide.textColor }}
-          >
-            {careerGuide.subtitle}
-          </h2>
-          <p 
-            className="text-lg mb-12 max-w-3xl mx-auto"
-            style={{ color: careerGuide.textColor }}
-          >
-            {careerGuide.description}
-          </p>
-        </div>
+      <div className="max-w-8xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
-        <div className="max-w-5xl mx-auto mt-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {features
-              .filter(feature => feature.isActive)
-              .sort((a, b) => a.displayOrder - b.displayOrder)
-              .map((feature) => (
-                <div 
-                  key={feature.id} 
-                  className="flex items-start space-x-4 p-6 rounded-lg bg-white bg-opacity-90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <div className="flex-shrink-0">
-                    {feature.iconUrl ? (
-                      <img 
-                        src={feature.iconUrl} 
-                        alt={feature.title} 
-                        className="w-10 h-10 object-contain"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div 
-                      className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center"
-                      style={{ display: feature.iconUrl ? 'none' : 'flex' }}
-                    >
-                      <Check className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+          {/* LEFT SIDE */}
+          <div>
+            <span
+              className="flex bg-white gap-2 inline-block text-sm font-semibold mb-4"
+              style={{ color: activeSection.subtitleColor }}
+            >
+              <img
+                src={'https://cdn-icons-png.flaticon.com/512/11261/11261342.png '}
+                alt="test"
+                className="w-5 h-5"
+              // style={{
+              //   // filter: `brightness(0) saturate(100%) ${item.iconColor}`,
+              // }}
+              /> Career guide
+            </span>
+
+            <h1
+              className="text-4xl lg:text-4xl font-bold mb-6"
+              style={{ color: activeSection.titleColor }}
+            >
+              {activeSection.title}
+            </h1>
+
+            <p
+              className="text-lg mb-6"
+              style={{ color: activeSection.subtitleColor }}
+            >
+              {activeSection.subtitle}
+            </p>
+
+            <p
+              className="text-base leading-relaxed max-w-xl"
+              style={{ color: activeSection.descriptionColor }}
+            >
+              {activeSection.description}
+            </p>
           </div>
+
+          {/* RIGHT SIDE */}
+          <div className="space-y-4">
+            {activeSection.items.map((item: CareerGuideItem) => (
+              <>
+              <div key={item.id} className="flex gap-4 items-start">
+
+                {/* Icon */}
+                <div
+                  className="flex items-center justify-center w-6 h-6 rounded-md flex-shrink-0"
+                  style={{ backgroundColor: item.iconColor + "1A" }}
+                >
+                  <img
+                    src={item.iconUrl}
+                    alt={item.title}
+                    className="w-5 h-5"
+                    style={{
+                      filter: `brightness(0) saturate(100%) ${item.iconColor}`,
+                    }}
+                  />
+                </div>
+
+                {/* Text */}
+                <div>
+                  <h3
+                    className="text-sm font-semibold mb-1"
+                    style={{ color: item.textColor }}
+                  >
+                    {item.title}
+                  </h3>
+                  <p
+                    className="text-sm leading-relaxed text-gray"
+                  // style={{ color: item.textColor }}
+                  >
+                    {item.description}
+                  </p>
+
+                </div>
+                
+              </div>
+              <hr />
+              </>
+            ))}
+          </div>
+
         </div>
       </div>
-    </div>
+    </section>
   );
-}
+
+};
+
+export default CareerGuideSection;

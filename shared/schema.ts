@@ -960,73 +960,191 @@ export const insertResumeBuilderSchema = createInsertSchema(resumeBuilder, {
 export type InsertResumeBuilder = z.infer<typeof insertResumeBuilderSchema>;
 export type ResumeBuilder = typeof resumeBuilder.$inferSelect;
 
-// Add these tables to your schema.ts file
 
+// Update your shared/schema.ts file
 export const careerGuide = pgTable("career_guide", {
-  id: varchar("id").primaryKey(),
-  title: varchar("title", { length: 255 }).notNull(),
-  subtitle: varchar("subtitle", { length: 500 }).notNull(),
-  description: text("description").notNull(),
-  titleIconUrl: text("title_icon_url"), // Icon for the title
-  backgroundImage: text("background_image"),
-  backgroundColor: varchar("background_color", { length: 20 }).default("#ffffff"),
-  textColor: varchar("text_color", { length: 20 }).default("#000000"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (table) => ({
-  activeIdx: index("career_guide_active_idx").on(table.isActive),
-}));
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
 
-export const careerGuideFeatures = pgTable("career_guide_features", {
-  id: varchar("id").primaryKey(),
-  careerGuideId: varchar("career_guide_id").notNull().references(() => careerGuide.id, { onDelete: "cascade" }),
-  title: varchar("title", { length: 255 }).notNull(),
+  // Left side content
+  title: text("title").notNull(),
+  subtitle: text("subtitle").notNull(),
   description: text("description").notNull(),
-  iconUrl: text("icon_url"),
-  displayOrder: integer("display_order").default(0),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (table) => ({
-  careerGuideIdIdx: index("career_guide_features_career_guide_id_idx").on(table.careerGuideId),
-  orderIdx: index("career_guide_features_order_idx").on(table.displayOrder),
-  activeIdx: index("career_guide_features_active_idx").on(table.isActive),
-}));
+  titleIconUrl: text("title_icon_url"), // Icon for the title section
 
-// Schema validation
-export const insertCareerGuideSchema = createInsertSchema(careerGuide, {
-  title: z.string().min(1, "Title is required"),
-  subtitle: z.string().min(1, "Subtitle is required"),
-  description: z.string().min(1, "Description is required"),
-  titleIconUrl: z.string().url("Invalid icon URL").optional(),
-  backgroundColor: z
-    .string()
-    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color")
-    .default("#ffffff"),
-  textColor: z
-    .string()
-    .regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color")
-    .default("#000000"),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+  // Right side items
+  items: json("items").notNull(), // Array of career guide items
+
+  // Styling options
+  backgroundColor: text("background_color").default("#ffffff"),
+  titleColor: text("title_color").default("#000000"),
+  subtitleColor: text("subtitle_color").default("#666666"),
+  descriptionColor: text("description_color").default("#666666"),
+  titleIconColor: text("title_icon_color").default("#000000"),
+
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertCareerGuideFeatureSchema = createInsertSchema(careerGuideFeatures, {
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  displayOrder: z.number().min(0, "Display order must be positive"),
-}).omit({
-  id: true,
-  careerGuideId: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-// Types
+export const insertCareerGuideSchema = createInsertSchema(careerGuide);
 export type InsertCareerGuide = z.infer<typeof insertCareerGuideSchema>;
 export type CareerGuide = typeof careerGuide.$inferSelect;
-export type InsertCareerGuideFeature = z.infer<typeof insertCareerGuideFeatureSchema>;
-export type CareerGuideFeature = typeof careerGuideFeatures.$inferSelect;
+
+
+// Career Industry table for "Search careers by industry" section
+export const careerIndustry = pgTable("career_industry", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  titleColor: text("title_color").default("#000000"),
+  items: json("items").$type<{
+    id: string;
+    icon: string;
+    iconColor: string;
+    iconBackgroundColor: string;
+    text: string;
+    path: string;
+  }[]>().notNull(),
+  backgroundColor: text("background_color").default("#ffffff"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  activeIdx: index("career_industry_active_idx").on(table.isActive),
+  createdAtIdx: index("career_industry_created_at_idx").on(table.createdAt),
+}));
+
+export const insertCareerIndustrySchema = createInsertSchema(careerIndustry, {
+  title: z.string().min(1, "Title is required"),
+  titleColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#000000"),
+  items: z.array(z.object({
+    id: z.string(),
+    icon: z.string(),
+    iconColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color"),
+    iconBackgroundColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color"),
+    text: z.string(),
+    path: z.string(),
+  })).min(1, "At least one item is required"),
+  backgroundColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#ffffff"),
+  isActive: z.boolean().default(true),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertCareerIndustry = z.infer<typeof insertCareerIndustrySchema>;
+export type CareerIndustry = typeof careerIndustry.$inferSelect;
+
+// States table for "Search jobs by state" section
+export const states = pgTable("states", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  titleColor: text("title_color").default("#000000"),
+  items: json("items").$type<{
+    id: string;
+    text: string;
+    textColor: string;
+    path: string;
+  }[]>().notNull(),
+  backgroundColor: text("background_color").default("#ffffff"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  activeIdx: index("states_active_idx").on(table.isActive),
+  createdAtIdx: index("states_created_at_idx").on(table.createdAt),
+}));
+
+export const insertStatesSchema = createInsertSchema(states, {
+  title: z.string().min(1, "Title is required"),
+  titleColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#000000"),
+  items: z.array(z.object({
+    id: z.string(),
+    text: z.string(),
+    textColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color"),
+    path: z.string(),
+  })).min(1, "At least one item is required"),
+  backgroundColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#ffffff"),
+  isActive: z.boolean().default(true),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertStates = z.infer<typeof insertStatesSchema>;
+export type States = typeof states.$inferSelect;
+
+
+// Topics table for "All our topics" section
+export const topics = pgTable("topics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  subtitle: text("subtitle").notNull(),
+  titleColor: text("title_color").default("#000000"),
+  subtitleColor: text("subtitle_color").default("#666666"),
+  backgroundColor: text("background_color").default("#ffffff"),
+  categories: json("categories").$type<{
+    id: string;
+    name: string;
+    items: {
+      id: string;
+      name: string;
+      path: string;
+    }[];
+  }[]>().notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  activeIdx: index("topics_active_idx").on(table.isActive),
+  createdAtIdx: index("topics_created_at_idx").on(table.createdAt),
+}));
+
+export const insertTopicsSchema = createInsertSchema(topics, {
+  title: z.string().min(1, "Title is required"),
+  subtitle: z.string().min(1, "Subtitle is required"),
+  titleColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#000000"),
+  subtitleColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#666666"),
+  backgroundColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#ffffff"),
+  categories: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    items: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      path: z.string(),
+    })),
+  })).min(1, "At least one category is required"),
+  isActive: z.boolean().default(true),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertTopics = z.infer<typeof insertTopicsSchema>;
+export type Topics = typeof topics.$inferSelect;
+
+// Donation table for donation banner
+export const donation = pgTable("donation", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  buttonText: text("button_text").notNull(),
+  redirectUrl: text("redirect_url").notNull(),
+  backgroundColor: text("background_color").default("#ffc501"),
+  textColor: text("text_color").default("#000000"),
+  buttonColor: text("button_color").default("#ff0000"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  activeIdx: index("donation_active_idx").on(table.isActive),
+  displayOrderIdx: index("donation_display_order_idx").on(table.displayOrder),
+  createdAtIdx: index("donation_created_at_idx").on(table.createdAt),
+}));
+
+export const insertDonationSchema = createInsertSchema(donation, {
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  buttonText: z.string().min(1, "Button text is required"),
+  redirectUrl: z.string().min(1, "Redirect URL is required"),
+  backgroundColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#ffc501"),
+  textColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#000000"),
+  buttonColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Must be a valid hex color").default("#ff0000"),
+  displayOrder: z.number().min(0, "Display order must be a positive number").default(0),
+  isActive: z.boolean().default(true),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertDonation = z.infer<typeof insertDonationSchema>;
+export type Donation = typeof donation.$inferSelect;

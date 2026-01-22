@@ -10,7 +10,6 @@ import adminRoutes from "./admin-routes.js";
 import { AdminAuthService } from "./admin-auth.js";
 import { User as SchemaUser } from "../shared/schema.js";
 import { v4 as uuidv4 } from "uuid";
-import { db } from "db.js";
 import { eq } from "drizzle-orm";
 // Simple in-memory cache for better performance
 const cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
@@ -836,25 +835,7 @@ app.get("/api/ideas/:ideaId/user-review", async (req, res) => {
   }
 });
 // Add to a public router file (not admin router)
-app.get("/resume-builder", async (req,res) => {
-  try {
-    const activeResumeBuilder = await db
-      .select()
-      .from(resumeBuilder)
-      .where(eq(resumeBuilder.isActive, true))
-      .orderBy(resumeBuilder.displayOrder)
-      .limit(1);
 
-    if (activeResumeBuilder.length === 0) {
-      return res.status(404).json({ error: "No active resume builder section found" });
-    }
-
-    res.json(activeResumeBuilder[0]);
-  } catch (error) {
-    console.error("Get resume builder error:", error);
-    res.status(500).json({ error: "Failed to fetch resume builder" });
-  }
-});
   const httpServer = createServer(app);
 
   return httpServer;
