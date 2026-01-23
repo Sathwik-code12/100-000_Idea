@@ -7642,7 +7642,7 @@ export default function AdminDashboard() {
                                   />
                                 </div>
 
-                                <div>
+                                {/* <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Icon Color
                                   </label>
@@ -7652,7 +7652,7 @@ export default function AdminDashboard() {
                                     onChange={(e) => updateCareerGuideItem(index, 'iconColor', e.target.value)}
                                     className="h-10 w-full rounded border border-gray-300 cursor-pointer"
                                   />
-                                </div>
+                                </div> */}
                               </div>
                             </div>
                           ))}
@@ -7715,7 +7715,7 @@ export default function AdminDashboard() {
                               />
                             </div>
 
-                            <div>
+                            {/* <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Title Icon Color
                               </label>
@@ -7726,7 +7726,7 @@ export default function AdminDashboard() {
                                 onChange={handleCareerGuideFormChange}
                                 className="h-10 w-full rounded border border-gray-300 cursor-pointer"
                               />
-                            </div>
+                            </div> */}
                           </div>
 
                           <div className="flex items-center">
