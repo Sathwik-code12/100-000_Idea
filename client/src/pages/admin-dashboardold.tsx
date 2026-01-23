@@ -3668,100 +3668,298 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-gray-100 py-6 px-4 rounded-lg flex flex-wrap gap-2 justify-start h-full">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-white">
+          {/* <TabsList className="bg-gray-100 py-6 px-4 rounded-lg flex flex-wrap gap-2 justify-start h-full"> */}
+          <TabsList className="
+  bg-gray-100
+  rounded-lg
+  grid
+  grid-cols-2
+  md:grid-cols-3
+  lg:grid-cols-6
+h-full">
+
+            <TabsTrigger value="overview" className="
+    flex
+    items-center
+    justify-start
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="platform-ideas" className="data-[state=active]:bg-white">
+            <TabsTrigger value="platform-ideas" className="
+    flex
+    items-center
+    justify-start
+
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
               Platform Ideas
             </TabsTrigger>
-            <TabsTrigger value="menu" className="data-[state=active]:bg-white">
+            <TabsTrigger value="menu" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              Menu Management
+              Menu
             </TabsTrigger>
-            <TabsTrigger value="icons" className="data-[state=active]:bg-white">
+            <TabsTrigger value="icons" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              Icon Management
+              Icon
             </TabsTrigger>
-            <TabsTrigger value="hero" className="data-[state=active]:bg-white">
+            <TabsTrigger value="hero" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              Hero Management
+              Hero
             </TabsTrigger>
-            <TabsTrigger value="classifieds" className="data-[state=active]:bg-white">
+            <TabsTrigger value="classifieds" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              Classifieds Management
+              Classifieds
             </TabsTrigger>
-            <TabsTrigger value="resource" className="data-[state=active]:bg-white">
+            <TabsTrigger value="resource" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              Resource Management
+              Resource
             </TabsTrigger>
-            <TabsTrigger value="banner" className="data-[state=active]:bg-white">
+            <TabsTrigger value="banner" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              Banner Management
+              Banner
             </TabsTrigger>
-            <TabsTrigger value="submitted-ideas" className="data-[state=active]:bg-white">
+            <TabsTrigger value="submitted-ideas" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
               Submitted Ideas
             </TabsTrigger>
-            <TabsTrigger value="upload" className="data-[state=active]:bg-white">
+            <TabsTrigger value="upload" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <Upload className="h-4 w-4 mr-2" />
               Upload Ideas
             </TabsTrigger>
-            <TabsTrigger value="users" className="data-[state=active]:bg-white">
+            <TabsTrigger value="users" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <Users className="h-4 w-4 mr-2" />
               Users
             </TabsTrigger>
-            <TabsTrigger value="subscribers" className="data-[state=active]:bg-white">
+            <TabsTrigger value="subscribers" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <UserCheck className="h-4 w-4 mr-2" />
               Subscribers
             </TabsTrigger>
-            {/* <TabsTrigger value="bookmarks" className="data-[state=active]:bg-white">
+            {/* <TabsTrigger value="bookmarks" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <BookmarkCheck className="h-4 w-4 mr-2" />
               Bookmarks
             </TabsTrigger> */}
-            <TabsTrigger value="activities" className="data-[state=active]:bg-white">
+            <TabsTrigger value="activities" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <Activity className="h-4 w-4 mr-2" />
               Activity Logs
             </TabsTrigger>
-            <TabsTrigger value="system" className="data-[state=active]:bg-white">
+            <TabsTrigger value="system" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <Settings className="h-4 w-4 mr-2" />
               System
             </TabsTrigger>
-            <TabsTrigger value="profile" className="data-[state=active]:bg-white">
+            <TabsTrigger value="profile" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <User className="h-4 w-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="submenu" className="data-[state=active]:bg-white">
+            <TabsTrigger value="submenu" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              Submenu Management
+              Submenu
             </TabsTrigger>
-            <TabsTrigger value="imagePositions" className="data-[state=active]:bg-white">
+            <TabsTrigger value="imagePositions" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <Image className="h-4 w-4 mr-2" />
               Image Positions
             </TabsTrigger>
-            <TabsTrigger value="resume-builder" className="data-[state=active]:bg-white">
+            <TabsTrigger value="resume-builder" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
               Resume Builder
             </TabsTrigger>
-            <TabsTrigger value="career-guide" className="data-[state=active]:bg-white">
+            <TabsTrigger value="career-guide" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
               Career Guide
             </TabsTrigger>
-            <TabsTrigger value="career-industry" className="data-[state=active]:bg-white">
+            <TabsTrigger value="career-industry" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
               Career Industry
             </TabsTrigger>
-            <TabsTrigger value="states" className="data-[state=active]:bg-white">
+            <TabsTrigger value="states" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              States Management
+              States
             </TabsTrigger>
-            <TabsTrigger value="topics" className="data-[state=active]:bg-white">
+            <TabsTrigger value="topics" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
-              Topics Management
+              Topics
             </TabsTrigger>
-            <TabsTrigger value="donation" className="data-[state=active]:bg-white">
+            <TabsTrigger value="donation" className="
+    flex
+    items-center
+    justify-start
+    px-3
+    py-2
+    data-[state=active]:bg-white
+    rounded-md
+  ">
               <FileText className="h-4 w-4 mr-2" />
               Donation Banner
             </TabsTrigger>
@@ -4720,7 +4918,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">Banner Management</h2>
-                      <p className="text-sm text-gray-500 mt-1">Manage promotional banners for the homepagessaa</p>
+                      <p className="text-sm text-gray-500 mt-1">Manage promotional banners for the homepages</p>
                     </div>
                     <Button
                       className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
@@ -4747,76 +4945,77 @@ export default function AdminDashboard() {
                       </div>
 
                       <form onSubmit={handleBannerSubmit} className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Title (Max 10 words)
-                          </label>
-                          <Input
-                            name="title"
-                            value={bannerForm.title}
-                            onChange={handleBannerFormChange}
-                            placeholder="Enter banner title"
-                            className="w-full"
-                            required
-                          />
-                          <p className="text-xs text-gray-500 mt-1">0/10 words</p>
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Title (Max 10 words)
+                            </label>
+                            <Input
+                              name="title"
+                              value={bannerForm.title}
+                              onChange={handleBannerFormChange}
+                              placeholder="Enter banner title"
+                              className="w-full"
+                              required
+                            />
+                            <p className="text-xs text-gray-500 mt-1">0/10 words</p>
+                          </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Button Text
-                          </label>
-                          <Input
-                            name="buttonText"
-                            value={bannerForm.buttonText}
-                            onChange={handleBannerFormChange}
-                            placeholder="e.g. Get Started"
-                            className="w-full"
-                            required
-                          />
-                        </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Button Text
+                            </label>
+                            <Input
+                              name="buttonText"
+                              value={bannerForm.buttonText}
+                              onChange={handleBannerFormChange}
+                              placeholder="e.g. Get Started"
+                              className="w-full"
+                              required
+                            />
+                          </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Redirect URL
-                          </label>
-                          <Input
-                            name="redirectUrl"
-                            value={bannerForm.redirectUrl}
-                            onChange={handleBannerFormChange}
-                            placeholder="e.g. /ideas"
-                            className="w-full"
-                            required
-                          />
-                        </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Redirect URL
+                            </label>
+                            <Input
+                              name="redirectUrl"
+                              value={bannerForm.redirectUrl}
+                              onChange={handleBannerFormChange}
+                              placeholder="e.g. /ideas"
+                              className="w-full"
+                              required
+                            />
+                          </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Display Order
-                          </label>
-                          <Input
-                            name="displayOrder"
-                            type="number"
-                            value={bannerForm.displayOrder}
-                            onChange={handleBannerFormChange}
-                            className="w-full"
-                            min="0"
-                          />
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={bannerForm.displayOrder}
+                              onChange={handleBannerFormChange}
+                              className="w-full"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Badge
+                            </label>
+                            <Input
+                              name="imageUrl"
+                              type="text"
+                              value={bannerForm.imageUrl}
+                              onChange={handleBannerFormChange}
+                              className="w-full"
+                              min="0"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Badge
-                          </label>
-                          <Input
-                            name="imageUrl"
-                            type="text"
-                            value={bannerForm.imageUrl}
-                            onChange={handleBannerFormChange}
-                            className="w-full"
-                            min="0"
-                          />
-                        </div>
-
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Description
@@ -4845,20 +5044,9 @@ export default function AdminDashboard() {
                             Active
                           </label>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex gap-4">
                           {/* Background Color */}
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Background Color
-                            </label>
-                            <input
-                              type="color"
-                              name="backgroundColor"
-                              value={bannerForm.backgroundColor || "#ffffff"}
-                              onChange={handleBannerFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
-                            />
-                          </div>
+
 
                           {/* Text Color */}
                           <div>
@@ -4870,7 +5058,7 @@ export default function AdminDashboard() {
                               name="textColor"
                               value={bannerForm.textColor || "#000000"}
                               onChange={handleBannerFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                             />
                           </div>
 
@@ -4884,7 +5072,19 @@ export default function AdminDashboard() {
                               name="buttonColor"
                               value={bannerForm.buttonColor || "#ffc501"}
                               onChange={handleBannerFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Background Color
+                            </label>
+                            <input
+                              type="color"
+                              name="backgroundColor"
+                              value={bannerForm.backgroundColor || "#ffffff"}
+                              onChange={handleBannerFormChange}
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                             />
                           </div>
                         </div>
@@ -5242,7 +5442,8 @@ export default function AdminDashboard() {
                           <label className="block text-sm font-medium mb-1">
                             Icon Image
                           </label>
-                          <div className="space-y-3">
+
+                          <div className="flex items-center gap-4">
                             <Input
                               name="iconUrl"
                               value={iconForm.iconUrl}
@@ -5421,33 +5622,35 @@ export default function AdminDashboard() {
                       </div>
                       <form onSubmit={handleHeroSubmit} className="space-y-4">
                         {/* Title */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Title
-                          </label>
-                          <Input
-                            name="title"
-                            value={heroForm.title}
-                            onChange={handleHeroFormChange}
-                            placeholder="Enter hero title"
-                            required
-                          />
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Title
+                            </label>
+                            <Input
+                              name="title"
+                              value={heroForm.title}
+                              onChange={handleHeroFormChange}
+                              placeholder="Enter hero title"
+                              required
+                            />
+                          </div>
 
-                        {/* Subtitle */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Subtitle
-                          </label>
-                          <textarea
-                            name="subtitle"
-                            value={heroForm.subtitle}
-                            onChange={handleHeroFormChange}
-                            placeholder="Enter hero subtitle"
-                            rows={3}
-                            className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-400"
-                            required
-                          />
+                          {/* Subtitle */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Subtitle
+                            </label>
+                            <textarea
+                              name="subtitle"
+                              value={heroForm.subtitle}
+                              onChange={handleHeroFormChange}
+                              placeholder="Enter hero subtitle"
+                              rows={3}
+                              className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-400"
+                              required
+                            />
+                          </div>
                         </div>
 
                         {/* CTA Label */}
@@ -5481,12 +5684,13 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* CTA Background */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               CTA Background Color
                             </label>
                             <Input
+                              className="w-12 h-12"
                               name="ctaBackground"
                               type="color"
                               value={heroForm.ctaBackground}
@@ -5500,6 +5704,7 @@ export default function AdminDashboard() {
                               Hero Background Color
                             </label>
                             <Input
+                              className="w-12 h-12"
                               name="backgroundColor"
                               type="color"
                               value={heroForm.backgroundColor}
@@ -5656,7 +5861,19 @@ export default function AdminDashboard() {
                               </SelectContent>
                             </Select>
                           </div>
-
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={classifiedForm.displayOrder}
+                              onChange={handleClassifiedFormChange}
+                              className="w-full"
+                              min="0"
+                            />
+                          </div>
                           {/* <div>
                             <label className="block text-sm font-medium mb-1">
                               Path
@@ -5684,6 +5901,7 @@ export default function AdminDashboard() {
                             required
                           />
                         </div>
+
                         {/* <div>
                           <label className="block text-sm font-medium mb-1">
                             Icon URL (Flaticon)
@@ -5709,19 +5927,7 @@ export default function AdminDashboard() {
                           </div>
                         )}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Display Order
-                            </label>
-                            <Input
-                              name="displayOrder"
-                              type="number"
-                              value={classifiedForm.displayOrder}
-                              onChange={handleClassifiedFormChange}
-                              className="w-[300px]"
-                              min="0"
-                            />
-                          </div>
+
                           <div className="flex items-center">
                             <input
                               type="checkbox"
@@ -5887,10 +6093,11 @@ export default function AdminDashboard() {
                               value={resourceForm.path}
                               onChange={handleResourceFormChange}
                               placeholder="e.g. /resource"
-                              className="w-[300px]"
+                              className="w-full"
                               required
                             />
                           </div>
+
                         </div>
                         <div>
                           <label className="block text-sm font-medium mb-1">
@@ -5905,19 +6112,33 @@ export default function AdminDashboard() {
                             required
                           />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">
-                            Icon URL (Flaticon)
-                          </label>
-                          <Input
-                            name="iconUrl"
-                            value={resourceForm.iconUrl}
-                            onChange={handleResourceFormChange}
-                            placeholder="https://cdn-icons-png.flaticon.com/..."
-                            required
-                          />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              Icon URL (Flaticon)
+                            </label>
+                            <Input
+                              name="iconUrl"
+                              value={resourceForm.iconUrl}
+                              onChange={handleResourceFormChange}
+                              placeholder="https://cdn-icons-png.flaticon.com/..."
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={resourceForm.displayOrder}
+                              onChange={handleResourceFormChange}
+                              className="w-full"
+                              min="0"
+                            />
+                          </div>
                         </div>
-
                         {/* Preview */}
                         {resourceForm.iconUrl && (
                           <div className="flex items-center gap-3">
@@ -5930,19 +6151,7 @@ export default function AdminDashboard() {
                           </div>
                         )}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Display Order
-                            </label>
-                            <Input
-                              name="displayOrder"
-                              type="number"
-                              value={resourceForm.displayOrder}
-                              onChange={handleResourceFormChange}
-                              className="w-[300px]"
-                              min="0"
-                            />
-                          </div>
+
                           <div className="flex items-center">
                             <input
                               type="checkbox"
@@ -6791,7 +7000,7 @@ export default function AdminDashboard() {
                         </Button>
                       </div>
                       <form onSubmit={handleSubmenuSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Label
@@ -6801,7 +7010,7 @@ export default function AdminDashboard() {
                               value={submenuForm.label}
                               onChange={handleSubmenuFormChange}
                               placeholder="Enter submenu name"
-                              className="w-[300px]"
+                              className="w-full"
                               required
                             />
                           </div>
@@ -6814,25 +7023,26 @@ export default function AdminDashboard() {
                               value={submenuForm.path}
                               onChange={handleSubmenuFormChange}
                               placeholder="e.g. /ideas/technology"
-                              className="w-[300px]"
+                              className="w-full"
                               required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={submenuForm.displayOrder}
+                              onChange={handleSubmenuFormChange}
+                              className="w-full"
+                              min="0"
                             />
                           </div>
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Display Order
-                          </label>
-                          <Input
-                            name="displayOrder"
-                            type="number"
-                            value={submenuForm.displayOrder}
-                            onChange={handleSubmenuFormChange}
-                            className="w-[300px]"
-                            min="0"
-                          />
-                        </div>
+
 
                         <div className="flex items-center">
                           <input
@@ -6964,27 +7174,30 @@ export default function AdminDashboard() {
                       </div>
 
                       <form onSubmit={handleImagePositionSubmit} className="space-y-4">
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Image URL or Upload
                           </label>
                           <div className="space-y-3">
-                            <Input
-                              name="imageUrl"
-                              value={imagePositionForm.imageUrl}
-                              onChange={handleImagePositionFormChange}
-                              placeholder="Enter image URL"
-                              className="w-full"
-                              disabled={!!imagePositionForm.imageFile} // Disable if file is selected
-                            />
-                            <div className="text-sm text-gray-500">OR</div>
-                            <Input
-                              name="imageFile"
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImagePositionFormChange}
-                              className="w-full"
-                            />
+                            <div className="flex items-center gap-4">
+                              <Input
+                                name="imageUrl"
+                                value={imagePositionForm.imageUrl}
+                                onChange={handleImagePositionFormChange}
+                                placeholder="Enter image URL"
+                                className="w-full"
+                                disabled={!!imagePositionForm.imageFile} // Disable if file is selected
+                              />
+                              <div className="text-sm text-gray-500">OR</div>
+                              <Input
+                                name="imageFile"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImagePositionFormChange}
+                                className="w-full"
+                              />
+                            </div>
                           </div>
 
                           {/* Preview */}
@@ -7172,34 +7385,48 @@ export default function AdminDashboard() {
                       </div>
 
                       <form onSubmit={handleResumeBuilderSubmit} className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Title
-                          </label>
-                          <Input
-                            name="title"
-                            value={resumeBuilderForm.title}
-                            onChange={handleResumeBuilderFormChange}
-                            placeholder="Enter title"
-                            className="w-full"
-                            required
-                          />
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Title
+                            </label>
+                            <Input
+                              name="title"
+                              value={resumeBuilderForm.title}
+                              onChange={handleResumeBuilderFormChange}
+                              placeholder="Enter title"
+                              className="w-full"
+                              required
+                            />
+                          </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Subtitle
-                          </label>
-                          <Input
-                            name="subtitle"
-                            value={resumeBuilderForm.subtitle}
-                            onChange={handleResumeBuilderFormChange}
-                            placeholder="Enter subtitle"
-                            className="w-full"
-                            required
-                          />
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Subtitle
+                            </label>
+                            <Input
+                              name="subtitle"
+                              value={resumeBuilderForm.subtitle}
+                              onChange={handleResumeBuilderFormChange}
+                              placeholder="Enter subtitle"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Display Order
+                            </label>
+                            <Input
+                              name="displayOrder"
+                              type="number"
+                              value={resumeBuilderForm.displayOrder}
+                              onChange={handleResumeBuilderFormChange}
+                              className="w-full"
+                              min="0"
+                            />
+                          </div>
                         </div>
-
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Description
@@ -7209,7 +7436,7 @@ export default function AdminDashboard() {
                             value={resumeBuilderForm.description}
                             onChange={handleResumeBuilderFormChange}
                             placeholder="Enter description"
-                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            className="w-full min-h-[50px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                             required
                           />
                         </div>
@@ -7245,16 +7472,18 @@ export default function AdminDashboard() {
                         </div>
 
                         <div>
+
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Image URL or Upload
                           </label>
-                          <div className="space-y-3">
+                          <div className="flex items-center gap-4">
+                            {/* <div className="space-y-3"> */}
                             <Input
                               name="imageUrl"
                               value={resumeBuilderForm.imageUrl}
                               onChange={handleResumeBuilderFormChange}
                               placeholder="Enter image URL"
-                              className="w-full"
+                              // className="w-full"
                               disabled={!!resumeBuilderForm.imageFile} // Disable if file is selected
                             />
                             <div className="text-sm text-gray-500">OR</div>
@@ -7265,8 +7494,8 @@ export default function AdminDashboard() {
                               onChange={handleResumeBuilderFormChange}
                               className="w-full"
                             />
+                            {/* </div> */}
                           </div>
-
                           {/* Preview */}
                           {(resumeBuilderForm.previewUrl || resumeBuilderForm.imageUrl) && (
                             <div className="flex items-center gap-3 mt-3">
@@ -7301,33 +7530,10 @@ export default function AdminDashboard() {
                         </div>
 
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Display Order
-                          </label>
-                          <Input
-                            name="displayOrder"
-                            type="number"
-                            value={resumeBuilderForm.displayOrder}
-                            onChange={handleResumeBuilderFormChange}
-                            className="w-full"
-                            min="0"
-                          />
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Background Color
-                            </label>
-                            <input
-                              type="color"
-                              name="backgroundColor"
-                              value={resumeBuilderForm.backgroundColor || "#ffffff"}
-                              onChange={handleResumeBuilderFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
-                            />
-                          </div>
+
+                        <div className="flex gap-4">
+
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -7338,7 +7544,7 @@ export default function AdminDashboard() {
                               name="textColor"
                               value={resumeBuilderForm.textColor || "#000000"}
                               onChange={handleResumeBuilderFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                             />
                           </div>
 
@@ -7351,7 +7557,19 @@ export default function AdminDashboard() {
                               name="buttonColor"
                               value={resumeBuilderForm.buttonColor || "#007bff"}
                               onChange={handleResumeBuilderFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Background Color
+                            </label>
+                            <input
+                              type="color"
+                              name="backgroundColor"
+                              value={resumeBuilderForm.backgroundColor || "#ffffff"}
+                              onChange={handleResumeBuilderFormChange}
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                             />
                           </div>
                         </div>
@@ -7491,60 +7709,62 @@ export default function AdminDashboard() {
                         {/* Left Side Content */}
                         <div className="space-y-4">
                           <h4 className="text-md font-medium text-gray-900 border-b pb-2">Left Side Content</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title
+                              </label>
+                              <Input
+                                name="title"
+                                value={careerGuideForm.title}
+                                onChange={handleCareerGuideFormChange}
+                                placeholder="Enter title"
+                                className="w-full"
+                                required
+                              />
+                            </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Title
-                            </label>
-                            <Input
-                              name="title"
-                              value={careerGuideForm.title}
-                              onChange={handleCareerGuideFormChange}
-                              placeholder="Enter title"
-                              className="w-full"
-                              required
-                            />
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Subtitle
+                              </label>
+                              <Input
+                                name="subtitle"
+                                value={careerGuideForm.subtitle}
+                                onChange={handleCareerGuideFormChange}
+                                placeholder="Enter subtitle"
+                                className="w-full"
+                                required
+                              />
+                            </div>
                           </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Description
+                              </label>
+                              <textarea
+                                name="description"
+                                value={careerGuideForm.description}
+                                onChange={handleCareerGuideFormChange}
+                                placeholder="Enter description"
+                                className="w-full  px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                required
+                              />
+                            </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Subtitle
-                            </label>
-                            <Input
-                              name="subtitle"
-                              value={careerGuideForm.subtitle}
-                              onChange={handleCareerGuideFormChange}
-                              placeholder="Enter subtitle"
-                              className="w-full"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Description
-                            </label>
-                            <textarea
-                              name="description"
-                              value={careerGuideForm.description}
-                              onChange={handleCareerGuideFormChange}
-                              placeholder="Enter description"
-                              className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Title Icon URL
-                            </label>
-                            <Input
-                              name="titleIconUrl"
-                              value={careerGuideForm.titleIconUrl}
-                              onChange={handleCareerGuideFormChange}
-                              placeholder="Enter title icon URL"
-                              className="w-full"
-                            />
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title Icon URL
+                              </label>
+                              <Input
+                                name="titleIconUrl"
+                                value={careerGuideForm.titleIconUrl}
+                                onChange={handleCareerGuideFormChange}
+                                placeholder="Enter title icon URL"
+                                className="w-full"
+                              />
+                            </div>
                           </div>
                         </div>
 
@@ -7617,18 +7837,8 @@ export default function AdminDashboard() {
                                 />
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Background Color
-                                  </label>
-                                  <input
-                                    type="color"
-                                    value={item.backgroundColor}
-                                    onChange={(e) => updateCareerGuideItem(index, 'backgroundColor', e.target.value)}
-                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
-                                  />
-                                </div>
+                              <div className="flex gap-4">
+
 
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -7638,10 +7848,20 @@ export default function AdminDashboard() {
                                     type="color"
                                     value={item.textColor}
                                     onChange={(e) => updateCareerGuideItem(index, 'textColor', e.target.value)}
-                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                    className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                                   />
                                 </div>
-
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Background Color
+                                  </label>
+                                  <input
+                                    type="color"
+                                    value={item.backgroundColor}
+                                    onChange={(e) => updateCareerGuideItem(index, 'backgroundColor', e.target.value)}
+                                    className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
+                                  />
+                                </div>
                                 {/* <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Icon Color
@@ -7662,19 +7882,8 @@ export default function AdminDashboard() {
                         <div className="space-y-4">
                           <h4 className="text-md font-medium text-gray-900 border-b pb-2">Styling Options</h4>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Background Color
-                              </label>
-                              <input
-                                type="color"
-                                name="backgroundColor"
-                                value={careerGuideForm.backgroundColor}
-                                onChange={handleCareerGuideFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
-                              />
-                            </div>
+                          <div className="flex gap-4">
+
 
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -7685,7 +7894,7 @@ export default function AdminDashboard() {
                                 name="titleColor"
                                 value={careerGuideForm.titleColor}
                                 onChange={handleCareerGuideFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                               />
                             </div>
 
@@ -7698,7 +7907,7 @@ export default function AdminDashboard() {
                                 name="subtitleColor"
                                 value={careerGuideForm.subtitleColor}
                                 onChange={handleCareerGuideFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                               />
                             </div>
 
@@ -7711,10 +7920,21 @@ export default function AdminDashboard() {
                                 name="descriptionColor"
                                 value={careerGuideForm.descriptionColor}
                                 onChange={handleCareerGuideFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                               />
                             </div>
-
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Background Color
+                              </label>
+                              <input
+                                type="color"
+                                name="backgroundColor"
+                                value={careerGuideForm.backgroundColor}
+                                onChange={handleCareerGuideFormChange}
+                                className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
                             {/* <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Title Icon Color
@@ -7884,7 +8104,7 @@ export default function AdminDashboard() {
                             />
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex gap-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Title Color
@@ -7894,7 +8114,7 @@ export default function AdminDashboard() {
                                 name="titleColor"
                                 value={careerIndustryForm.titleColor}
                                 onChange={handleCareerIndustryFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                               />
                             </div>
 
@@ -7907,7 +8127,7 @@ export default function AdminDashboard() {
                                 name="backgroundColor"
                                 value={careerIndustryForm.backgroundColor}
                                 onChange={handleCareerIndustryFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                               />
                             </div>
                           </div>
@@ -7943,7 +8163,7 @@ export default function AdminDashboard() {
                                 </Button>
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Icon
@@ -7967,21 +8187,22 @@ export default function AdminDashboard() {
                                     required
                                   />
                                 </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Path
+                                  </label>
+                                  <Input
+                                    value={item.path}
+                                    onChange={(e) => updateCareerIndustryItem(index, 'path', e.target.value)}
+                                    placeholder="Enter navigation path"
+                                    required
+                                  />
+                                </div>
                               </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Path
-                                </label>
-                                <Input
-                                  value={item.path}
-                                  onChange={(e) => updateCareerIndustryItem(index, 'path', e.target.value)}
-                                  placeholder="Enter navigation path"
-                                  required
-                                />
-                              </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                              <div className="flex gap-4">
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Text Color
@@ -7990,7 +8211,7 @@ export default function AdminDashboard() {
                                     type="color"
                                     value={item.iconColor}
                                     onChange={(e) => updateCareerIndustryItem(index, 'iconColor', e.target.value)}
-                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                    className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                                   />
                                 </div>
 
@@ -8002,7 +8223,7 @@ export default function AdminDashboard() {
                                     type="color"
                                     value={item.iconBackgroundColor}
                                     onChange={(e) => updateCareerIndustryItem(index, 'iconBackgroundColor', e.target.value)}
-                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                    className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                                   />
                                 </div>
                               </div>
@@ -8168,7 +8389,7 @@ export default function AdminDashboard() {
                             />
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex gap-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Title Color
@@ -8178,7 +8399,7 @@ export default function AdminDashboard() {
                                 name="titleColor"
                                 value={statesForm.titleColor}
                                 onChange={handleStatesFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                               />
                             </div>
 
@@ -8191,7 +8412,7 @@ export default function AdminDashboard() {
                                 name="backgroundColor"
                                 value={statesForm.backgroundColor}
                                 onChange={handleStatesFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                               />
                             </div>
                           </div>
@@ -8261,7 +8482,7 @@ export default function AdminDashboard() {
                                   type="color"
                                   value={item.textColor}
                                   onChange={(e) => updateStatesItem(index, 'textColor', e.target.value)}
-                                  className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                  className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                                 />
                               </div>
                             </div>
@@ -8412,73 +8633,74 @@ export default function AdminDashboard() {
                         {/* Title and Colors */}
                         <div className="space-y-4">
                           <h4 className="text-md font-medium text-gray-900 border-b pb-2">Title and Colors</h4>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Title
-                            </label>
-                            <Input
-                              name="title"
-                              value={topicsForm.title}
-                              onChange={handleTopicsFormChange}
-                              placeholder="Enter title"
-                              className="w-full"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Subtitle
-                            </label>
-                            <Input
-                              name="subtitle"
-                              value={topicsForm.subtitle}
-                              onChange={handleTopicsFormChange}
-                              placeholder="Enter subtitle"
-                              className="w-full"
-                              required
-                            />
-                          </div>
-
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Title Color
+                                Title
                               </label>
-                              <input
-                                type="color"
-                                name="titleColor"
-                                value={topicsForm.titleColor}
+                              <Input
+                                name="title"
+                                value={topicsForm.title}
                                 onChange={handleTopicsFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                placeholder="Enter title"
+                                className="w-full"
+                                required
                               />
                             </div>
 
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Subtitle Color
+                                Subtitle
                               </label>
-                              <input
-                                type="color"
-                                name="subtitleColor"
-                                value={topicsForm.subtitleColor}
+                              <Input
+                                name="subtitle"
+                                value={topicsForm.subtitle}
                                 onChange={handleTopicsFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                placeholder="Enter subtitle"
+                                className="w-full"
+                                required
                               />
                             </div>
 
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Background Color
-                              </label>
-                              <input
-                                type="color"
-                                name="backgroundColor"
-                                value={topicsForm.backgroundColor}
-                                onChange={handleTopicsFormChange}
-                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
-                              />
+                            <div className="flex gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Title Color
+                                </label>
+                                <input
+                                  type="color"
+                                  name="titleColor"
+                                  value={topicsForm.titleColor}
+                                  onChange={handleTopicsFormChange}
+                                  className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Subtitle Color
+                                </label>
+                                <input
+                                  type="color"
+                                  name="subtitleColor"
+                                  value={topicsForm.subtitleColor}
+                                  onChange={handleTopicsFormChange}
+                                  className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Background Color
+                                </label>
+                                <input
+                                  type="color"
+                                  name="backgroundColor"
+                                  value={topicsForm.backgroundColor}
+                                  onChange={handleTopicsFormChange}
+                                  className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -8801,19 +9023,8 @@ export default function AdminDashboard() {
                           />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Background Color
-                            </label>
-                            <input
-                              type="color"
-                              name="backgroundColor"
-                              value={donationForm.backgroundColor}
-                              onChange={handleDonationFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
-                            />
-                          </div>
+                        <div className="flex gap-4">
+
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -8824,7 +9035,7 @@ export default function AdminDashboard() {
                               name="textColor"
                               value={donationForm.textColor}
                               onChange={handleDonationFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                             />
                           </div>
 
@@ -8837,7 +9048,20 @@ export default function AdminDashboard() {
                               name="buttonColor"
                               value={donationForm.buttonColor}
                               onChange={handleDonationFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Background Color
+                            </label>
+                            <input
+                              type="color"
+                              name="backgroundColor"
+                              value={donationForm.backgroundColor}
+                              onChange={handleDonationFormChange}
+                              className="h-12 w-12 rounded border border-gray-300 cursor-pointer"
                             />
                           </div>
                         </div>
