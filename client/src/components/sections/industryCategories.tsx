@@ -51,28 +51,36 @@ export default function CareerIndustrySection() {
 
     return (
         <section
-            className="py-12"
+            className="py-16 px-4"
             style={{ backgroundColor: activeSection.backgroundColor }}
         >
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
 
                 <h2
-                    className="text-xl font-semibold text-center mb-8"
+                    className="text-3xl font-bold text-center mb-12"
                     style={{ color: activeSection.titleColor }}
                 >
                     {activeSection.title}
                 </h2>
 
-                <div className="flex flex-wrap justify-center gap-x-12 gap-y-6">
+                {/* <div className="flex flex-wrap justify-center gap-x-12 gap-y-6"> */}
+                {/* <div className="flex flex-wrap justify-center px-5"> */}
+                <div className="flex flex-wrap max-w-6xl mx-auto">
+
                     {activeSection.items.map((item: CareerIndustryItem) => (
                         <a
                             key={item.id}
                             href={item.path}
-                            className="flex items-center gap-3 hover:opacity-80 transition"
+                            //                 className="flex items-center gap-4 p-4 rounded-lg hover:shadow-lg transition-all duration-300 group
+                            //  w-full sm:w-1/2 lg:w-1/3"
+                            className="flex items-center gap-4 p-4 rounded-lg transition-all duration-300
+           w-full sm:w-1/2 lg:w-1/3"
+
                         >
+
                             {/* Icon */}
                             <span
-                                className="w-10 h-10 rounded-full flex items-center justify-center"
+                                className="w-10 h-10 rounded-lg rotate-45 flex items-center justify-center"
                                 style={{ backgroundColor: item.iconBackgroundColor }}
                             >
                                 {/* <i
@@ -82,7 +90,7 @@ export default function CareerIndustrySection() {
                                 <img
                                     src={item.icon}
                                     alt={item.icon}
-                                    className="w-5 h-5"
+                                    className="w-5 h-5 -rotate-45"
                                     style={{
                                         filter: `brightness(0) saturate(100%) ${item.iconColor}`,
                                     }}
@@ -91,9 +99,10 @@ export default function CareerIndustrySection() {
 
                             {/* Text */}
                             <span
-                                className="text-sm font-medium whitespace-nowrap"
+                                className="text-sm font-medium leading-snug max-w-[220px]"
                                 style={{ color: item.iconColor }}
                             >
+
                                 {item.text}
                             </span>
                         </a>
