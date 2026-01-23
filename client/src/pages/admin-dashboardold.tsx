@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, apiRequestJson, apiRequestWithPage } from "@/lib/queryClient";
+import { v4 as uuidv4 } from 'uuid';
 import {
   Shield,
   Users,
@@ -243,32 +244,98 @@ interface ResumeBuilder {
   createdAt: string;
 }
 
-// Add these interfaces at the top with your other interfaces
+// Update these interfaces at the top of your AdminDashboard.tsx file
 interface CareerGuide {
   id: string;
   title: string;
   subtitle: string;
   description: string;
-  titleIconUrl?: string;
-  backgroundImage?: string;
+  titleIconUrl: string;
+  items: CareerGuideItem[];
   backgroundColor: string;
-  textColor: string;
+  titleColor: string;
+  subtitleColor: string;
+  descriptionColor: string;
+  titleIconColor: string;
   isActive: boolean;
   createdAt: string;
 }
 
-interface CareerGuideFeature {
+interface CareerGuideItem {
   id: string;
-  careerGuideId: string;
   title: string;
   description: string;
-  iconUrl?: string;
+  iconUrl: string;
+  backgroundColor: string;
+  textColor: string;
+  iconColor: string;
+}
+
+interface CareerIndustry {
+  id: string;
+  title: string;
+  titleColor: string;
+  items: {
+    id: string;
+    icon: string;
+    iconColor: string;
+    iconBackgroundColor: string;
+    text: string;
+    path: string;
+  }[];
+  backgroundColor: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface States {
+  id: string;
+  title: string;
+  titleColor: string;
+  items: {
+    id: string;
+    text: string;
+    textColor: string;
+    path: string;
+  }[];
+  backgroundColor: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+
+interface Topics {
+  id: string;
+  title: string;
+  subtitle: string;
+  titleColor: string;
+  subtitleColor: string;
+  backgroundColor: string;
+  categories: {
+    id: string;
+    name: string;
+    items: {
+      id: string;
+      name: string;
+      path: string;
+    }[];
+  }[];
+  isActive: boolean;
+  createdAt: string;
+}
+interface Donation {
+  id: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  redirectUrl: string;
+  backgroundColor: string;
+  textColor: string;
+  buttonColor: string;
   displayOrder: number;
   isActive: boolean;
   createdAt: string;
 }
-
-
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("users");
@@ -347,49 +414,795 @@ export default function AdminDashboard() {
     imageUrl: "",
     displayOrder: 0,
     isActive: true,
+    imageFile: null as File | null,
+    previewUrl: "",
+  });
+  const [donationItems, setDonationItems] = useState<Donation[]>([]);
+  const [isDonationFormOpen, setIsDonationFormOpen] = useState(false);
+  const [editingDonation, setEditingDonation] = useState<Donation | null>(null);
+  const [donationForm, setDonationForm] = useState({
+    title: "",
+    description: "",
+    buttonText: "",
+    redirectUrl: "",
+    backgroundColor: "#ffc501",
+    textColor: "#000000",
+    buttonColor: "#ff0000",
+    displayOrder: 0,
+    isActive: true,
   });
 
-  // Add these state variables with your other state variables
-  const [careerGuide, setCareerGuide] = useState<CareerGuide | null>(null);
-  const [careerGuideFeatures, setCareerGuideFeatures] = useState<CareerGuideFeature[]>([]);
-  const [isCareerGuideFormOpen, setIsCareerGuideFormOpen] = useState(false);
-  const [isCareerGuideFeatureFormOpen, setIsCareerGuideFeatureFormOpen] = useState(false);
-  const [editingCareerGuide, setEditingCareerGuide] = useState<CareerGuide | null>(null);
-  const [editingCareerGuideFeature, setEditingCareerGuideFeature] = useState<CareerGuideFeature | null>(null);
+  // Add these mutations
+  const deleteDonationMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/donation/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
+      if (!response.ok) {
+        throw new Error("Failed to delete donation item");
+      }
+
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/donation"] });
+      toast({
+        title: "Success",
+        description: "Donation item deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveDonationMutation = useMutation({
+    mutationFn: async (donation: Partial<Donation>) => {
+      const method = editingDonation ? "PUT" : "POST";
+      const url = editingDonation
+        ? `/api/admin/donation/${editingDonation.id}`
+        : "/api/admin/donation";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(donation),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save donation item");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/donation"] });
+      toast({
+        title: "Success",
+        description: editingDonation
+          ? "Donation item updated successfully"
+          : "Donation item created successfully",
+      });
+      closeDonationForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add these functions
+  const openDonationForm = (donation?: Donation) => {
+    if (donation) {
+      setEditingDonation(donation);
+      setDonationForm({
+        title: donation.title,
+        description: donation.description,
+        buttonText: donation.buttonText,
+        redirectUrl: donation.redirectUrl,
+        backgroundColor: donation.backgroundColor,
+        textColor: donation.textColor,
+        buttonColor: donation.buttonColor,
+        displayOrder: donation.displayOrder,
+        isActive: donation.isActive,
+      });
+    } else {
+      setEditingDonation(null);
+      setDonationForm({
+        title: "",
+        description: "",
+        buttonText: "",
+        redirectUrl: "",
+        backgroundColor: "#ffc501",
+        textColor: "#000000",
+        buttonColor: "#ff0000",
+        displayOrder: 0,
+        isActive: true,
+      });
+    }
+    setIsDonationFormOpen(true);
+  };
+
+  const closeDonationForm = () => {
+    setIsDonationFormOpen(false);
+    setEditingDonation(null);
+  };
+
+  const handleDonationFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    } else if (name === "displayOrder") {
+      value = parseInt(value, 10) || 0;
+    }
+
+    setDonationForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDonationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveDonationMutation.mutate(donationForm);
+  };
+
+  // Add this query to fetch donation data
+  const { data: donationData, isLoading: donationLoading } = useQuery({
+    queryKey: ["/api/admin/donation"],
+    enabled: activeTab === "donation",
+  });
+
+  const [topicsItems, setTopicsItems] = useState<Topics[]>([]);
+  const [isTopicsFormOpen, setIsTopicsFormOpen] = useState(false);
+  const [editingTopics, setEditingTopics] = useState<Topics | null>(null);
+  const [topicsForm, setTopicsForm] = useState({
+    title: "",
+    subtitle: "",
+    titleColor: "#000000",
+    subtitleColor: "#666666",
+    backgroundColor: "#ffffff",
+    categories: [] as {
+      id: string;
+      name: string;
+      items: {
+        id: string;
+        name: string;
+        path: string;
+      }[];
+    }[],
+    isActive: true,
+  });
+
+  // Add these mutations
+  const deleteTopicsMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/topics/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete topics item");
+      }
+
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/topics"] });
+      toast({
+        title: "Success",
+        description: "Topics item deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveTopicsMutation = useMutation({
+    mutationFn: async (topics: Partial<Topics>) => {
+      const method = editingTopics ? "PUT" : "POST";
+      const url = editingTopics
+        ? `/api/admin/topics/${editingTopics.id}`
+        : "/api/admin/topics";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(topics),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save topics item");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/topics"] });
+      toast({
+        title: "Success",
+        description: editingTopics
+          ? "Topics item updated successfully"
+          : "Topics item created successfully",
+      });
+      closeTopicsForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add these functions
+  const openTopicsForm = (topics?: Topics) => {
+    if (topics) {
+      setEditingTopics(topics);
+      setTopicsForm({
+        title: topics.title,
+        subtitle: topics.subtitle,
+        titleColor: topics.titleColor,
+        subtitleColor: topics.subtitleColor,
+        backgroundColor: topics.backgroundColor,
+        categories: topics.categories,
+        isActive: topics.isActive,
+      });
+    } else {
+      setEditingTopics(null);
+      setTopicsForm({
+        title: "",
+        subtitle: "",
+        titleColor: "#000000",
+        subtitleColor: "#666666",
+        backgroundColor: "#ffffff",
+        categories: [],
+        isActive: true,
+      });
+    }
+    setIsTopicsFormOpen(true);
+  };
+
+  const closeTopicsForm = () => {
+    setIsTopicsFormOpen(false);
+    setEditingTopics(null);
+  };
+
+  const handleTopicsFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    }
+
+    setTopicsForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleTopicsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveTopicsMutation.mutate(topicsForm);
+  };
+
+  // Helper functions for managing categories
+  const addTopicsCategory = () => {
+    const newCategory = {
+      id: uuidv4(),
+      name: "",
+      items: [] as {
+        id: string;
+        name: string;
+        path: string;
+      }[],
+    };
+    setTopicsForm(prev => ({
+      ...prev,
+      categories: [...prev.categories, newCategory]
+    }));
+  };
+
+  const updateTopicsCategory = (index: number, field: string, value: any) => {
+    setTopicsForm(prev => ({
+      ...prev,
+      categories: prev.categories.map((category, i) =>
+        i === index ? { ...category, [field]: value } : category
+      )
+    }));
+  };
+
+  const removeTopicsCategory = (index: number) => {
+    setTopicsForm(prev => ({
+      ...prev,
+      categories: prev.categories.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Helper functions for managing items within categories
+  const addTopicsItem = (categoryIndex: number) => {
+    const newItem = {
+      id: uuidv4(),
+      name: "",
+      path: "",
+    };
+
+    setTopicsForm(prev => ({
+      ...prev,
+      categories: prev.categories.map((category, i) =>
+        i === categoryIndex
+          ? { ...category, items: [...category.items, newItem] }
+          : category
+      )
+    }));
+  };
+
+  const updateTopicsItem = (categoryIndex: number, itemIndex: number, field: string, value: any) => {
+    setTopicsForm(prev => ({
+      ...prev,
+      categories: prev.categories.map((category, i) =>
+        i === categoryIndex
+          ? {
+            ...category,
+            items: category.items.map((item, j) =>
+              j === itemIndex ? { ...item, [field]: value } : item
+            )
+          }
+          : category
+      )
+    }));
+  };
+
+  const removeTopicsItem = (categoryIndex: number, itemIndex: number) => {
+    setTopicsForm(prev => ({
+      ...prev,
+      categories: prev.categories.map((category, i) =>
+        i === categoryIndex
+          ? { ...category, items: category.items.filter((_, j) => j !== itemIndex) }
+          : category
+      )
+    }));
+  };
+
+  // Add this query to fetch topics data
+  const { data: topicsData, isLoading: topicsLoading } = useQuery({
+    queryKey: ["/api/admin/topics"],
+    enabled: activeTab === "topics",
+  });
+  const [statesItems, setStatesItems] = useState<States[]>([]);
+  const [isStatesFormOpen, setIsStatesFormOpen] = useState(false);
+  const [editingStates, setEditingStates] = useState<States | null>(null);
+  const [statesForm, setStatesForm] = useState({
+    title: "",
+    titleColor: "#000000",
+    items: [] as {
+      id: string;
+      text: string;
+      textColor: string;
+      path: string;
+    }[],
+    backgroundColor: "#ffffff",
+    isActive: true,
+  });
+
+  // Add these mutations
+  const deleteStatesMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/states/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete states item");
+      }
+
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/states"] });
+      toast({
+        title: "Success",
+        description: "States item deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveStatesMutation = useMutation({
+    mutationFn: async (states: Partial<States>) => {
+      const method = editingStates ? "PUT" : "POST";
+      const url = editingStates
+        ? `/api/admin/states/${editingStates.id}`
+        : "/api/admin/states";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(states),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save states item");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/states"] });
+      toast({
+        title: "Success",
+        description: editingStates
+          ? "States item updated successfully"
+          : "States item created successfully",
+      });
+      closeStatesForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add these functions
+  const openStatesForm = (states?: States) => {
+    if (states) {
+      setEditingStates(states);
+      setStatesForm({
+        title: states.title,
+        titleColor: states.titleColor,
+        items: states.items,
+        backgroundColor: states.backgroundColor,
+        isActive: states.isActive,
+      });
+    } else {
+      setEditingStates(null);
+      setStatesForm({
+        title: "",
+        titleColor: "#000000",
+        items: [],
+        backgroundColor: "#ffffff",
+        isActive: true,
+      });
+    }
+    setIsStatesFormOpen(true);
+  };
+
+  const closeStatesForm = () => {
+    setIsStatesFormOpen(false);
+    setEditingStates(null);
+  };
+
+  const handleStatesFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    }
+
+    setStatesForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleStatesSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveStatesMutation.mutate(statesForm);
+  };
+
+  // Helper functions for managing items
+  const addStatesItem = () => {
+    const newItem = {
+      id: uuidv4(),
+      text: "",
+      textColor: "#000000",
+      path: "",
+    };
+    setStatesForm(prev => ({
+      ...prev,
+      items: [...prev.items, newItem]
+    }));
+  };
+
+  const updateStatesItem = (index: number, field: string, value: any) => {
+    setStatesForm(prev => ({
+      ...prev,
+      items: prev.items.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
+  const removeStatesItem = (index: number) => {
+    setStatesForm(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Add this query to fetch states data
+  const { data: statesData, isLoading: statesLoading } = useQuery({
+    queryKey: ["/api/admin/states"],
+    enabled: activeTab === "states",
+  });
+
+  // Add these state variables
+  const [careerIndustryItems, setCareerIndustryItems] = useState<CareerIndustry[]>([]);
+  const [isCareerIndustryFormOpen, setIsCareerIndustryFormOpen] = useState(false);
+  const [editingCareerIndustry, setEditingCareerIndustry] = useState<CareerIndustry | null>(null);
+  const [careerIndustryForm, setCareerIndustryForm] = useState({
+    title: "",
+    titleColor: "#000000",
+    items: [] as {
+      id: string;
+      icon: string;
+      iconColor: string;
+      iconBackgroundColor: string;
+      text: string;
+      path: string;
+    }[],
+    backgroundColor: "#ffffff",
+    isActive: true,
+  });
+
+  // Add these mutations
+  const deleteCareerIndustryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/career-industry/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete career industry item");
+      }
+
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/career-industry"] });
+      toast({
+        title: "Success",
+        description: "Career industry item deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveCareerIndustryMutation = useMutation({
+    mutationFn: async (careerIndustry: Partial<CareerIndustry>) => {
+      const method = editingCareerIndustry ? "PUT" : "POST";
+      const url = editingCareerIndustry
+        ? `/api/admin/career-industry/${editingCareerIndustry.id}`
+        : "/api/admin/career-industry";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(careerIndustry),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save career industry item");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/career-industry"] });
+      toast({
+        title: "Success",
+        description: editingCareerIndustry
+          ? "Career industry item updated successfully"
+          : "Career industry item created successfully",
+      });
+      closeCareerIndustryForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add these functions
+  const openCareerIndustryForm = (careerIndustry?: CareerIndustry) => {
+    if (careerIndustry) {
+      setEditingCareerIndustry(careerIndustry);
+      setCareerIndustryForm({
+        title: careerIndustry.title,
+        titleColor: careerIndustry.titleColor,
+        items: careerIndustry.items,
+        backgroundColor: careerIndustry.backgroundColor,
+        isActive: careerIndustry.isActive,
+      });
+    } else {
+      setEditingCareerIndustry(null);
+      setCareerIndustryForm({
+        title: "",
+        titleColor: "#000000",
+        items: [],
+        backgroundColor: "#ffffff",
+        isActive: true,
+      });
+    }
+    setIsCareerIndustryFormOpen(true);
+  };
+
+  const closeCareerIndustryForm = () => {
+    setIsCareerIndustryFormOpen(false);
+    setEditingCareerIndustry(null);
+  };
+
+  const handleCareerIndustryFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: any = target.value;
+
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = (target as HTMLInputElement).checked;
+    }
+
+    setCareerIndustryForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCareerIndustrySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveCareerIndustryMutation.mutate(careerIndustryForm);
+  };
+
+  // Helper functions for managing items
+  const addCareerIndustryItem = () => {
+    const newItem = {
+      id: uuidv4(),
+      icon: "",
+      iconColor: "#000000",
+      iconBackgroundColor: "#ffffff",
+      text: "",
+      path: "",
+    };
+    setCareerIndustryForm(prev => ({
+      ...prev,
+      items: [...prev.items, newItem]
+    }));
+  };
+
+  const updateCareerIndustryItem = (index: number, field: string, value: any) => {
+    setCareerIndustryForm(prev => ({
+      ...prev,
+      items: prev.items.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
+  const removeCareerIndustryItem = (index: number) => {
+    setCareerIndustryForm(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Add this query to fetch career industry data
+  const { data: careerIndustryData, isLoading: careerIndustryLoading } = useQuery({
+    queryKey: ["/api/admin/career-industry"],
+    enabled: activeTab === "career-industry",
+  });
+
+  const [careerGuideItems, setCareerGuideItems] = useState<CareerGuide[]>([]);
+  const [isCareerGuideFormOpen, setIsCareerGuideFormOpen] = useState(false);
+  const [editingCareerGuide, setEditingCareerGuide] = useState<CareerGuide | null>(null);
   const [careerGuideForm, setCareerGuideForm] = useState({
     title: "",
     subtitle: "",
     description: "",
     titleIconUrl: "",
-    backgroundImage: "",
+    items: [] as CareerGuideItem[],
     backgroundColor: "#ffffff",
-    textColor: "#000000",
+    titleColor: "#000000",
+    subtitleColor: "#666666",
+    descriptionColor: "#666666",
+    titleIconColor: "#000000",
     isActive: true,
   });
 
-  const [careerGuideFeatureForm, setCareerGuideFeatureForm] = useState({
-    careerGuideId: "",
-    title: "",
-    description: "",
-    iconUrl: "",
-    displayOrder: 0,
-    isActive: true,
-  });
-
-
-  // Add these queries with your other queries
+  // Add this query to fetch career guide data
   const { data: careerGuideData, isLoading: careerGuideLoading } = useQuery({
     queryKey: ["/api/admin/career-guide"],
     enabled: activeTab === "career-guide",
   });
 
-  const { data: careerGuideFeaturesData, isLoading: careerGuideFeaturesLoading } = useQuery({
-    queryKey: ["/api/admin/career-guide-features"],
-    enabled: activeTab === "career-guide",
+  // Update these mutations
+  const deleteCareerGuideMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/career-guide/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete career guide item");
+      }
+
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/career-guide"] });
+      toast({
+        title: "Success",
+        description: "Career guide item deleted successfully",
+      });
+      closeDeleteDialog();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
-  // Add these mutations with your other mutations
   const saveCareerGuideMutation = useMutation({
     mutationFn: async (careerGuide: Partial<CareerGuide>) => {
       const method = editingCareerGuide ? "PUT" : "POST";
@@ -407,7 +1220,7 @@ export default function AdminDashboard() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save career guide");
+        throw new Error("Failed to save career guide item");
       }
 
       return response.json();
@@ -417,8 +1230,8 @@ export default function AdminDashboard() {
       toast({
         title: "Success",
         description: editingCareerGuide
-          ? "Career guide updated successfully"
-          : "Career guide created successfully",
+          ? "Career guide item updated successfully"
+          : "Career guide item created successfully",
       });
       closeCareerGuideForm();
     },
@@ -431,90 +1244,22 @@ export default function AdminDashboard() {
     },
   });
 
-  const saveCareerGuideFeatureMutation = useMutation({
-    mutationFn: async (feature: Partial<CareerGuideFeature>) => {
-      const method = editingCareerGuideFeature ? "PUT" : "POST";
-      const url = editingCareerGuideFeature
-        ? `/api/admin/career-guide-features/${editingCareerGuideFeature.id}`
-        : "/api/admin/career-guide-features";
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(feature),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save career guide feature");
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/career-guide-features"] });
-      toast({
-        title: "Success",
-        description: editingCareerGuideFeature
-          ? "Career guide feature updated successfully"
-          : "Career guide feature created successfully",
-      });
-      closeCareerGuideFeatureForm();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const deleteCareerGuideFeatureMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/admin/career-guide-features/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete career guide feature");
-      }
-
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/career-guide-features"] });
-      toast({
-        title: "Success",
-        description: "Career guide feature deleted successfully",
-      });
-      closeDeleteDialog();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Add these functions with your other functions
-  const openCareerGuideForm = (guide?: CareerGuide) => {
-    if (guide) {
-      setEditingCareerGuide(guide);
+  // Update these functions
+  const openCareerGuideForm = (careerGuide?: CareerGuide) => {
+    if (careerGuide) {
+      setEditingCareerGuide(careerGuide);
       setCareerGuideForm({
-        title: guide.title,
-        subtitle: guide.subtitle,
-        description: guide.description,
-        titleIconUrl: guide.titleIconUrl || "",
-        backgroundImage: guide.backgroundImage || "",
-        backgroundColor: guide.backgroundColor || "#ffffff",
-        textColor: guide.textColor || "#000000",
-        isActive: guide.isActive,
+        title: careerGuide.title,
+        subtitle: careerGuide.subtitle,
+        description: careerGuide.description,
+        titleIconUrl: careerGuide.titleIconUrl || "",
+        items: careerGuide.items || [],
+        backgroundColor: careerGuide.backgroundColor,
+        titleColor: careerGuide.titleColor,
+        subtitleColor: careerGuide.subtitleColor,
+        descriptionColor: careerGuide.descriptionColor,
+        titleIconColor: careerGuide.titleIconColor,
+        isActive: careerGuide.isActive,
       });
     } else {
       setEditingCareerGuide(null);
@@ -523,9 +1268,12 @@ export default function AdminDashboard() {
         subtitle: "",
         description: "",
         titleIconUrl: "",
-        backgroundImage: "",
+        items: [],
         backgroundColor: "#ffffff",
-        textColor: "#000000",
+        titleColor: "#000000",
+        subtitleColor: "#666666",
+        descriptionColor: "#666666",
+        titleIconColor: "#000000",
         isActive: true,
       });
     }
@@ -557,57 +1305,39 @@ export default function AdminDashboard() {
     saveCareerGuideMutation.mutate(careerGuideForm);
   };
 
-  const openCareerGuideFeatureForm = (feature?: CareerGuideFeature) => {
-    if (feature) {
-      setEditingCareerGuideFeature(feature);
-      setCareerGuideFeatureForm({
-        careerGuideId: feature.careerGuideId,
-        title: feature.title,
-        description: feature.description,
-        iconUrl: feature.iconUrl || "",
-        displayOrder: feature.displayOrder,
-        isActive: feature.isActive,
-      });
-    } else {
-      setEditingCareerGuideFeature(null);
-      setCareerGuideFeatureForm({
-        careerGuideId: careerGuide?.id || "",
-        title: "",
-        description: "",
-        iconUrl: "",
-        displayOrder: 0,
-        isActive: true,
-      });
-    }
-    setIsCareerGuideFeatureFormOpen(true);
-  };
-
-  const closeCareerGuideFeatureForm = () => {
-    setIsCareerGuideFeatureFormOpen(false);
-    setEditingCareerGuideFeature(null);
-  };
-
-  const handleCareerGuideFeatureFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const target = e.target;
-    const name = target.name;
-    let value: any = target.value;
-
-    if (name === "displayOrder") {
-      value = parseInt(value, 10) || 0;
-    } else if (target instanceof HTMLInputElement && target.type === "checkbox") {
-      value = (target as HTMLInputElement).checked;
-    }
-
-    setCareerGuideFeatureForm(prev => ({
+  // Helper functions for managing items
+  const addCareerGuideItem = () => {
+    const newItem: CareerGuideItem = {
+      id: uuidv4(),
+      title: "",
+      description: "",
+      iconUrl: "",
+      backgroundColor: "#ffffff",
+      textColor: "#000000",
+      iconColor: "#000000",
+    };
+    setCareerGuideForm(prev => ({
       ...prev,
-      [name]: value
+      items: [...prev.items, newItem]
     }));
   };
 
-  const handleCareerGuideFeatureSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveCareerGuideFeatureMutation.mutate(careerGuideFeatureForm);
+  const updateCareerGuideItem = (index: number, field: keyof CareerGuideItem, value: any) => {
+    setCareerGuideForm(prev => ({
+      ...prev,
+      items: prev.items.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
   };
+
+  const removeCareerGuideItem = (index: number) => {
+    setCareerGuideForm(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
+  };
+
   const deleteResumeBuilderMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/admin/resume-builder/${id}`, {
@@ -681,6 +1411,11 @@ export default function AdminDashboard() {
 
   // Add these functions
   const openResumeBuilderForm = (resumeBuilder?: ResumeBuilder) => {
+    // Clean up previous preview if it exists
+    if (resumeBuilderForm.previewUrl && resumeBuilderForm.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(resumeBuilderForm.previewUrl);
+    }
+
     if (resumeBuilder) {
       setEditingResumeBuilder(resumeBuilder);
       setResumeBuilderForm({
@@ -695,6 +1430,8 @@ export default function AdminDashboard() {
         imageUrl: resumeBuilder.imageUrl || "",
         displayOrder: resumeBuilder.displayOrder,
         isActive: resumeBuilder.isActive,
+        imageFile: null,
+        previewUrl: resumeBuilder.imageUrl || "", // Set preview URL if it's a URL
       });
     } else {
       setEditingResumeBuilder(null);
@@ -710,13 +1447,20 @@ export default function AdminDashboard() {
         imageUrl: "",
         displayOrder: 0,
         isActive: true,
+        imageFile: null,
+        previewUrl: "",
       });
     }
     setIsResumeBuilderFormOpen(true);
   };
 
 
+
   const closeResumeBuilderForm = () => {
+    // Clean up preview URL if it exists
+    if (resumeBuilderForm.previewUrl && resumeBuilderForm.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(resumeBuilderForm.previewUrl);
+    }
     setIsResumeBuilderFormOpen(false);
     setEditingResumeBuilder(null);
   };
@@ -724,24 +1468,85 @@ export default function AdminDashboard() {
   const handleResumeBuilderFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const target = e.target;
     const name = target.name;
-    let value: any = target.value;
 
-    if (name === "displayOrder") {
-      value = parseInt(value, 10) || 0;
+    if (name === "imageFile" && target.files && target.files.length > 0) {
+      const file = target.files[0];
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setResumeBuilderForm(prev => ({
+        ...prev,
+        imageFile: file,
+        previewUrl: previewUrl,
+        imageUrl: prev.imageUrl // Keep existing URL if no file is selected
+      }));
+    } else if (name === "displayOrder") {
+      const value = parseInt(target.value, 10) || 0;
+      setResumeBuilderForm(prev => ({
+        ...prev,
+        [name]: value
+      }));
     } else if (target instanceof HTMLInputElement && target.type === "checkbox") {
-      value = (target as HTMLInputElement).checked;
+      setResumeBuilderForm(prev => ({
+        ...prev,
+        [name]: target.checked
+      }));
+    } else {
+      setResumeBuilderForm(prev => ({
+        ...prev,
+        [name]: target.value
+      }));
     }
-
-    setResumeBuilderForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
 
   const handleResumeBuilderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveResumeBuilderMutation.mutate(resumeBuilderForm);
+
+    // If a file is uploaded, convert it to base64
+    if (resumeBuilderForm.imageFile) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        setResumeBuilderForm(prev => ({
+          ...prev,
+          imageUrl: base64String,
+          imageFile: null,
+          previewUrl: ""
+        }));
+
+        // Submit after the base64 conversion is complete
+        saveResumeBuilderMutation.mutate({
+          title: resumeBuilderForm.title,
+          description: resumeBuilderForm.description,
+          subtitle: resumeBuilderForm.subtitle,
+          ctaText: resumeBuilderForm.ctaText,
+          ctaLink: resumeBuilderForm.ctaLink,
+          backgroundColor: resumeBuilderForm.backgroundColor,
+          textColor: resumeBuilderForm.textColor,
+          buttonColor: resumeBuilderForm.buttonColor,
+          imageUrl: base64String,
+          displayOrder: resumeBuilderForm.displayOrder,
+          isActive: resumeBuilderForm.isActive,
+        });
+      };
+      reader.readAsDataURL(resumeBuilderForm.imageFile);
+    } else {
+      // Submit with URL directly
+      saveResumeBuilderMutation.mutate({
+        title: resumeBuilderForm.title,
+        description: resumeBuilderForm.description,
+        subtitle: resumeBuilderForm.subtitle,
+        ctaText: resumeBuilderForm.ctaText,
+        ctaLink: resumeBuilderForm.ctaLink,
+        backgroundColor: resumeBuilderForm.backgroundColor,
+        textColor: resumeBuilderForm.textColor,
+        buttonColor: resumeBuilderForm.buttonColor,
+        imageUrl: resumeBuilderForm.imageUrl,
+        displayOrder: resumeBuilderForm.displayOrder,
+        isActive: resumeBuilderForm.isActive,
+      });
+    }
   };
+
 
   // Add this query
   const { data: resumeBuildersData, isLoading: resumeBuildersLoading } = useQuery({
@@ -2351,8 +3156,20 @@ export default function AdminDashboard() {
       case "resume-builder":
         deleteResumeBuilderMutation.mutate(itemToDelete.id);
         break;
-      case "career-guide-feature":
-        deleteCareerGuideFeatureMutation.mutate(itemToDelete.id);
+      case "career-guide":
+        deleteCareerGuideMutation.mutate(itemToDelete.id);
+        break;
+      case "career-industry":
+        deleteCareerIndustryMutation.mutate(itemToDelete.id);
+        break;
+      case "states":
+        deleteStatesMutation.mutate(itemToDelete.id);
+        break;
+      case "topics":
+        deleteTopicsMutation.mutate(itemToDelete.id);
+        break;
+      case "donation":
+        deleteDonationMutation.mutate(itemToDelete.id);
         break;
       default:
         break;
@@ -2932,7 +3749,22 @@ export default function AdminDashboard() {
               <FileText className="h-4 w-4 mr-2" />
               Career Guide
             </TabsTrigger>
-
+            <TabsTrigger value="career-industry" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Career Industry
+            </TabsTrigger>
+            <TabsTrigger value="states" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              States Management
+            </TabsTrigger>
+            <TabsTrigger value="topics" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Topics Management
+            </TabsTrigger>
+            <TabsTrigger value="donation" className="data-[state=active]:bg-white">
+              <FileText className="h-4 w-4 mr-2" />
+              Donation Banner
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -6414,16 +7246,60 @@ export default function AdminDashboard() {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Image URL
+                            Image URL or Upload
                           </label>
-                          <Input
-                            name="imageUrl"
-                            value={resumeBuilderForm.imageUrl}
-                            onChange={handleResumeBuilderFormChange}
-                            placeholder="Enter image URL"
-                            className="w-full"
-                          />
+                          <div className="space-y-3">
+                            <Input
+                              name="imageUrl"
+                              value={resumeBuilderForm.imageUrl}
+                              onChange={handleResumeBuilderFormChange}
+                              placeholder="Enter image URL"
+                              className="w-full"
+                              disabled={!!resumeBuilderForm.imageFile} // Disable if file is selected
+                            />
+                            <div className="text-sm text-gray-500">OR</div>
+                            <Input
+                              name="imageFile"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleResumeBuilderFormChange}
+                              className="w-full"
+                            />
+                          </div>
+
+                          {/* Preview */}
+                          {(resumeBuilderForm.previewUrl || resumeBuilderForm.imageUrl) && (
+                            <div className="flex items-center gap-3 mt-3">
+                              <img
+                                src={resumeBuilderForm.previewUrl || resumeBuilderForm.imageUrl}
+                                alt="Preview"
+                                className="w-24 h-24 object-contain rounded border border-gray-200"
+                              />
+                              <span className="text-sm text-gray-500">Preview</span>
+                              {resumeBuilderForm.imageFile && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (resumeBuilderForm.previewUrl && resumeBuilderForm.previewUrl.startsWith('blob:')) {
+                                      URL.revokeObjectURL(resumeBuilderForm.previewUrl);
+                                      setResumeBuilderForm(prev => ({
+                                        ...prev,
+                                        imageFile: null,
+                                        previewUrl: "",
+                                        imageUrl: prev.imageUrl // Keep existing URL if no file is selected
+                                      }));
+                                    }
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          )}
                         </div>
+
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -6584,15 +7460,15 @@ export default function AdminDashboard() {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="text-xl font-semibold text-gray-900">Career Guide</h2>
-                      <p className="text-sm text-gray-500 mt-1">Manage the career guide page content</p>
+                      <h2 className="text-xl font-semibold text-gray-900">Career Guide Management</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage career guide section content</p>
                     </div>
                     <Button
                       className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
-                      onClick={() => openCareerGuideForm(careerGuide || undefined)}
+                      onClick={() => openCareerGuideForm()}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
-                      {careerGuide ? "Edit Career Guide" : "Create Career Guide"}
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Section
                     </Button>
                   </div>
 
@@ -6600,7 +7476,7 @@ export default function AdminDashboard() {
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-semibold text-gray-900">
-                          {editingCareerGuide ? "Edit Career Guide" : "Create Career Guide"}
+                          {editingCareerGuide ? "Edit Career Guide Section" : "Create New Career Guide Section"}
                         </h3>
                         <Button
                           variant="ghost"
@@ -6611,128 +7487,261 @@ export default function AdminDashboard() {
                         </Button>
                       </div>
 
-                      <form onSubmit={handleCareerGuideSubmit} className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Title
-                          </label>
-                          <Input
-                            name="title"
-                            value={careerGuideForm.title}
-                            onChange={handleCareerGuideFormChange}
-                            placeholder="Enter career guide title"
-                            className="w-full"
-                            required
-                          />
+                      <form onSubmit={handleCareerGuideSubmit} className="space-y-6">
+                        {/* Left Side Content */}
+                        <div className="space-y-4">
+                          <h4 className="text-md font-medium text-gray-900 border-b pb-2">Left Side Content</h4>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Title
+                            </label>
+                            <Input
+                              name="title"
+                              value={careerGuideForm.title}
+                              onChange={handleCareerGuideFormChange}
+                              placeholder="Enter title"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Subtitle
+                            </label>
+                            <Input
+                              name="subtitle"
+                              value={careerGuideForm.subtitle}
+                              onChange={handleCareerGuideFormChange}
+                              placeholder="Enter subtitle"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Description
+                            </label>
+                            <textarea
+                              name="description"
+                              value={careerGuideForm.description}
+                              onChange={handleCareerGuideFormChange}
+                              placeholder="Enter description"
+                              className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Title Icon URL
+                            </label>
+                            <Input
+                              name="titleIconUrl"
+                              value={careerGuideForm.titleIconUrl}
+                              onChange={handleCareerGuideFormChange}
+                              placeholder="Enter title icon URL"
+                              className="w-full"
+                            />
+                          </div>
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Title Icon URL
-                          </label>
-                          <Input
-                            name="titleIconUrl"
-                            value={careerGuideForm.titleIconUrl}
-                            onChange={handleCareerGuideFormChange}
-                            placeholder="Enter title icon URL"
-                            className="w-full"
-                          />
-                          {careerGuideForm.titleIconUrl && (
-                            <div className="mt-2 flex items-center gap-2">
-                              <img
-                                src={careerGuideForm.titleIconUrl}
-                                alt="Title icon preview"
-                                className="w-12 h-12 object-contain"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                              <span className="text-xs text-gray-500">Icon preview</span>
+                        {/* Right Side Items */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-md font-medium text-gray-900 border-b pb-2">Right Side Items</h4>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={addCareerGuideItem}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Item
+                            </Button>
+                          </div>
+
+                          {careerGuideForm.items.map((item, index) => (
+                            <div key={item.id} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h5 className="text-sm font-medium text-gray-700">Item {index + 1}</h5>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeCareerGuideItem(index)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Title
+                                  </label>
+                                  <Input
+                                    value={item.title}
+                                    onChange={(e) => updateCareerGuideItem(index, 'title', e.target.value)}
+                                    placeholder="Enter item title"
+                                    required
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Icon URL
+                                  </label>
+                                  <Input
+                                    value={item.iconUrl}
+                                    onChange={(e) => updateCareerGuideItem(index, 'iconUrl', e.target.value)}
+                                    placeholder="Enter icon URL"
+                                    required
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Description
+                                </label>
+                                <textarea
+                                  value={item.description}
+                                  onChange={(e) => updateCareerGuideItem(index, 'description', e.target.value)}
+                                  placeholder="Enter item description"
+                                  className="w-full min-h-[80px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                  required
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Background Color
+                                  </label>
+                                  <input
+                                    type="color"
+                                    value={item.backgroundColor}
+                                    onChange={(e) => updateCareerGuideItem(index, 'backgroundColor', e.target.value)}
+                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Text Color
+                                  </label>
+                                  <input
+                                    type="color"
+                                    value={item.textColor}
+                                    onChange={(e) => updateCareerGuideItem(index, 'textColor', e.target.value)}
+                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Icon Color
+                                  </label>
+                                  <input
+                                    type="color"
+                                    value={item.iconColor}
+                                    onChange={(e) => updateCareerGuideItem(index, 'iconColor', e.target.value)}
+                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                  />
+                                </div>
+                              </div>
                             </div>
-                          )}
+                          ))}
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Subtitle
-                          </label>
-                          <Input
-                            name="subtitle"
-                            value={careerGuideForm.subtitle}
-                            onChange={handleCareerGuideFormChange}
-                            placeholder="Enter career guide subtitle"
-                            className="w-full"
-                            required
-                          />
-                        </div>
+                        {/* Styling Options */}
+                        <div className="space-y-4">
+                          <h4 className="text-md font-medium text-gray-900 border-b pb-2">Styling Options</h4>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Description
-                          </label>
-                          <textarea
-                            name="description"
-                            value={careerGuideForm.description}
-                            onChange={handleCareerGuideFormChange}
-                            placeholder="Enter career guide description"
-                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                            required
-                          />
-                        </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Background Color
+                              </label>
+                              <input
+                                type="color"
+                                name="backgroundColor"
+                                value={careerGuideForm.backgroundColor}
+                                onChange={handleCareerGuideFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Background Image URL
-                          </label>
-                          <Input
-                            name="backgroundImage"
-                            value={careerGuideForm.backgroundImage}
-                            onChange={handleCareerGuideFormChange}
-                            placeholder="Enter background image URL"
-                            className="w-full"
-                          />
-                        </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title Color
+                              </label>
+                              <input
+                                type="color"
+                                name="titleColor"
+                                value={careerGuideForm.titleColor}
+                                onChange={handleCareerGuideFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Background Color
-                            </label>
-                            <input
-                              type="color"
-                              name="backgroundColor"
-                              value={careerGuideForm.backgroundColor || "#ffffff"}
-                              onChange={handleCareerGuideFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
-                            />
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Subtitle Color
+                              </label>
+                              <input
+                                type="color"
+                                name="subtitleColor"
+                                value={careerGuideForm.subtitleColor}
+                                onChange={handleCareerGuideFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Description Color
+                              </label>
+                              <input
+                                type="color"
+                                name="descriptionColor"
+                                value={careerGuideForm.descriptionColor}
+                                onChange={handleCareerGuideFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title Icon Color
+                              </label>
+                              <input
+                                type="color"
+                                name="titleIconColor"
+                                value={careerGuideForm.titleIconColor}
+                                onChange={handleCareerGuideFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
                           </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Text Color
-                            </label>
+                          <div className="flex items-center">
                             <input
-                              type="color"
-                              name="textColor"
-                              value={careerGuideForm.textColor || "#000000"}
+                              type="checkbox"
+                              id="isActive"
+                              name="isActive"
+                              checked={careerGuideForm.isActive}
                               onChange={handleCareerGuideFormChange}
-                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
                             />
+                            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                              Active
+                            </label>
                           </div>
-                        </div>
-
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id="isActive"
-                            name="isActive"
-                            checked={careerGuideForm.isActive}
-                            onChange={handleCareerGuideFormChange}
-                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
-                          />
-                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
-                            Active
-                          </label>
                         </div>
 
                         <div className="flex justify-end gap-2 pt-4">
@@ -6754,7 +7763,7 @@ export default function AdminDashboard() {
                                 Saving...
                               </>
                             ) : (
-                              editingCareerGuide ? "Update Career Guide" : "Create Career Guide"
+                              editingCareerGuide ? "Update Section" : "Create Section"
                             )}
                           </Button>
                         </div>
@@ -6762,262 +7771,1187 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Career Guide Sections</p>
                       {careerGuideLoading ? (
-                        <div className="text-center py-12 text-gray-500">Loading career guide...</div>
-                      ) : careerGuide ? (
-                        <div className="bg-white rounded-lg border border-gray-200 p-6">
-                          <div className="flex items-start gap-4 mb-3">
-                            {careerGuide.titleIconUrl && (
-                              <img
-                                src={careerGuide.titleIconUrl}
-                                alt="Career guide icon"
-                                className="w-16 h-16 object-contain"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            )}
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900 text-base">{careerGuide.title}</h3>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              {careerGuide.isActive && (
-                                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-4">{careerGuide.subtitle}</p>
-                          <p className="text-sm text-gray-600 mb-4">{careerGuide.description}</p>
-                          <div className="space-y-2 mb-4 text-xs text-gray-500">
-                            <div>Background Color: {careerGuide.backgroundColor}</div>
-                            <div>Text Color: {careerGuide.textColor}</div>
-                            {careerGuide.titleIconUrl && (
-                              <div>Title Icon: {careerGuide.titleIconUrl}</div>
-                            )}
-                            {careerGuide.backgroundImage && (
-                              <div>Background Image: {careerGuide.backgroundImage}</div>
-                            )}
-                          </div>
-                          <div className="flex gap-2 pt-4 border-t border-gray-100">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1 text-xs"
-                              onClick={() => openCareerGuideForm(careerGuide)}
-                            >
-                              <Edit className="h-3 w-3 mr-1" />
-                              Edit
-                            </Button>
-                          </div>
-                        </div>
+                        <div className="text-center py-12 text-gray-500">Loading career guide sections...</div>
                       ) : (
-                        <div className="text-center py-12 text-gray-500">No career guide found. Create one to get started.</div>
+                        <div className="space-y-4">
+                          {careerGuideData?.careerGuide?.map((section: CareerGuide) => (
+                            <div key={section.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{section.title}</h3>
+                                <div className="flex items-center gap-1">
+                                  {section.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                {section.subtitle}
+                              </p>
+                              <div className="space-y-2 mb-4 text-xs text-gray-500">
+                                <div>Items: {section.items?.length || 0}</div>
+                                <div className="flex items-center gap-2">
+                                  <span>Background:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: section.backgroundColor }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openCareerGuideForm(section)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(section.id, "career-guide", section.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
                   )}
-
-                  <div className="mt-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Career Guide Features</h3>
-                      <Button
-                        className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
-                        onClick={() => openCareerGuideFeatureForm()}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Feature
-                      </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="career-industry" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Career Industry Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Career Industry Management</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage "Search careers by industry" section</p>
                     </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openCareerIndustryForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Section
+                    </Button>
+                  </div>
 
-                    {isCareerGuideFeatureFormOpen ? (
-                      <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <div className="flex items-center justify-between mb-6">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {editingCareerGuideFeature ? "Edit Feature" : "Create New Feature"}
-                          </h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={closeCareerGuideFeatureForm}
-                          >
-                            <X className="h-5 w-5" />
-                          </Button>
-                        </div>
+                  {isCareerIndustryFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingCareerIndustry ? "Edit Career Industry Section" : "Create New Career Industry Section"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeCareerIndustryForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
 
-                        <form onSubmit={handleCareerGuideFeatureSubmit} className="space-y-4">
+                      <form onSubmit={handleCareerIndustrySubmit} className="space-y-6">
+                        {/* Title and Colors */}
+                        <div className="space-y-4">
+                          <h4 className="text-md font-medium text-gray-900 border-b pb-2">Title and Colors</h4>
+
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Title
                             </label>
                             <Input
                               name="title"
-                              value={careerGuideFeatureForm.title}
-                              onChange={handleCareerGuideFeatureFormChange}
-                              placeholder="Enter feature title"
+                              value={careerIndustryForm.title}
+                              onChange={handleCareerIndustryFormChange}
+                              placeholder="Enter title"
                               className="w-full"
                               required
                             />
                           </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Description
-                            </label>
-                            <textarea
-                              name="description"
-                              value={careerGuideFeatureForm.description}
-                              onChange={handleCareerGuideFeatureFormChange}
-                              placeholder="Enter feature description"
-                              className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                              required
-                            />
-                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title Color
+                              </label>
+                              <input
+                                type="color"
+                                name="titleColor"
+                                value={careerIndustryForm.titleColor}
+                                onChange={handleCareerIndustryFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Icon URL
-                            </label>
-                            <Input
-                              name="iconUrl"
-                              value={careerGuideFeatureForm.iconUrl}
-                              onChange={handleCareerGuideFeatureFormChange}
-                              placeholder="Enter icon URL"
-                              className="w-full"
-                            />
-                            {careerGuideFeatureForm.iconUrl && (
-                              <div className="mt-2 flex items-center gap-2">
-                                <img
-                                  src={careerGuideFeatureForm.iconUrl}
-                                  alt="Feature icon preview"
-                                  className="w-8 h-8 object-contain"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
-                                <span className="text-xs text-gray-500">Icon preview</span>
-                              </div>
-                            )}
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Background Color
+                              </label>
+                              <input
+                                type="color"
+                                name="backgroundColor"
+                                value={careerIndustryForm.backgroundColor}
+                                onChange={handleCareerIndustryFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
                           </div>
+                        </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Display Order
-                            </label>
-                            <Input
-                              name="displayOrder"
-                              type="number"
-                              value={careerGuideFeatureForm.displayOrder}
-                              onChange={handleCareerGuideFeatureFormChange}
-                              className="w-full"
-                              min="0"
-                            />
-                          </div>
-
-                          <div className="flex items-center">
-                            <input
-                              type="checkbox"
-                              id="isActive"
-                              name="isActive"
-                              checked={careerGuideFeatureForm.isActive}
-                              onChange={handleCareerGuideFeatureFormChange}
-                              className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
-                            />
-                            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
-                              Active
-                            </label>
-                          </div>
-
-                          <div className="flex justify-end gap-2 pt-4">
+                        {/* Industry Items */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-md font-medium text-gray-900 border-b pb-2">Industry Items</h4>
                             <Button
                               type="button"
                               variant="outline"
-                              onClick={closeCareerGuideFeatureForm}
+                              size="sm"
+                              onClick={addCareerIndustryItem}
                             >
-                              Cancel
-                            </Button>
-                            <Button
-                              type="submit"
-                              className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
-                              disabled={saveCareerGuideFeatureMutation.isPending}
-                            >
-                              {saveCareerGuideFeatureMutation.isPending ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Saving...
-                                </>
-                              ) : (
-                                editingCareerGuideFeature ? "Update Feature" : "Create Feature"
-                              )}
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Item
                             </Button>
                           </div>
-                        </form>
-                      </div>
-                    ) : (
-                      <div className="mt-6">
-                        {careerGuideFeaturesLoading ? (
-                          <div className="text-center py-12 text-gray-500">Loading features...</div>
-                        ) : careerGuideFeatures.length > 0 ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {careerGuideFeatures.map((feature: CareerGuideFeature) => (
-                              <div key={feature.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                                <div className="flex items-start justify-between mb-3">
-                                  <div className="flex items-center gap-3">
-                                    {feature.iconUrl ? (
-                                      <img
-                                        src={feature.iconUrl}
-                                        alt={feature.title}
-                                        className="w-8 h-8 object-contain"
-                                      />
-                                    ) : (
-                                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                        <Check className="w-5 h-5 text-white" />
-                                      </div>
-                                    )}
-                                    <h3 className="font-semibold text-gray-900 text-base">{feature.title}</h3>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    {feature.isActive && (
-                                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                    )}
-                                  </div>
+
+                          {careerIndustryForm.items.map((item, index) => (
+                            <div key={item.id} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h5 className="text-sm font-medium text-gray-700">Item {index + 1}</h5>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeCareerIndustryItem(index)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Icon
+                                  </label>
+                                  <Input
+                                    value={item.icon}
+                                    onChange={(e) => updateCareerIndustryItem(index, 'icon', e.target.value)}
+                                    placeholder="Enter icon name or class"
+                                    required
+                                  />
                                 </div>
-                                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{feature.description}</p>
-                                <div className="text-xs text-gray-500 mb-4">Order: {feature.displayOrder}</div>
-                                <div className="flex gap-2 pt-4 border-t border-gray-100">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1 text-xs"
-                                    onClick={() => openCareerGuideFeatureForm(feature)}
-                                  >
-                                    <Edit className="h-3 w-3 mr-1" />
-                                    Edit
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                                    onClick={() => openDeleteDialog(feature.id, "career-guide-feature", feature.title)}
-                                  >
-                                    <Trash2 className="h-3 w-3 mr-1" />
-                                    Delete
-                                  </Button>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Text
+                                  </label>
+                                  <Input
+                                    value={item.text}
+                                    onChange={(e) => updateCareerIndustryItem(index, 'text', e.target.value)}
+                                    placeholder="Enter item text"
+                                    required
+                                  />
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-12 text-gray-500">No features found. Add some features to get started.</div>
-                        )}
-                      </div>
-                    )}
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Path
+                                </label>
+                                <Input
+                                  value={item.path}
+                                  onChange={(e) => updateCareerIndustryItem(index, 'path', e.target.value)}
+                                  placeholder="Enter navigation path"
+                                  required
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Text Color
+                                  </label>
+                                  <input
+                                    type="color"
+                                    value={item.iconColor}
+                                    onChange={(e) => updateCareerIndustryItem(index, 'iconColor', e.target.value)}
+                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Icon Background Color
+                                  </label>
+                                  <input
+                                    type="color"
+                                    value={item.iconBackgroundColor}
+                                    onChange={(e) => updateCareerIndustryItem(index, 'iconBackgroundColor', e.target.value)}
+                                    className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={careerIndustryForm.isActive}
+                            onChange={handleCareerIndustryFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeCareerIndustryForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveCareerIndustryMutation.isPending}
+                          >
+                            {saveCareerIndustryMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingCareerIndustry ? "Update Section" : "Create Section"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Career Industry Sections</p>
+                      {careerIndustryLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading career industry sections...</div>
+                      ) : (
+                        <div className="space-y-4">
+                          {careerIndustryData?.careerIndustry?.map((section: CareerIndustry) => (
+                            <div key={section.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{section.title}</h3>
+                                <div className="flex items-center gap-1">
+                                  {section.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="space-y-2 mb-4 text-xs text-gray-500">
+                                <div>Items: {section.items?.length || 0}</div>
+                                <div className="flex items-center gap-2">
+                                  <span>Title Color:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: section.titleColor }}
+                                  ></div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span>Background:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: section.backgroundColor }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openCareerIndustryForm(section)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(section.id, "career-industry", section.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="states" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">States Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">States Management</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage "Search jobs by state" section</p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openStatesForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Section
+                    </Button>
                   </div>
+
+                  {isStatesFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingStates ? "Edit States Section" : "Create New States Section"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeStatesForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      <form onSubmit={handleStatesSubmit} className="space-y-6">
+                        {/* Title and Colors */}
+                        <div className="space-y-4">
+                          <h4 className="text-md font-medium text-gray-900 border-b pb-2">Title and Colors</h4>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Title
+                            </label>
+                            <Input
+                              name="title"
+                              value={statesForm.title}
+                              onChange={handleStatesFormChange}
+                              placeholder="Enter title"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title Color
+                              </label>
+                              <input
+                                type="color"
+                                name="titleColor"
+                                value={statesForm.titleColor}
+                                onChange={handleStatesFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Background Color
+                              </label>
+                              <input
+                                type="color"
+                                name="backgroundColor"
+                                value={statesForm.backgroundColor}
+                                onChange={handleStatesFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* State Items */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-md font-medium text-gray-900 border-b pb-2">State Items</h4>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={addStatesItem}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add State
+                            </Button>
+                          </div>
+
+                          {statesForm.items.map((item, index) => (
+                            <div key={item.id} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h5 className="text-sm font-medium text-gray-700">State {index + 1}</h5>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeStatesItem(index)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    State Name
+                                  </label>
+                                  <Input
+                                    value={item.text}
+                                    onChange={(e) => updateStatesItem(index, 'text', e.target.value)}
+                                    placeholder="Enter state name"
+                                    required
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Path
+                                  </label>
+                                  <Input
+                                    value={item.path}
+                                    onChange={(e) => updateStatesItem(index, 'path', e.target.value)}
+                                    placeholder="Enter navigation path"
+                                    required
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Text Color
+                                </label>
+                                <input
+                                  type="color"
+                                  value={item.textColor}
+                                  onChange={(e) => updateStatesItem(index, 'textColor', e.target.value)}
+                                  className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={statesForm.isActive}
+                            onChange={handleStatesFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeStatesForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveStatesMutation.isPending}
+                          >
+                            {saveStatesMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingStates ? "Update Section" : "Create Section"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current States Sections</p>
+                      {statesLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading states sections...</div>
+                      ) : (
+                        <div className="space-y-4">
+                          {statesData?.states?.map((section: States) => (
+                            <div key={section.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{section.title}</h3>
+                                <div className="flex items-center gap-1">
+                                  {section.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="space-y-2 mb-4 text-xs text-gray-500">
+                                <div>States: {section.items?.length || 0}</div>
+                                <div className="flex items-center gap-2">
+                                  <span>Title Color:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: section.titleColor }}
+                                  ></div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span>Background:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: section.backgroundColor }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openStatesForm(section)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(section.id, "states", section.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
+          <TabsContent value="topics" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Topics Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Topics Management</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage "All our topics" section</p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openTopicsForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Section
+                    </Button>
+                  </div>
 
+                  {isTopicsFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingTopics ? "Edit Topics Section" : "Create New Topics Section"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeTopicsForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
 
+                      <form onSubmit={handleTopicsSubmit} className="space-y-6">
+                        {/* Title and Colors */}
+                        <div className="space-y-4">
+                          <h4 className="text-md font-medium text-gray-900 border-b pb-2">Title and Colors</h4>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Title
+                            </label>
+                            <Input
+                              name="title"
+                              value={topicsForm.title}
+                              onChange={handleTopicsFormChange}
+                              placeholder="Enter title"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Subtitle
+                            </label>
+                            <Input
+                              name="subtitle"
+                              value={topicsForm.subtitle}
+                              onChange={handleTopicsFormChange}
+                              placeholder="Enter subtitle"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title Color
+                              </label>
+                              <input
+                                type="color"
+                                name="titleColor"
+                                value={topicsForm.titleColor}
+                                onChange={handleTopicsFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Subtitle Color
+                              </label>
+                              <input
+                                type="color"
+                                name="subtitleColor"
+                                value={topicsForm.subtitleColor}
+                                onChange={handleTopicsFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Background Color
+                              </label>
+                              <input
+                                type="color"
+                                name="backgroundColor"
+                                value={topicsForm.backgroundColor}
+                                onChange={handleTopicsFormChange}
+                                className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Categories and Items */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-md font-medium text-gray-900 border-b pb-2">Categories and Items</h4>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={addTopicsCategory}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Category
+                            </Button>
+                          </div>
+
+                          {topicsForm.categories.map((category, categoryIndex) => (
+                            <div key={category.id} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h5 className="text-sm font-medium text-gray-700">Category {categoryIndex + 1}</h5>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeTopicsCategory(categoryIndex)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Category Name
+                                </label>
+                                <Input
+                                  value={category.name}
+                                  onChange={(e) => updateTopicsCategory(categoryIndex, 'name', e.target.value)}
+                                  placeholder="Enter category name"
+                                  required
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <h6 className="text-sm font-medium text-gray-700">Items</h6>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => addTopicsItem(categoryIndex)}
+                                  >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    Add Item
+                                  </Button>
+                                </div>
+
+                                {category.items.map((item, itemIndex) => (
+                                  <div key={item.id} className="border border-gray-100 rounded p-3 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-medium text-gray-600">Item {itemIndex + 1}</span>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => removeTopicsItem(categoryIndex, itemIndex)}
+                                        className="text-red-600 hover:text-red-700"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                          Name
+                                        </label>
+                                        <Input
+                                          value={item.name}
+                                          onChange={(e) => updateTopicsItem(categoryIndex, itemIndex, 'name', e.target.value)}
+                                          placeholder="Enter item name"
+                                          required
+                                          className="text-sm"
+                                        />
+                                      </div>
+
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                          Path
+                                        </label>
+                                        <Input
+                                          value={item.path}
+                                          onChange={(e) => updateTopicsItem(categoryIndex, itemIndex, 'path', e.target.value)}
+                                          placeholder="Enter navigation path"
+                                          required
+                                          className="text-sm"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={topicsForm.isActive}
+                            onChange={handleTopicsFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeTopicsForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveTopicsMutation.isPending}
+                          >
+                            {saveTopicsMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingTopics ? "Update Section" : "Create Section"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Topics Sections</p>
+                      {topicsLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading topics sections...</div>
+                      ) : (
+                        <div className="space-y-4">
+                          {topicsData?.topics?.map((section: Topics) => (
+                            <div key={section.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{section.title}</h3>
+                                <div className="flex items-center gap-1">
+                                  {section.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4">{section.subtitle}</p>
+                              <div className="space-y-2 mb-4 text-xs text-gray-500">
+                                <div>Categories: {section.categories?.length || 0}</div>
+                                <div className="flex items-center gap-2">
+                                  <span>Title Color:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: section.titleColor }}
+                                  ></div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span>Background:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: section.backgroundColor }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openTopicsForm(section)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(section.id, "topics", section.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="donation" className="space-y-6">
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-gray">Donation Banner Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Donation Banner Management</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage donation banner for the website</p>
+                    </div>
+                    <Button
+                      className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                      onClick={() => openDonationForm()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Banner
+                    </Button>
+                  </div>
+
+                  {isDonationFormOpen ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {editingDonation ? "Edit Donation Banner" : "Create New Donation Banner"}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={closeDonationForm}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      <form onSubmit={handleDonationSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Title
+                          </label>
+                          <Input
+                            name="title"
+                            value={donationForm.title}
+                            onChange={handleDonationFormChange}
+                            placeholder="Enter banner title"
+                            className="w-full"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            name="description"
+                            value={donationForm.description}
+                            onChange={handleDonationFormChange}
+                            placeholder="Enter banner description"
+                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            required
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Button Text
+                            </label>
+                            <Input
+                              name="buttonText"
+                              value={donationForm.buttonText}
+                              onChange={handleDonationFormChange}
+                              placeholder="e.g. Donate now"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Redirect URL
+                            </label>
+                            <Input
+                              name="redirectUrl"
+                              value={donationForm.redirectUrl}
+                              onChange={handleDonationFormChange}
+                              placeholder="e.g. /donate"
+                              className="w-full"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Display Order
+                          </label>
+                          <Input
+                            name="displayOrder"
+                            type="number"
+                            value={donationForm.displayOrder}
+                            onChange={handleDonationFormChange}
+                            className="w-full"
+                            min="0"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Background Color
+                            </label>
+                            <input
+                              type="color"
+                              name="backgroundColor"
+                              value={donationForm.backgroundColor}
+                              onChange={handleDonationFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Text Color
+                            </label>
+                            <input
+                              type="color"
+                              name="textColor"
+                              value={donationForm.textColor}
+                              onChange={handleDonationFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Button Color
+                            </label>
+                            <input
+                              type="color"
+                              name="buttonColor"
+                              value={donationForm.buttonColor}
+                              onChange={handleDonationFormChange}
+                              className="h-10 w-full rounded border border-gray-300 cursor-pointer"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={donationForm.isActive}
+                            onChange={handleDonationFormChange}
+                            className="h-4 w-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+                          />
+                          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                            Active
+                          </label>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={closeDonationForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
+                            disabled={saveDonationMutation.isPending}
+                          >
+                            {saveDonationMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              editingDonation ? "Update Banner" : "Create Banner"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">Current Donation Banners</p>
+                      {donationLoading ? (
+                        <div className="text-center py-12 text-gray-500">Loading donation banners...</div>
+                      ) : (
+                        <div className="space-y-4">
+                          {donationData?.donation?.map((banner: Donation) => (
+                            <div key={banner.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base">{banner.title}</h3>
+                                <div className="flex items-center gap-1">
+                                  {banner.isActive && (
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{banner.description}</p>
+                              <div className="space-y-2 mb-4 text-xs text-gray-500">
+                                <div>Button: {banner.buttonText}</div>
+                                <div>URL: {banner.redirectUrl}</div>
+                                <div>Order: {banner.displayOrder}</div>
+                                <div className="flex items-center gap-2">
+                                  <span>Colors:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: banner.backgroundColor }}
+                                    title="Background"
+                                  ></div>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: banner.textColor }}
+                                    title="Text"
+                                  ></div>
+                                  <div
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: banner.buttonColor }}
+                                    title="Button"
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-4 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs"
+                                  onClick={() => openDonationForm(banner)}
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => openDeleteDialog(banner.id, "donation", banner.title)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
 

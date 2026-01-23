@@ -28,7 +28,10 @@ import {
   insertImagePositionSchema,
   insertResumeBuilderSchema,
   insertCareerGuideSchema,
-  insertCareerGuideFeatureSchema
+  insertCareerIndustrySchema,
+  insertStatesSchema,
+  insertTopicsSchema,
+  insertDonationSchema,
 } from '../shared/schema.js';
 import { db } from './db.js';
 import { eq, and, desc, asc, or, like, count, AnyColumn } from 'drizzle-orm';
@@ -1231,52 +1234,73 @@ router.delete("/resume-builder/:id", requireAdminAuth, async (req: Request, res:
   }
 });
 
-// Career Guide Management Routes
+// Update these routes in your admin-routes.ts file
 
 /**
  * GET /api/admin/career-guide
- * Get career guide data
+ * Get career guide items with pagination
  */
 router.get("/career-guide", async (req: Request, res: Response) => {
   try {
-    const careerGuideData = await adminStorage.getCareerGuide();
-    res.json(careerGuideData);
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getCareerGuideItems(options);
+    res.json(result);
   } catch (error) {
     console.error("Get career guide error:", error);
-    res.status(500).json({ error: "Failed to fetch career guide data" });
+    res.status(500).json({ error: "Failed to fetch career guide items" });
+  }
+});
+
+/**
+ * GET /api/admin/career-guide/:id
+ * Get a single career guide item by ID
+ */
+router.get("/career-guide/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const careerGuideItem = await adminStorage.getCareerGuideById(id);
+
+    if (!careerGuideItem) {
+      return res.status(404).json({ error: "Career guide item not found" });
+    }
+
+    res.json(careerGuideItem);
+  } catch (error) {
+    console.error("Get career guide item error:", error);
+    res.status(500).json({ error: "Failed to fetch career guide item" });
   }
 });
 
 /**
  * POST /api/admin/career-guide
- * Create or update career guide
+ * Create a new career guide item
  */
 router.post("/career-guide", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const careerGuideData = insertCareerGuideSchema.parse(req.body);
-    const careerGuide = await adminStorage.createOrUpdateCareerGuide(careerGuideData);
-    res.json(careerGuide);
+    const careerGuideItem = await adminStorage.createCareerGuide(careerGuideData);
+    res.json(careerGuideItem);
   } catch (error) {
-    console.error("Create/update career guide error:", error);
+    console.error("Create career guide error:", error);
     res.status(400).json({ error: "Invalid request data" });
   }
 });
 
 /**
  * PUT /api/admin/career-guide/:id
- * Update career guide
+ * Update a career guide item
  */
 router.put("/career-guide/:id", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updates = insertCareerGuideSchema.partial().parse(req.body);
-    const careerGuide = await adminStorage.updateCareerGuide(id, updates);
+    const careerGuideItem = await adminStorage.updateCareerGuide(id, updates);
 
-    if (!careerGuide) {
-      return res.status(404).json({ error: "Career guide not found" });
+    if (!careerGuideItem) {
+      return res.status(404).json({ error: "Career guide item not found" });
     }
 
-    res.json(careerGuide);
+    res.json(careerGuideItem);
   } catch (error) {
     console.error("Update career guide error:", error);
     res.status(400).json({ error: "Invalid request data" });
@@ -1284,75 +1308,396 @@ router.put("/career-guide/:id", requireAdminAuth, async (req: Request, res: Resp
 });
 
 /**
- * GET /api/admin/career-guide-features
- * Get career guide features
+ * DELETE /api/admin/career-guide/:id
+ * Delete a career guide item
  */
-router.get("/career-guide-features", async (req: Request, res: Response) => {
-  try {
-    const options = paginationSchema.parse(req.query);
-    const result = await adminStorage.getCareerGuideFeatures(options);
-    res.json(result);
-  } catch (error) {
-    console.error("Get career guide features error:", error);
-    res.status(500).json({ error: "Failed to fetch career guide features" });
-  }
-});
-
-/**
- * POST /api/admin/career-guide-features
- * Create a new career guide feature
- */
-router.post("/career-guide-features", requireAdminAuth, async (req: Request, res: Response) => {
-  try {
-    const featureData = insertCareerGuideFeatureSchema.parse(req.body);
-    const feature = await adminStorage.createCareerGuideFeature(featureData);
-    res.json(feature);
-  } catch (error) {
-    console.error("Create career guide feature error:", error);
-    res.status(400).json({ error: "Invalid request data" });
-  }
-});
-
-/**
- * PUT /api/admin/career-guide-features/:id
- * Update a career guide feature
- */
-router.put("/career-guide-features/:id", requireAdminAuth, async (req: Request, res: Response) => {
-  try {
-    const { id } = req?.params;
-    const updates = insertCareerGuideFeatureSchema.partial().parse(req.body);
-    const feature = await adminStorage.updateCareerGuideFeature(id, updates);
-
-    if (!feature) {
-      return res.status(404).json({ error: "Career guide feature not found" });
-    }
-
-    res.json(feature);
-  } catch (error) {
-    console.error("Update career guide feature error:", error);
-    res.status(400).json({ error: "Invalid request data" });
-  }
-});
-
-/**
- * DELETE /api/admin/career-guide-features/:id
- * Delete a career guide feature
- */
-router.delete("/career-guide-features/:id", requireAdminAuth, async (req: Request, res: Response) => {
+router.delete("/career-guide/:id", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const success = await adminStorage.deleteCareerGuideFeature(id);
+    const success = await adminStorage.deleteCareerGuide(id);
 
     if (!success) {
-      return res.status(404).json({ error: "Career guide feature not found" });
+      return res.status(404).json({ error: "Career guide item not found" });
     }
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Delete career guide feature error:", error);
-    res.status(500).json({ error: "Failed to delete career guide feature" });
+    console.error("Delete career guide error:", error);
+    res.status(500).json({ error: "Failed to delete career guide item" });
+  }
+});
+
+// Add these routes with your other admin routes
+
+/**
+ * GET /api/admin/career-industry
+ * Get career industry items with pagination
+ */
+router.get("/career-industry", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getCareerIndustryItems(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get career industry error:", error);
+    res.status(500).json({ error: "Failed to fetch career industry items" });
+  }
+});
+
+/**
+ * GET /api/admin/career-industry/:id
+ * Get a single career industry item by ID
+ */
+router.get("/career-industry/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const careerIndustryItem = await adminStorage.getCareerIndustryById(id);
+
+    if (!careerIndustryItem) {
+      return res.status(404).json({ error: "Career industry item not found" });
+    }
+
+    res.json(careerIndustryItem);
+  } catch (error) {
+    console.error("Get career industry item error:", error);
+    res.status(500).json({ error: "Failed to fetch career industry item" });
+  }
+});
+
+/**
+ * POST /api/admin/career-industry
+ * Create a new career industry item
+ */
+router.post("/career-industry", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const careerIndustryData = insertCareerIndustrySchema.parse(req.body);
+    const careerIndustryItem = await adminStorage.createCareerIndustry(careerIndustryData);
+    res.json(careerIndustryItem);
+  } catch (error) {
+    console.error("Create career industry error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/career-industry/:id
+ * Update a career industry item
+ */
+router.put("/career-industry/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertCareerIndustrySchema.partial().parse(req.body);
+    const careerIndustryItem = await adminStorage.updateCareerIndustry(id, updates);
+
+    if (!careerIndustryItem) {
+      return res.status(404).json({ error: "Career industry item not found" });
+    }
+
+    res.json(careerIndustryItem);
+  } catch (error) {
+    console.error("Update career industry error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * DELETE /api/admin/career-industry/:id
+ * Delete a career industry item
+ */
+router.delete("/career-industry/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const success = await adminStorage.deleteCareerIndustry(id);
+
+    if (!success) {
+      return res.status(404).json({ error: "Career industry item not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete career industry error:", error);
+    res.status(500).json({ error: "Failed to delete career industry item" });
+  }
+});
+
+// Add these routes with your other admin routes
+
+/**
+ * GET /api/admin/states
+ * Get states items with pagination
+ */
+router.get("/states", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getStatesItems(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get states error:", error);
+    res.status(500).json({ error: "Failed to fetch states items" });
+  }
+});
+
+/**
+ * GET /api/admin/states/:id
+ * Get a single states item by ID
+ */
+router.get("/states/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const statesItem = await adminStorage.getStatesById(id);
+
+    if (!statesItem) {
+      return res.status(404).json({ error: "States item not found" });
+    }
+
+    res.json(statesItem);
+  } catch (error) {
+    console.error("Get states item error:", error);
+    res.status(500).json({ error: "Failed to fetch states item" });
+  }
+});
+
+/**
+ * POST /api/admin/states
+ * Create a new states item
+ */
+router.post("/states", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const statesData = insertStatesSchema.parse(req.body);
+    const statesItem = await adminStorage.createStates(statesData);
+    res.json(statesItem);
+  } catch (error) {
+    console.error("Create states error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/states/:id
+ * Update a states item
+ */
+router.put("/states/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertStatesSchema.partial().parse(req.body);
+    const statesItem = await adminStorage.updateStates(id, updates);
+
+    if (!statesItem) {
+      return res.status(404).json({ error: "States item not found" });
+    }
+
+    res.json(statesItem);
+  } catch (error) {
+    console.error("Update states error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * DELETE /api/admin/states/:id
+ * Delete a states item
+ */
+router.delete("/states/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const success = await adminStorage.deleteStates(id);
+
+    if (!success) {
+      return res.status(404).json({ error: "States item not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete states error:", error);
+    res.status(500).json({ error: "Failed to delete states item" });
   }
 });
 
 
+// Add these routes with your other admin routes
+
+/**
+ * GET /api/admin/topics
+ * Get topics items with pagination
+ */
+router.get("/topics", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getTopicsItems(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get topics error:", error);
+    res.status(500).json({ error: "Failed to fetch topics items" });
+  }
+});
+
+/**
+ * GET /api/admin/topics/:id
+ * Get a single topics item by ID
+ */
+router.get("/topics/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const topicsItem = await adminStorage.getTopicsById(id);
+
+    if (!topicsItem) {
+      return res.status(404).json({ error: "Topics item not found" });
+    }
+
+    res.json(topicsItem);
+  } catch (error) {
+    console.error("Get topics item error:", error);
+    res.status(500).json({ error: "Failed to fetch topics item" });
+  }
+});
+
+/**
+ * POST /api/admin/topics
+ * Create a new topics item
+ */
+router.post("/topics", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const topicsData = insertTopicsSchema.parse(req.body);
+    const topicsItem = await adminStorage.createTopics(topicsData);
+    res.json(topicsItem);
+  } catch (error) {
+    console.error("Create topics error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/topics/:id
+ * Update a topics item
+ */
+router.put("/topics/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertTopicsSchema.partial().parse(req.body);
+    const topicsItem = await adminStorage.updateTopics(id, updates);
+
+    if (!topicsItem) {
+      return res.status(404).json({ error: "Topics item not found" });
+    }
+
+    res.json(topicsItem);
+  } catch (error) {
+    console.error("Update topics error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * DELETE /api/admin/topics/:id
+ * Delete a topics item
+ */
+router.delete("/topics/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const success = await adminStorage.deleteTopics(id);
+
+    if (!success) {
+      return res.status(404).json({ error: "Topics item not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete topics error:", error);
+    res.status(500).json({ error: "Failed to delete topics item" });
+  }
+});
+// Add these imports at the top
+
+// Add these routes with your other admin routes
+
+/**
+ * GET /api/admin/donation
+ * Get donation items with pagination
+ */
+router.get("/donation", async (req: Request, res: Response) => {
+  try {
+    const options = paginationSchema.parse(req.query);
+    const result = await adminStorage.getDonationItems(options);
+    res.json(result);
+  } catch (error) {
+    console.error("Get donation error:", error);
+    res.status(500).json({ error: "Failed to fetch donation items" });
+  }
+});
+
+/**
+ * GET /api/admin/donation/:id
+ * Get a single donation item by ID
+ */
+router.get("/donation/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const donationItem = await adminStorage.getDonationById(id);
+
+    if (!donationItem) {
+      return res.status(404).json({ error: "Donation item not found" });
+    }
+
+    res.json(donationItem);
+  } catch (error) {
+    console.error("Get donation item error:", error);
+    res.status(500).json({ error: "Failed to fetch donation item" });
+  }
+});
+
+/**
+ * POST /api/admin/donation
+ * Create a new donation item
+ */
+router.post("/donation", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const donationData = insertDonationSchema.parse(req.body);
+    const donationItem = await adminStorage.createDonation(donationData);
+    res.json(donationItem);
+  } catch (error) {
+    console.error("Create donation error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * PUT /api/admin/donation/:id
+ * Update a donation item
+ */
+router.put("/donation/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = insertDonationSchema.partial().parse(req.body);
+    const donationItem = await adminStorage.updateDonation(id, updates);
+
+    if (!donationItem) {
+      return res.status(404).json({ error: "Donation item not found" });
+    }
+
+    res.json(donationItem);
+  } catch (error) {
+    console.error("Update donation error:", error);
+    res.status(400).json({ error: "Invalid request data" });
+  }
+});
+
+/**
+ * DELETE /api/admin/donation/:id
+ * Delete a donation item
+ */
+router.delete("/donation/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const success = await adminStorage.deleteDonation(id);
+
+    if (!success) {
+      return res.status(404).json({ error: "Donation item not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete donation error:", error);
+    res.status(500).json({ error: "Failed to delete donation item" });
+  }
+});
 export default router;

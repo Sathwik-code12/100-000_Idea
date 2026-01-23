@@ -1,5 +1,9 @@
 import HorizontalScrollCards from "./horizontal-scroll-cards";
 import IdeaGrid from "./idea-grid";
+import ResumeBuilderSection from "./resumeBuilderSection";
+import CareerGuidePage from "./careerGuidePage";
+import IndustryCategories from "./industryCategories";
+import StatesSearch from "./statesSearch";
 
 import RightSidebar from "./right-sidebar";
 interface IdeaCard {
@@ -42,6 +46,10 @@ export default function MainContentLayout({ ideas, isSearchActive, totalDefaultI
             <div className="text-lg text-center text-gray-600">discover innovative business ideas from our community members</div> */}
             <IdeaGrid ideas={ideas} isSearchActive={isSearchActive}
               totalDefaultIdeas={totalDefaultIdeas} />
+              <ResumeBuilderSection />
+                    <CareerGuidePage />
+                    <IndustryCategories />
+                    <StatesSearch />
           </div>
 
           {/* Right Sidebar - Fixed width and responsive */}

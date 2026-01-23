@@ -70,7 +70,8 @@ export default function ResumeBuilderSection() {
               color: resumeBuilder.buttonColor,
             }}
           >
-            Resume Builder
+            {/* <span className="border border-rounded">AI</span> */}
+            {resumeBuilder.title}
           </span>
 
           {/* Title */}
@@ -78,7 +79,7 @@ export default function ResumeBuilderSection() {
             className="text-4xl md:text-5xl font-bold mb-6 leading-tight"
             style={{ color: resumeBuilder.textColor }}
           >
-            {resumeBuilder.title}
+            {resumeBuilder.subtitle}
           </h1>
 
           {/* Subtitle */}
@@ -86,13 +87,13 @@ export default function ResumeBuilderSection() {
             className="text-lg mb-4"
             style={{ color: resumeBuilder.textColor }}
           >
-            {resumeBuilder.subtitle}
+            {resumeBuilder.description}
           </p>
 
           {/* Description */}
           <p
-            className="text-base mb-8 opacity-90"
-            style={{ color: resumeBuilder.textColor }}
+            className="text-base mb-8 opacity-90 text-gray"
+            // style={{ color: resumeBuilder.textColor }}
           >
             {resumeBuilder.description}
           </p>
@@ -101,7 +102,7 @@ export default function ResumeBuilderSection() {
           <div className="flex flex-wrap gap-4">
             <a
               href={resumeBuilder.ctaLink}
-              className="px-6 py-3 rounded-md font-medium text-white transition"
+              className="px-6 py-3 rounded-3xl font-medium text-white transition"
               style={{ backgroundColor: resumeBuilder.buttonColor }}
             >
               {resumeBuilder.ctaText}
@@ -109,7 +110,7 @@ export default function ResumeBuilderSection() {
 
             <a
               href="#learn-more"
-              className="px-6 py-3 rounded-md font-medium border transition"
+              className="px-6 py-3 rounded-3xl font-medium border transition"
               style={{
                 color: resumeBuilder.buttonColor,
                 borderColor: resumeBuilder.buttonColor,

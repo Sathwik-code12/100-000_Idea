@@ -1,4 +1,4 @@
-import { eq, and, desc, count, sql, gte, lte, ilike, or, asc, getTableColumns, AnyColumn } from 'drizzle-orm';
+import { eq, and, desc, count, sql, gte, lte, ilike, like, or, asc, getTableColumns, AnyColumn } from 'drizzle-orm';
 import { db } from './db.js';
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -39,12 +39,17 @@ import {
   ResumeBuilder,
   resumeBuilder,
   InsertResumeBuilder,
-  careerGuideFeatures,
-  CareerGuideFeature,
-  InsertCareerGuideFeature,
   careerGuide,
   CareerGuide,
-  InsertCareerGuide
+  InsertCareerGuide,
+  careerIndustry,
+  InsertCareerIndustry,
+  states,
+  InsertStates,
+  topics,
+  InsertTopics,
+  donation,
+  InsertDonation,
 } from '../shared/schema.js';
 
 export interface PaginationOptions {
@@ -1297,117 +1302,418 @@ export class AdminStorage {
 
   // Add these methods to your AdminStorage class
 
+  // Update these methods in your AdminStorage class
+
   // Career Guide Management
-  async getCareerGuide(): Promise<CareerGuide | null> {
-    const [careerGuiderow] = await db
-      .select()
-      .from(careerGuide)
-      .where(eq(careerGuide.isActive, true))
-      .limit(1);
-
-    return careerGuiderow || null;
-  }
-
-  async createOrUpdateCareerGuide(data: InsertCareerGuide): Promise<CareerGuide> {
-    // Check if a career guide already exists
-    const existingGuide = await this.getCareerGuide();
-
-    if (existingGuide) {
-      // Update existing guide
-      const [updatedGuide] = await db
-        .update(careerGuide)
-        .set({
-          ...data,
-          updatedAt: new Date(),
-          titleIconUrl: data.titleIconUrl || null
-        })
-        .where(eq(careerGuide.id, existingGuide.id))
-        .returning();
-
-      return updatedGuide;
-    } else {
-      // Create new guide
-      const dataWithId: any = {
-        ...data,
-        id: uuidv4(),
-        titleIconUrl: data.titleIconUrl || null
-      };
-
-      const [newGuide] = await db.insert(careerGuide).values(dataWithId).returning();
-      return newGuide;
-    }
-  }
-
-  async updateCareerGuide(id: string, updates: Partial<CareerGuide>): Promise<CareerGuide | null> {
-    const [careerGuiderow] = await db
-      .update(careerGuide)
-      .set({
-        ...updates,
-        updatedAt: new Date(),
-        titleIconUrl: updates.titleIconUrl || null
-      })
-      .where(eq(careerGuide.id, id))
-      .returning();
-
-    return careerGuiderow || null;
-  }
-
-  // Career Guide Features Management
-  async getCareerGuideFeatures(options: PaginationOptions) {
-    const { page, limit, sortBy = "displayOrder", sortOrder = "asc" } = options;
+  async getCareerGuideItems(options: PaginationOptions) {
+    const { page, limit, sortBy = "createdAt", sortOrder = "desc" } = options;
     const offset = (page - 1) * limit;
 
-    const [totalCountResult, featuresData] = await Promise.all([
-      db.select({ count: count() }).from(careerGuideFeatures),
+    const [totalCountResult, careerGuideData] = await Promise.all([
+      db.select({ count: count() }).from(careerGuide),
       db
         .select()
-        .from(careerGuideFeatures)
+        .from(careerGuide)
         .orderBy(
           sortOrder === "asc"
-            ? asc(careerGuideFeatures[sortBy as keyof typeof careerGuideFeatures.$inferSelect] as AnyColumn)
-            : desc(careerGuideFeatures[sortBy as keyof typeof careerGuideFeatures.$inferSelect] as AnyColumn)
+            ? asc(careerGuide[sortBy as keyof typeof careerGuide.$inferSelect] as AnyColumn)
+            : desc(careerGuide[sortBy as keyof typeof careerGuide.$inferSelect] as AnyColumn)
         )
         .limit(limit)
         .offset(offset),
     ]);
 
-    const totalFeatures = totalCountResult[0].count;
-    const totalPages = Math.ceil(totalFeatures / limit);
+    const totalCareerGuideItems = totalCountResult[0].count;
+    const totalPages = Math.ceil(totalCareerGuideItems / limit);
 
     return {
-      features: featuresData,
+      careerGuide: careerGuideData,
       pagination: {
         page,
         limit,
-        total: totalFeatures,
+        total: totalCareerGuideItems,
         totalPages,
       },
     };
   }
 
-  async createCareerGuideFeature(data: any & { careerGuideId: string }): Promise<CareerGuideFeature> {
+  async getCareerGuideById(id: string): Promise<CareerGuide | null> {
+    const [careerGuideItem] = await db.select().from(careerGuide).where(eq(careerGuide.id, id));
+    return careerGuideItem || null;
+  }
+
+  async createCareerGuide(careerGuideData: InsertCareerGuide): Promise<CareerGuide> {
     const dataWithId: any = {
-      ...data,
+      ...careerGuideData,
       id: uuidv4(),
     };
 
-    const [feature] = await db.insert(careerGuideFeatures).values(dataWithId).returning();
-    return feature;
+    const [careerGuideItem] = await db.insert(careerGuide).values(dataWithId).returning();
+    return careerGuideItem;
   }
 
-  async updateCareerGuideFeature(id: string, updates: Partial<CareerGuideFeature>): Promise<CareerGuideFeature | null> {
-    const [feature] = await db
-      .update(careerGuideFeatures)
+  async updateCareerGuide(id: string, updates: Partial<CareerGuide>): Promise<CareerGuide | null> {
+    const [careerGuideItem] = await db
+      .update(careerGuide)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(careerGuideFeatures.id, id))
+      .where(eq(careerGuide.id, id))
       .returning();
 
-    return feature || null;
+    return careerGuideItem || null;
   }
 
-  async deleteCareerGuideFeature(id: string): Promise<boolean> {
-    const result = await db.delete(careerGuideFeatures).where(eq(careerGuideFeatures.id, id));
+  async deleteCareerGuide(id: string): Promise<boolean> {
+    const result = await db.delete(careerGuide).where(eq(careerGuide.id, id));
     return Array.isArray(result) ? result.length > 0 : true;
   }
+  // Add these methods to your adminStorage class
+
+  async getCareerIndustryItems(options: {
+    page: number;
+    limit: number;
+    search?: string;
+  }) {
+    const offset = (options.page - 1) * options.limit;
+
+    let whereConditions: any[] = [];
+
+    if (options.search) {
+      whereConditions.push(
+        or(
+          like(careerIndustry.title, `%${options.search}%`)
+        )
+      );
+    }
+
+    const items = await db
+      .select()
+      .from(careerIndustry)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .orderBy(desc(careerIndustry.createdAt))
+      .limit(options.limit)
+      .offset(offset);
+
+    const totalCount = await db
+      .select({ count: count() })
+      .from(careerIndustry)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+
+    const totalPages = Math.ceil(totalCount[0].count / options.limit);
+
+    return {
+      careerIndustry: items,
+      pagination: {
+        page: options.page,
+        limit: options.limit,
+        total: totalCount[0].count,
+        totalPages,
+      },
+    };
+  }
+
+  async getCareerIndustryById(id: string) {
+    const items = await db
+      .select()
+      .from(careerIndustry)
+      .where(eq(careerIndustry.id, id))
+      .limit(1);
+
+    return items[0] || null;
+  }
+
+  async createCareerIndustry(data: InsertCareerIndustry) {
+    const id = uuidv4();
+    const newItem = {
+      id,
+      ...data,
+    };
+
+    await db.insert(careerIndustry).values(newItem);
+
+    return this.getCareerIndustryById(id);
+  }
+
+  async updateCareerIndustry(id: string, data: Partial<InsertCareerIndustry>) {
+    await db
+      .update(careerIndustry)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(careerIndustry.id, id));
+
+    return this.getCareerIndustryById(id);
+  }
+
+  async deleteCareerIndustry(id: string) {
+    const result = await db
+      .delete(careerIndustry)
+      .where(eq(careerIndustry.id, id));
+
+    // return result?.rowCount > 0;
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+  // Add these methods to your adminStorage class
+
+  async getStatesItems(options: {
+    page: number;
+    limit: number;
+    search?: string;
+  }) {
+    const offset = (options.page - 1) * options.limit;
+
+    let whereConditions: any[] = [];
+
+    if (options.search) {
+      whereConditions.push(
+        or(
+          like(states.title, `%${options.search}%`)
+        )
+      );
+    }
+
+    const items = await db
+      .select()
+      .from(states)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .orderBy(desc(states.createdAt))
+      .limit(options.limit)
+      .offset(offset);
+
+    const totalCount = await db
+      .select({ count: count() })
+      .from(states)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+
+    const totalPages = Math.ceil(totalCount[0].count / options.limit);
+
+    return {
+      states: items,
+      pagination: {
+        page: options.page,
+        limit: options.limit,
+        total: totalCount[0].count,
+        totalPages,
+      },
+    };
+  }
+
+  async getStatesById(id: string) {
+    const items = await db
+      .select()
+      .from(states)
+      .where(eq(states.id, id))
+      .limit(1);
+
+    return items[0] || null;
+  }
+
+  async createStates(data: InsertStates) {
+    const id = uuidv4();
+    const newItem = {
+      id,
+      ...data,
+    };
+
+    await db.insert(states).values(newItem);
+
+    return this.getStatesById(id);
+  }
+
+  async updateStates(id: string, data: Partial<InsertStates>) {
+    await db
+      .update(states)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(states.id, id));
+
+    return this.getStatesById(id);
+  }
+
+  async deleteStates(id: string) {
+    const result = await db
+      .delete(states)
+      .where(eq(states.id, id));
+
+    // return result.rowCount > 0;
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+  // Add these methods to your adminStorage class
+
+  async getTopicsItems(options: {
+    page: number;
+    limit: number;
+    search?: string;
+  }) {
+    const offset = (options.page - 1) * options.limit;
+
+    let whereConditions: any[] = [];
+
+    if (options.search) {
+      whereConditions.push(
+        or(
+          like(topics.title, `%${options.search}%`),
+          like(topics.subtitle, `%${options.search}%`)
+        )
+      );
+    }
+
+    const items = await db
+      .select()
+      .from(topics)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .orderBy(desc(topics.createdAt))
+      .limit(options.limit)
+      .offset(offset);
+
+    const totalCount = await db
+      .select({ count: count() })
+      .from(topics)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+
+    const totalPages = Math.ceil(totalCount[0].count / options.limit);
+
+    return {
+      topics: items,
+      pagination: {
+        page: options.page,
+        limit: options.limit,
+        total: totalCount[0].count,
+        totalPages,
+      },
+    };
+  }
+
+  async getTopicsById(id: string) {
+    const items = await db
+      .select()
+      .from(topics)
+      .where(eq(topics.id, id))
+      .limit(1);
+
+    return items[0] || null;
+  }
+
+  async createTopics(data: InsertTopics) {
+    const id = uuidv4();
+    const newItem = {
+      id,
+      ...data,
+    };
+
+    await db.insert(topics).values(newItem);
+
+    return this.getTopicsById(id);
+  }
+
+  async updateTopics(id: string, data: Partial<InsertTopics>) {
+    await db
+      .update(topics)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(topics.id, id));
+
+    return this.getTopicsById(id);
+  }
+
+  async deleteTopics(id: string) {
+    const result = await db
+      .delete(topics)
+      .where(eq(topics.id, id));
+
+    // return result.rowCount > 0;
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+  // Add these methods to your adminStorage class
+
+async getDonationItems(options: {
+  page: number;
+  limit: number;
+  search?: string;
+}) {
+  const offset = (options.page - 1) * options.limit;
+  
+  let whereConditions: any[] = [];
+  
+  if (options.search) {
+    whereConditions.push(
+      or(
+        like(donation.title, `%${options.search}%`),
+        like(donation.description, `%${options.search}%`)
+      )
+    );
+  }
+  
+  const items = await db
+    .select()
+    .from(donation)
+    .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+    .orderBy(asc(donation.displayOrder), desc(donation.createdAt))
+    .limit(options.limit)
+    .offset(offset);
+    
+  const totalCount = await db
+    .select({ count: count() })
+    .from(donation)
+    .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+    
+  const totalPages = Math.ceil(totalCount[0].count / options.limit);
+  
+  return {
+    donation: items,
+    pagination: {
+      page: options.page,
+      limit: options.limit,
+      total: totalCount[0].count,
+      totalPages,
+    },
+  };
+}
+
+async getDonationById(id: string) {
+  const items = await db
+    .select()
+    .from(donation)
+    .where(eq(donation.id, id))
+    .limit(1);
+    
+  return items[0] || null;
+}
+
+async createDonation(data: InsertDonation) {
+  const id = uuidv4();
+  const newItem = {
+    id,
+    ...data,
+  };
+  
+  await db.insert(donation).values(newItem);
+  
+  return this.getDonationById(id);
+}
+
+async updateDonation(id: string, data: Partial<InsertDonation>) {
+  await db
+    .update(donation)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(donation.id, id));
+    
+  return this.getDonationById(id);
+}
+
+async deleteDonation(id: string) {
+  const result = await db
+    .delete(donation)
+    .where(eq(donation.id, id));
+    
+  // return result.rowCount > 0;
+  return Array.isArray(result) ? result.length > 0 : true;
+}
+
+async getActiveDonation() {
+  const items = await db
+    .select()
+    .from(donation)
+    .where(eq(donation.isActive, true))
+    .orderBy(asc(donation.displayOrder))
+    .limit(1);
+    
+  return items[0] || null;
+}
 }
 export const adminStorage = new AdminStorage();
