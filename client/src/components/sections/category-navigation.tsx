@@ -96,10 +96,18 @@ export default function CategoryNavigation() {
     //     </div>
     //   </div>
     // </section>
-    <section className="bg-gradient-to-r from-gray-50 to-white py-4 border-b border-gray-200 w-full relative z-0">
-      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-        <div className="flex justify-center space-x-8 sm:space-x-8 overflow-x-auto">
+    <section className="bg-gradient-to-r from-gray-50 to-white py-4 border-b border-gray-200 w-full">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6">
 
+        <div
+          className="
+        flex gap-4
+        overflow-x-auto
+        lg:overflow-visible
+        justify-start lg:justify-center
+        
+      "
+        >
           {icons.length === 0 ? (
             <p className="text-sm text-gray-500">
               No categories available. Updating soon.
@@ -108,48 +116,64 @@ export default function CategoryNavigation() {
             icons
               .filter((icon: any) => icon.isActive)
               .sort((a: any, b: any) => a.displayOrder - b.displayOrder)
-              .map((icon: any, index: number) => {
-                const bgClass =
-                  ICON_BG_COLORS[index % ICON_BG_COLORS.length];
-
-                return (
-                  <Link
-                    key={icon.id}
-                    href={`/all-ideas?category=${encodeURIComponent(icon.label)}`}
-                    className="flex flex-col items-center cursor-pointer group flex-shrink-0"
+              .map((icon: any, index: number) => (
+                <Link
+                  key={icon.id}
+                  href={`/all-ideas?category=${encodeURIComponent(icon.label)}`}
+                  className="
+                flex flex-col items-center
+                flex-shrink-0
+                min-w-[72px]
+                sm:min-w-[96px]
+                cursor-pointer
+                group
+              "
+                >
+                  {/* Icon */}
+                  <div
+                  //     className="
+                  //   w-12 h-12
+                  //   sm:w-14 sm:h-14
+                  //   md:w-16 md:h-16
+                  //   rounded-full
+                  //   bg-white
+                  //   border
+                  //   shadow-sm
+                  //   flex items-center justify-center
+                  //   group-hover:shadow-md
+                  //   group-hover:scale-105
+                  //   transition-all duration-300
+                  // "
                   >
-                    {/* Icon circle */}
-                    <div
-                    // className="w-14 h-14"
-                      // className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full
-                      // ${bgClass}
-                      // border flex items-center justify-center
-                      // shadow-md group-hover:shadow-lg
-                      // transition-all duration-300
-                      // group-hover:scale-105`}
-                    >
-                      {/* Flaticon Image */}
-                      <img
-                        src={icon.iconUrl}
-                        alt={icon.label}
-                        className="!w-14 !h-14 sm:w-9 sm:h-9 object-contain"
-                        loading="lazy"
-                      />
-                    </div>
+                    <img
+                      src={icon.iconUrl}
+                      alt={icon.label}
+                      className="!w-14 !h-14 sm:w-9 sm:h-9 object-contain"
+                      loading="lazy"
+                    />
+                  </div>
 
-                    {/* Label */}
-                    <span
-                      className="text-xs sm:text-sm font-medium text-gray-700
-                      text-center group-hover:text-blue-600 transition-colors duration-300"
-                    >
-                      {icon.label}
-                    </span>
-                  </Link>
-                );
-              })
+                  {/* Label */}
+                  <span
+                    className="
+                  mt-2
+                  text-[11px]
+                  sm:text-xs
+                  md:text-sm
+                  font-medium
+                  text-gray-700
+                  text-center
+                  group-hover:text-blue-600
+                  transition-colors
+                "
+                  >
+                    {icon.label}
+                  </span>
+                </Link>
+              ))
           )}
-
         </div>
+
       </div>
     </section>
 
