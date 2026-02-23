@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build:server": "tsc --project server/tsconfig.json",
-    "dev:server": "cross-env DOTENV_CONFIG_PATH=../deploy/.env NODE_ENV=development DATABASE_URL=\"postgresql://postgres:1234@localhost:5432/10000ideasnew\" nodemon -r dotenv/config dist/server/index.js",
+    "dev:server": "cross-env DOTENV_CONFIG_PATH=../deploy/.env NODE_ENV=development PORT=3001 DATABASE_URL=\"postgresql://postgres:1234@localhost:5432/10000ideasnew\" nodemon -r dotenv/config dist/server/index.js",
     "dev:client": "vite --config client/vite.config.ts",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build:client": "vite build --outDir ../dist/client",
@@ -125,6 +125,7 @@
     "@types/ws": "^8.5.13",
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
+    "baseline-browser-mapping": "^2.10.0",
     "concurrently": "^9.2.1",
     "cross-env": "^10.0.0",
     "drizzle-kit": "^0.30.4",

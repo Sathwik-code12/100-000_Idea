@@ -248,16 +248,17 @@ export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: M
   };
 
   const parseInvestment = (investment: any) => {
-    if (typeof investment === 'string') {
-      try {
-        const parsed = JSON.parse(investment);
-        return parsed.display || investment;
-      } catch (e) {
-        return investment;
-      }
+  if (!investment) return '₹0';  // ← handles null/undefined
+  if (typeof investment === 'string') {
+    try {
+      const parsed = JSON.parse(investment);
+      return parsed.display || investment;
+    } catch (e) {
+      return investment;
     }
-    return investment.display || '₹0';
-  };
+  }
+  return investment.display || '₹0';
+};
 
   return (
     <section className="pt-1 pb-0 bg-gray-50">

@@ -23,7 +23,7 @@ exports.default = (0, vite_1.defineConfig)({
     },
     server: {
         proxy: {
-            '/api': 'http://localhost:5000',
+            '/api': 'http://localhost:3001',
         },
     }
 });

@@ -70,7 +70,7 @@ export default function CategoryNavigation() {
   const { data: iconsData } = useQuery({
     queryKey: ["/api/admin/flat-icons"],
   });
-  const icons = iconsData?.icons || [];
+  const icons = (iconsData as any)?.icons || [];
   console.log("Fetched icons:", icons);
   return (
     // <section className="bg-gradient-to-r from-gray-50 to-white py-4 border-b border-gray-200 w-full relative z-0">

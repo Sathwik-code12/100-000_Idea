@@ -343,7 +343,7 @@ export function setupAuth(app: Express) {
   // Update the register endpoint
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { name, email, password } = req.body;
+      const { name, email, phone, password } = req.body;
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
@@ -357,6 +357,7 @@ export function setupAuth(app: Express) {
       const user = await storage.createUser({
         name,
         email,
+        phone,
         password: hashedPassword,
       });
 
@@ -520,4 +521,3 @@ export function setupAuth(app: Express) {
 function sendOtpEmail(email: any, otp: string) {
   throw new Error("Function not implemented.");
 }
-
