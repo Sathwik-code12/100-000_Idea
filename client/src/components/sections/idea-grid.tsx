@@ -67,10 +67,10 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
 
   return (
     <Link href={`/idea/${idea.id}`}>
-      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col w-full border border-gray-100">
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col w-full border border-gray-100">
 
         {/* ── Image Section ── */}
-        <div className="relative">
+        <div className="relative overflow-hidden rounded-t-2xl">
           <img
             src={idea.images?.[0] || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop"}
             alt={idea.title}
@@ -123,7 +123,7 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
                 <span className="truncate leading-none">{parseInvestment(idea.investment)}</span>
               </div>
               {/* Bubble tooltip */}
-              <div className="pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-48 bg-gray-950 text-white rounded-2xl shadow-2xl p-3.5 z-[60] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out border border-white/10">
+              <div className="pointer-events-none absolute bottom-[calc(100%+10px)] left-0 w-48 bg-gray-950 text-white rounded-2xl shadow-2xl p-3.5 z-[60] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out border border-white/10">
                 <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/10">
                   <div className="w-5 h-5 rounded-md bg-yellow-400/20 flex items-center justify-center flex-shrink-0">
                     <DollarSign className="w-3 h-3 text-yellow-400" />
@@ -141,7 +141,7 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
                   </div>
                 </div>
                 {/* Arrow pointing down */}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-950" />
+                <div className="absolute top-full left-4 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-950" />
               </div>
             </div>
 
@@ -180,7 +180,7 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
                 <span className="truncate leading-none">{idea.timeframe || "3-6 months"}</span>
               </div>
               {/* Bubble tooltip */}
-              <div className="pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-48 bg-gray-950 text-white rounded-2xl shadow-2xl p-3.5 z-[60] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out border border-white/10">
+              <div className="pointer-events-none absolute bottom-[calc(100%+10px)] right-0 w-48 bg-gray-950 text-white rounded-2xl shadow-2xl p-3.5 z-[60] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out border border-white/10">
                 <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/10">
                   <div className="w-5 h-5 rounded-md bg-yellow-400/20 flex items-center justify-center flex-shrink-0">
                     <Clock className="w-3 h-3 text-yellow-400" />
@@ -197,7 +197,7 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
                     <p className="text-[10px] text-gray-300 leading-relaxed">Shorter = quicker returns; longer = higher margins.</p>
                   </div>
                 </div>
-                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-950" />
+                <div className="absolute top-full right-4 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-950" />
               </div>
             </div>
 
