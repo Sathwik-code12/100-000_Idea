@@ -1,187 +1,6 @@
-// import { DollarSign, Star, TrendingUp, Clock, AlertCircle } from "lucide-react";
-// import { Link } from "wouter";
-// import { useState } from "react";
-// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// import { apiRequestWithPage } from "@/lib/queryClient";
-
-// interface IdeaCard {
-//   id: string;
-//   title: string;
-//   description: string;
-//   images: string[];
-//   category: string;
-//   difficulty: string;
-//   investment: {
-//     amount: number;
-//     currency: string;
-//     display: string;
-//     description: string;
-//   };
-//   timeframe: string;
-//   tags: string[];
-//   rating?: number;
-//   marketScore?: number;
-//   painPointScore?: number;
-//   timingScore?: number;
-// }
-
-// interface MainContentLayoutProps {
-//   ideas: IdeaCard[];
-//   isSearchActive: boolean;
-//   totalDefaultIdeas: number;
-// }
-
-// export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: MainContentLayoutProps) {
-//   const [usersPagination, setUsersPagination] = useState<any>({
-//     page: 1,
-//     limit: 10,
-//     total: 0,
-//     totalPages: 0,
-//   });
-//   const [usersLoading, setUsersLoading] = useState(false);
-//   const [usersError, setUsersError] = useState<string | null>(null);
-
-//   const getDifficultyColor = (difficulty: string) => {
-//     switch (difficulty?.toLowerCase()) {
-//       case 'easy': return 'bg-green-100 text-green-800';
-//       case 'medium': return 'bg-yellow-100 text-yellow-800';
-//       case 'hard': return 'bg-red-100 text-red-800';
-//       default: return 'bg-gray-100 text-gray-800';
-//     }
-//   };
-
-//   const getInvestmentColor = (investment: string) => {
-//     if (investment.includes('L')) return 'bg-green-500 text-white';
-//     if (investment.includes('Cr')) return 'bg-purple-500 text-white';
-//     if (investment.includes('M')) return 'bg-blue-500 text-white';
-//     return 'bg-purple-500 text-white';
-//   };
-
-//   const parseCategory = (category: string) => {
-//     try {
-//       const parsed = JSON.parse(category);
-//       return Array.isArray(parsed) ? parsed.join(', ') : category;
-//     } catch (e) {
-//       return category;
-//     }
-//   };
-
-//   const parseInvestment = (investment: any) => {
-//     if (typeof investment === 'string') {
-//       try {
-//         const parsed = JSON.parse(investment);
-//         return parsed.display || investment;
-//       } catch (e) {
-//         return investment;
-//       }
-//     }
-//     return investment.display || '₹0';
-//   };
-
-//   return (
-//     <section className="pt-4 pb-0 bg-gray-50">
-//       <div className="w-full">
-//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-//           {ideas?.map((idea) => (
-//             <Link key={idea.id} href={`/idea/${idea.id}`}>
-//               <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer flex flex-col min-h-[500px]">
-//                 <div className="relative">
-//                   <img
-//                     src={idea.images?.[0] || '/placeholder-image.jpg'}
-//                     alt={idea.title}
-//                     className="w-full h-56 object-cover"
-//                   />
-//                   <div className="absolute top-3 left-3">
-//                     <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getInvestmentColor(parseInvestment(idea.investment))}`}>
-//                       {parseInvestment(idea.investment)}
-//                     </span>
-//                   </div>
-//                   <div className="absolute top-3 right-3">
-//                     <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(idea.difficulty || 'Medium')}`}>
-//                       {idea.difficulty || 'Medium'}
-//                     </span>
-//                   </div>
-//                 </div>
-
-//                 <div className="p-4 sm:p-5 lg:p-6 flex flex-col flex-grow">
-//                   <div className="flex items-center justify-between mb-3">
-//                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-//                       {parseCategory(idea.category)}
-//                     </span>
-//                     <div className="flex items-center">
-//                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
-//                       <span className="text-sm text-gray-600 ml-1">{idea.rating || '4.0'}</span>
-//                     </div>
-//                   </div>
-
-//                   <h3 className="font-bold text-lg sm:text-xl text-gray-900 mb-3 line-clamp-2 leading-tight">
-//                     {idea.title}
-//                   </h3>
-
-//                   <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
-//                     {idea.description}
-//                   </p>
-
-//                   <div className="flex flex-wrap gap-2 mb-4">
-//                     {idea.tags?.map((tag, index) => (
-//                       <span
-//                         key={index}
-//                         className="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1.5 rounded-full font-medium"
-//                       >
-//                         {tag}
-//                       </span>
-//                     ))}
-//                   </div>
-
-//                   {/* Scores - Only show if they exist */}
-//                   {(idea.marketScore || idea.painPointScore || idea.timingScore) && (
-//                     <div className="flex items-center gap-4 mb-3 text-xs">
-//                       {idea.marketScore && (
-//                         <div className="flex items-center gap-1">
-//                           <TrendingUp className="w-3 h-3 text-blue-600" />
-//                           <span className="font-medium">{idea.marketScore}</span>
-//                         </div>
-//                       )}
-//                       {idea.painPointScore && (
-//                         <div className="flex items-center gap-1">
-//                           <AlertCircle className="w-3 h-3 text-red-600" />
-//                           <span className="font-medium">{idea.painPointScore}</span>
-//                         </div>
-//                       )}
-//                       {idea.timingScore && (
-//                         <div className="flex items-center gap-1">
-//                           <Clock className="w-3 h-3 text-green-600" />
-//                           <span className="font-medium">{idea.timingScore}</span>
-//                         </div>
-//                       )}
-//                     </div>
-//                   )}
-
-//                   <div className="mt-auto space-y-3 text-sm text-gray-600">
-//                     <div className="flex items-center">
-//                       <TrendingUp className="w-4 h-4 mr-2 text-green-500" />
-//                       <span>{idea.profitability || 'High profitability'}</span>
-//                     </div>
-//                     <div className="flex items-center">
-//                       <Clock className="w-4 h-4 mr-2 text-blue-500" />
-//                       <span>Time to market: {idea.timeframe || '6 months'}</span>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </Link>
-//           ))}
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-import { DollarSign, Star, TrendingUp, Clock, AlertCircle } from "lucide-react";
+import { Lightbulb, Heart, MessageCircle, MoreHorizontal, Clock, Star, DollarSign, ChevronUp } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequestWithPage } from "@/lib/queryClient";
 
 interface IdeaCard {
   id: string;
@@ -190,19 +9,16 @@ interface IdeaCard {
   images: string[];
   category: string;
   difficulty: string;
-  investment: {
-    amount: number;
-    currency: string;
-    display: string;
-    description: string;
-  };
+  investment: any;
   timeframe: string;
   tags: string[];
   rating?: number;
   marketScore?: number;
-  painPointScore?: number;
-  timingScore?: number;
+  reviewCount?: number;
   profitability?: string;
+  skills?: string;
+  machinery?: string;
+  location?: string;
 }
 
 interface MainContentLayoutProps {
@@ -211,164 +27,230 @@ interface MainContentLayoutProps {
   totalDefaultIdeas: number;
 }
 
-export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: MainContentLayoutProps) {
-  const [usersPagination, setUsersPagination] = useState<any>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
-  const [usersLoading, setUsersLoading] = useState(false);
-  const [usersError, setUsersError] = useState<string | null>(null);
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty?.toLowerCase()) {
-      case 'easy': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'hard': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getInvestmentColor = (investment: any) => {
-    const display = typeof investment === 'string' ? investment : investment.display || '';
-    if (display.includes('L')) return 'bg-green-500 text-white';
-    if (display.includes('Cr')) return 'bg-purple-500 text-white';
-    if (display.includes('M')) return 'bg-blue-500 text-white';
-    return 'bg-purple-500 text-white';
-  };
-
-  const parseCategory = (category: string) => {
-    try {
-      const parsed = JSON.parse(category);
-      return Array.isArray(parsed) ? parsed.join(', ') : category;
-    } catch (e) {
-      return category;
-    }
-  };
-
-  const parseInvestment = (investment: any) => {
-  if (!investment) return '₹0';  // ← handles null/undefined
-  if (typeof investment === 'string') {
-    try {
-      const parsed = JSON.parse(investment);
-      return parsed.display || investment;
-    } catch (e) {
-      return investment;
-    }
+// ─── Difficulty badge color helper ───
+function getDifficultyStyle(difficulty: string): { bg: string; text: string } {
+  switch (difficulty?.toLowerCase()) {
+    case "easy": return { bg: "bg-green-500", text: "EASY" };
+    case "medium": return { bg: "bg-orange-400", text: "MEDIUM" };
+    case "hard": return { bg: "bg-red-500", text: "HARD" };
+    default: return { bg: "bg-gray-400", text: difficulty?.toUpperCase() || "N/A" };
   }
-  return investment.display || '₹0';
-};
+}
+
+// ─── Shared card renderer (used on home + grid pages) ───
+export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number }) {
+  const [liked, setLiked] = useState(false);
+
+  const parseCategory = (cat: string) => {
+    try {
+      const p = JSON.parse(cat);
+      return Array.isArray(p) ? p[0] : cat;
+    } catch { return cat; }
+  };
+
+  const parseInvestment = (inv: any): string => {
+    if (!inv) return "₹1-5 Lakhs";
+    if (typeof inv === "string") {
+      try { const p = JSON.parse(inv); return p.display || inv; } catch { return inv; }
+    }
+    return inv.display || "₹1-5 Lakhs";
+  };
+
+  const views = Math.floor(Math.random() * 150 + 10);
+  const isIdeaOfDay = index === 0;
+  const diffStyle = getDifficultyStyle(idea.difficulty);
+
+  // Parse skills count from tags or default
+  const skillsCount = idea.tags?.length
+    ? `${Math.min(idea.tags.length, 3)}-${Math.min(idea.tags.length + 2, 5)} Skills`
+    : "3-5 Skills";
 
   return (
-    <section className="pt-1 pb-0 bg-gray-50">
-      <div className="w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {ideas?.map((idea) => (
-            <Link key={idea.id} href={`/idea/${idea.id}`}>
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col">
-                
-                {/* --- Image Section --- */}
-                <div className="relative">
-                  <img
-                    src={idea.images?.[0] || '/placeholder-image.jpg'}
-                    alt={idea.title}
-                    className="w-full h-60 object-cover"
-                  />
+    <Link href={`/idea/${idea.id}`}>
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col w-full border border-gray-100">
 
-                  {/* Top-left: Investment badge */}
-                  <div className="absolute top-3 left-3 bg-yellow-400 text-black text-sm font-semibold px-3 py-1 rounded-lg shadow-sm">
-                    {parseInvestment(idea.investment)}
-                  </div>
+        {/* ── Image Section ── */}
+        <div className="relative">
+          <img
+            src={idea.images?.[0] || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop"}
+            alt={idea.title}
+            className="w-full h-52 object-cover"
+          />
 
-                  {/* Top-right: Difficulty badge */}
-                  <div className="absolute top-3 right-3 bg-blue-900 text-white text-xs px-3 py-1 rounded-md font-medium">
-                    {idea.difficulty || 'Medium'}
-                  </div>
-                </div>
+          {/* Investment badge — top left, yellow rounded */}
+          <div className="absolute top-3 left-3 bg-yellow-400 text-black text-xs font-bold px-3 py-1.5 rounded-lg shadow">
+            {parseInvestment(idea.investment)}
+          </div>
 
-                {/* --- Content Area --- */}
-                <div className="p-5 flex flex-col flex-grow bg-white">
-                  {/* Category & Rating Row */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <p className="text-xs text-gray-600 uppercase tracking-wide font-semibold">
-                        {parseCategory(idea.category)}
-                      </p>
-                    </div>
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm text-gray-700 font-medium">
-                        {idea.rating || '4.0'}
-                      </span>
-                    </div>
-                  </div>
+          {/* Difficulty badge — top right, colored */}
+          <div className={`absolute top-3 right-3 ${diffStyle.bg} text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow`}>
+            {diffStyle.text}
+          </div>
 
-                  {/* Title */}
-                  <h3 className="text-lg font-bold text-black mb-3 leading-tight">
-                    {idea.title}
-                  </h3>
+          {/* Idea of the Day pill — overlapping bottom of image */}
+          {isIdeaOfDay && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap">
+              Idea of the Day
+            </div>
+          )}
+        </div>
 
-                  {/* Icon Row (Skills, Months, Machinery, Location) */}
-                  <div className="grid grid-cols-4 text-center mb-4 text-xs text-gray-600">
-                    <div className="flex flex-col items-center">
-                      <Star className="w-4 h-4 text-blue-700 mb-1" />
-                      <span>3–5 Skills</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <Clock className="w-4 h-4 text-green-700 mb-1" />
-                      <span>{idea.timeframe || '6 months'}</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <TrendingUp className="w-4 h-4 text-purple-700 mb-1" />
-                      <span>Machinery</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <AlertCircle className="w-4 h-4 text-yellow-700 mb-1" />
-                      <span>Location</span>
-                    </div>
-                  </div>
+        {/* ── Content Section ── */}
+        <div className="px-4 pt-4 pb-3 flex flex-col flex-grow">
 
-                  {/* Description */}
-                  <p className="text-gray-700 text-sm mb-3 line-clamp-3">
-                    {idea.description}
-                  </p>
+          {/* Category */}
+          <p className="text-xs text-orange-500 font-semibold mb-1 uppercase tracking-wide">
+            {parseCategory(idea.category)}
+          </p>
 
-                  {/* Investment / Market Growth / Time to Market */}
-                  <div className="grid grid-cols-2 gap-2 text-center mb-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl py-2 text-sm font-semibold text-blue-900">
-                      {parseInvestment(idea.investment)}
-                      <p className="text-xs font-normal">Investment Required</p>
-                    </div>
-                    <div className="bg-green-50 border border-green-200 rounded-xl py-2 text-sm font-semibold text-green-900">
-                      {idea.marketScore ? `${idea.marketScore}% CAGR` : '9.12% CAGR'}
-                      <p className="text-xs font-normal">Market Growth</p>
-                    </div>
-                    <div className="bg-purple-50 border border-purple-200 rounded-xl py-2 text-sm font-semibold text-purple-900 col-span-2">
-                      {idea.timeframe || '6 months'}
-                      <p className="text-xs font-normal">Time to Market</p>
-                    </div>
-                  </div>
+          {/* Title */}
+          <h3 className="text-base font-bold text-gray-900 mb-2 leading-snug line-clamp-2">
+            {idea.title}
+          </h3>
 
-                  {/* Download Report Button (below everything, not on image) */}
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-                    <button className="w-full sm:w-auto bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-semibold">
-                      Ask Expert
-                    </button>
-                    <button className="w-full sm:w-auto bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-semibold">
-                      Share
-                    </button>
-                  </div>
+          {/* Description */}
+          <p className="text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2 flex-grow">
+            {idea.description}
+          </p>
 
-                  {/* Below content: Download Detailed Report & Business Plan */}
-                  <div className="mt-4 text-center border-t border-gray-200 pt-3">
-                    <button className="w-full bg-yellow-400 text-black font-bold py-3 rounded-lg text-sm hover:bg-yellow-500 transition">
-                      Download Detailed Report & Business Plan
-                    </button>
-                  </div>
-                </div>
+          {/* ── Metadata Row: Investment / Skills / Time ── */}
+          <div className="flex items-center gap-2 mb-3 border-t border-gray-100 pt-3">
+
+            {/* ── Investment pill ── */}
+            <div className="group relative flex-1">
+              <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
+                <DollarSign className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate leading-none">{parseInvestment(idea.investment)}</span>
               </div>
-            </Link>
+              {/* Bubble tooltip */}
+              <div className="pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-48 bg-gray-950 text-white rounded-2xl shadow-2xl p-3.5 z-[60] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out border border-white/10">
+                <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/10">
+                  <div className="w-5 h-5 rounded-md bg-yellow-400/20 flex items-center justify-center flex-shrink-0">
+                    <DollarSign className="w-3 h-3 text-yellow-400" />
+                  </div>
+                  <span className="text-[11px] font-black text-yellow-400 tracking-wide uppercase">Investment</span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-yellow-500 text-[10px] leading-tight mt-0.5 flex-shrink-0">▸</span>
+                    <p className="text-[10px] text-gray-300 leading-relaxed">Capital needed to launch this idea from scratch.</p>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-yellow-500 text-[10px] leading-tight mt-0.5 flex-shrink-0">▸</span>
+                    <p className="text-[10px] text-gray-300 leading-relaxed">Covers setup, equipment & working capital.</p>
+                  </div>
+                </div>
+                {/* Arrow pointing down */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-950" />
+              </div>
+            </div>
+
+            {/* ── Skills pill ── */}
+            <div className="group relative flex-1">
+              <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
+                <Star className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate leading-none">{skillsCount}</span>
+              </div>
+              {/* Bubble tooltip */}
+              <div className="pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-48 bg-gray-950 text-white rounded-2xl shadow-2xl p-3.5 z-[60] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out border border-white/10">
+                <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/10">
+                  <div className="w-5 h-5 rounded-md bg-yellow-400/20 flex items-center justify-center flex-shrink-0">
+                    <Star className="w-3 h-3 text-yellow-400" />
+                  </div>
+                  <span className="text-[11px] font-black text-yellow-400 tracking-wide uppercase">Skills Needed</span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-yellow-500 text-[10px] leading-tight mt-0.5 flex-shrink-0">▸</span>
+                    <p className="text-[10px] text-gray-300 leading-relaxed">Distinct skill sets required to run this business.</p>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-yellow-500 text-[10px] leading-tight mt-0.5 flex-shrink-0">▸</span>
+                    <p className="text-[10px] text-gray-300 leading-relaxed">Fewer skills = solo-friendly; more may need a team.</p>
+                  </div>
+                </div>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-950" />
+              </div>
+            </div>
+
+            {/* ── Time pill ── */}
+            <div className="group relative flex-1">
+              <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
+                <Clock className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate leading-none">{idea.timeframe || "3-6 months"}</span>
+              </div>
+              {/* Bubble tooltip */}
+              <div className="pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-48 bg-gray-950 text-white rounded-2xl shadow-2xl p-3.5 z-[60] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out border border-white/10">
+                <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/10">
+                  <div className="w-5 h-5 rounded-md bg-yellow-400/20 flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-3 h-3 text-yellow-400" />
+                  </div>
+                  <span className="text-[11px] font-black text-yellow-400 tracking-wide uppercase">Time to Launch</span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-yellow-500 text-[10px] leading-tight mt-0.5 flex-shrink-0">▸</span>
+                    <p className="text-[10px] text-gray-300 leading-relaxed">Time from planning to your first live operation.</p>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-yellow-500 text-[10px] leading-tight mt-0.5 flex-shrink-0">▸</span>
+                    <p className="text-[10px] text-gray-300 leading-relaxed">Shorter = quicker returns; longer = higher margins.</p>
+                  </div>
+                </div>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-950" />
+              </div>
+            </div>
+
+          </div>
+
+          {/* ── Action Bar ── */}
+          <div className="flex items-center gap-2 border-t border-gray-100 pt-3">
+            {/* Bulb count pill */}
+            <div className="flex items-center gap-1.5 bg-yellow-400 text-black text-xs font-bold px-3 py-1.5 rounded-full">
+              <Lightbulb className="w-3.5 h-3.5" />
+              <span>{views}</span>
+            </div>
+
+            <div className="flex-1" />
+
+            {/* Like */}
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setLiked(!liked); }}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 border ${liked ? "bg-blue-600 border-blue-600" : "bg-white border-gray-200 hover:bg-gray-50"}`}
+            >
+              <Heart className={`w-4 h-4 ${liked ? "fill-white text-white" : "text-gray-400"}`} />
+            </button>
+
+            {/* Comment */}
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className="w-9 h-9 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <MessageCircle className="w-4 h-4 text-gray-400" />
+            </button>
+
+            {/* More */}
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className="w-9 h-9 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <MoreHorizontal className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ─── Grid wrapper ───
+export default function IdeaGrid({ ideas, isSearchActive, totalDefaultIdeas }: MainContentLayoutProps) {
+  return (
+    <section className="pt-2 pb-0 bg-gray-50">
+      <div className="w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          {ideas?.map((idea, index) => (
+            <IdeaCardItem key={idea.id} idea={idea} index={index} />
           ))}
         </div>
       </div>

@@ -1,61 +1,21 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Search, Lightbulb, MoreVertical, Edit, Trash2, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Badge } from "@/components/ui/badge";
+import { Lightbulb, Tag, User, Briefcase } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import Header from "@/components/layout/header";
 import NewFooter from "@/components/sections/new-footer";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-
-const categorySubcategories: Record<string, string[]> = {
-  Technology: ["AI/ML", "SaaS", "Mobile App", "Web Platform", "IoT", "Blockchain"],
-  Healthcare: ["Diagnostics", "Telemedicine", "MedTech", "Mental Health"],
-  Education: ["EdTech", "eLearning", "Skill Development", "Regional Language"],
-  Finance: ["FinTech", "Micro-Lending", "Insurance", "Crypto"],
-  Sustainability: ["Green Energy", "Waste Management", "Carbon Credits"],
-  "E-Commerce": ["B2B", "B2C", "Marketplace", "D2C"],
-  "Social Impact": ["NGO Tech", "Rural Development", "Women Empowerment"],
-  "Food & Beverage": ["Cloud Kitchen", "AgriFood", "Health Food"],
-  Agriculture: ["Smart Farming", "AgriTech", "Supply Chain"],
-  Automotive: ["EV", "Fleet Management", "Auto Parts"],
-  Fashion: ["Sustainable Fashion", "Fast Fashion", "Luxury"],
-};
-
-const knowledgeLevels = ["Beginner", "Intermediate", "Advanced", "Expert"];
-const experienceLevels = ["0–1 year", "1–3 years", "3–5 years", "5+ years"];
-const availableTags = [
-  "New Tech", "AI/ML", "Mobile App", "Web Platform", "IoT",
-  "Sustainability", "Social Impact", "B2B", "B2C", "SaaS",
-  "Marketplace", "Analytics", "Automation", "Blockchain",
-];
 
 const ideaSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -72,20 +32,34 @@ const ideaSchema = z.object({
 
 type IdeaFormData = z.infer<typeof ideaSchema>;
 
+const categorySubcategories = {
+  "Technology": ["Software Development", "Mobile Apps", "AI/ML", "Cybersecurity", "IoT", "Blockchain"],
+  "Healthcare": ["Telemedicine", "Medical Devices", "Health Apps", "Pharmaceuticals", "Mental Health", "Fitness"],
+  "Finance": ["Fintech", "Banking", "Insurance", "Investment", "Cryptocurrency", "Payment Solutions"],
+  "Education": ["E-learning", "EdTech", "Online Courses", "Skill Development", "Educational Games", "Language Learning"],
+  "Retail": ["E-commerce", "Fashion", "Food & Beverage", "Consumer Goods", "Marketplace", "Subscription Services"],
+  "Entertainment": ["Gaming", "Streaming", "Music", "Content Creation", "Social Media", "Events"],
+  "Environment": ["Green Energy", "Sustainability", "Recycling", "Clean Tech", "Environmental Monitoring", "Carbon Solutions"],
+  "Transportation": ["Logistics", "Delivery", "Ride Sharing", "Public Transport", "Electric Vehicles", "Travel"],
+};
+
+const availableTags = [
+  "New Tech", "AI/ML", "Mobile App", "Web Platform", "IoT",
+  "Sustainability", "Social Impact", "B2B", "B2C", "SaaS",
+  "Marketplace", "Analytics", "Automation", "Blockchain"
+];
+
+const knowledgeLevels = ["Beginner", "Intermediate", "Advanced", "Expert"];
+const experienceLevels = ["No Experience", "Some Experience", "Experienced", "Very Experienced"];
+
 export default function SubmitIdea() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deletingIdea, setDeletingIdea] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<"published" | "draft" | "archived">("published");
-  const [showForm, setShowForm] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const categories = Object.keys(categorySubcategories);
-
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IdeaFormData>({
+  const form = useForm<IdeaFormData>({
     resolver: zodResolver(ideaSchema),
     defaultValues: {
       name: user?.name || "",
@@ -101,471 +75,282 @@ export default function SubmitIdea() {
     },
   });
 
-  const watchCategory = watch("category");
-
-  // Fetch user's submitted ideas
-  const { data: ideasData, isLoading } = useQuery({
-    queryKey: ["/api/user/submitted-ideas"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/user/submitted-ideas");
-      return response.json();
-    },
-    enabled: !!user,
-  });
-
-  const ideas = ideasData?.ideas || [];
-
-  // Submit mutation
   const submitIdeaMutation = useMutation({
     mutationFn: async (data: IdeaFormData & { tags: string[] }) => {
       const response = await apiRequest("POST", "/api/submit-idea", data);
       return response.json();
     },
     onSuccess: () => {
-      reset();
+      form.reset();
       setSelectedTags([]);
       setSelectedCategory("");
-      setShowForm(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/user/submitted-ideas"] });
+      setSubmitted(true);
       toast({ title: "Success!", description: "Your idea has been submitted successfully." });
     },
     onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to submit idea.", variant: "destructive" });
+      toast({ title: "Error", description: error.message || "Failed to submit idea. Please try again.", variant: "destructive" });
     },
   });
-
-  // Delete mutation
-  const deleteIdeaMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await apiRequest("DELETE", `/api/user/submitted-ideas/${id}`);
-      return response.json();
-    },
-    onSuccess: () => {
-      setIsDeleteModalOpen(false);
-      setDeletingIdea(null);
-      queryClient.invalidateQueries({ queryKey: ["/api/user/submitted-ideas"] });
-      toast({ title: "Deleted", description: "Your idea has been deleted." });
-    },
-    onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to delete idea.", variant: "destructive" });
-    },
-  });
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
 
   const onSubmit = (data: IdeaFormData) => {
     submitIdeaMutation.mutate({ ...data, tags: selectedTags });
   };
 
-  const filteredIdeas = ideas.filter((idea: any) => {
-    const matchesTab =
-      (activeTab === "published" && (idea.status === "approved" || idea.status === "pending")) ||
-      (activeTab === "draft" && idea.status === "draft") ||
-      (activeTab === "archived" && idea.status === "rejected");
-    const matchesSearch =
-      idea.ideaTitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      idea.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
-
-  const getStatusBadge = (status: string) => {
-    const map: Record<string, { label: string; className: string }> = {
-      pending: { label: "Pending", className: "bg-yellow-100 text-yellow-800" },
-      approved: { label: "Published", className: "bg-green-100 text-green-800" },
-      rejected: { label: "Archived", className: "bg-red-100 text-red-800" },
-      draft: { label: "Draft", className: "bg-gray-100 text-gray-800" },
-    };
-    const config = map[status] || map.pending;
-    return (
-      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${config.className}`}>
-        {config.label}
-      </span>
-    );
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
   };
+
+  const categories = Object.keys(categorySubcategories);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      {/* Page Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-yellow-100 flex items-center justify-center">
-              <Lightbulb className="h-5 w-5 text-yellow-600" />
-            </div>
-            <div>
-              <h1 className="font-bold text-xl text-gray-900 leading-tight">Submit an Idea</h1>
-              <p className="text-xs text-gray-500">Share your innovative business idea with the community</p>
-            </div>
+      {/* Hero Banner */}
+      <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 py-10 px-4 text-center">
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <Lightbulb className="h-5 w-5 text-white" />
           </div>
-          <Button
-            size="sm"
-            className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold text-xs h-8 gap-1.5"
-            onClick={() => setShowForm((v) => !v)}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Upload Idea
-          </Button>
+          <h1 className="text-3xl font-bold text-white">Submit Your Business Idea</h1>
         </div>
-
-        {/* Search + Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search your ideas..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 text-sm bg-gray-50 border-gray-200"
-              />
-            </div>
-            <div className="flex gap-2">
-              {(["published", "draft", "archived"] as const).map((tab) => (
-                <Button
-                  key={tab}
-                  size="sm"
-                  variant={activeTab === tab ? "default" : "ghost"}
-                  onClick={() => setActiveTab(tab)}
-                  className={activeTab === tab ? "bg-yellow-500 hover:bg-yellow-600 text-white capitalize" : "text-gray-600 capitalize"}
-                >
-                  {tab}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <p className="text-yellow-900/80 text-sm max-w-xl mx-auto">
+          Share your innovative business idea with our community of entrepreneurs and investors
+        </p>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-
-        {/* Inline Form */}
-        {showForm && (
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-8">
-            <div>
-              <h2 className="font-bold text-lg text-gray-900">Upload New Idea</h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Fill out the details below to make your idea compelling and discoverable.
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        {submitted ? (
+          <Card className="border-0 shadow-lg text-center py-16">
+            <CardContent>
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lightbulb className="h-8 w-8 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Idea Submitted!</h2>
+              <p className="text-gray-600 mb-6">Thank you for sharing your idea. Our team will review it shortly.</p>
+              <Button onClick={() => setSubmitted(false)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-8">
+                Submit Another Idea
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
               {/* Basic Information */}
-              <section>
-                <h3 className="font-semibold text-sm text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  Basic Information
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-xs font-semibold text-gray-700">
-                      Idea Title <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      placeholder="Enter a compelling title for your idea"
-                      className="mt-1.5 h-9 text-sm"
-                      {...register("ideaTitle")}
-                    />
-                    {errors.ideaTitle && <p className="text-xs text-red-500 mt-1">{errors.ideaTitle.message}</p>}
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-5 pb-3 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <Lightbulb className="h-4 w-4 text-yellow-600" />
+                    </div>
+                    <h2 className="text-lg font-bold text-gray-900">Basic Information</h2>
                   </div>
+                  <div className="space-y-4">
+                    <FormField control={form.control} name="ideaTitle" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Idea Title *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter a compelling title for your idea" className="border-gray-200 focus:border-yellow-400 focus:ring-yellow-400" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
 
-                  <div>
-                    <Label className="text-xs font-semibold text-gray-700">
-                      Category <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      onValueChange={(v) => {
-                        setValue("category", v);
-                        setValue("subcategory", "");
-                        setSelectedCategory(v);
-                      }}
-                    >
-                      <SelectTrigger className="mt-1.5 h-9 text-sm">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat} className="text-sm">{cat}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.category && <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>}
-                  </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField control={form.control} name="category" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700 font-medium">Category *</FormLabel>
+                          <Select onValueChange={(value) => { field.onChange(value); setSelectedCategory(value); form.setValue("subcategory", ""); }} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="border-gray-200 focus:border-yellow-400">
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                  <div>
-                    <Label className="text-xs font-semibold text-gray-700">
-                      Subcategory <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      onValueChange={(v) => setValue("subcategory", v)}
-                      disabled={!watchCategory}
-                    >
-                      <SelectTrigger className="mt-1.5 h-9 text-sm">
-                        <SelectValue placeholder={watchCategory ? "Select subcategory" : "Select category first"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(categorySubcategories[watchCategory] || []).map((sub) => (
-                          <SelectItem key={sub} value={sub} className="text-sm">{sub}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.subcategory && <p className="text-xs text-red-500 mt-1">{errors.subcategory.message}</p>}
-                  </div>
+                      <FormField control={form.control} name="subcategory" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700 font-medium">Subcategory *</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
+                            <FormControl>
+                              <SelectTrigger className="border-gray-200 focus:border-yellow-400">
+                                <SelectValue placeholder={selectedCategory ? "Choose subcategory" : "Select category first"} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {selectedCategory && categorySubcategories[selectedCategory as keyof typeof categorySubcategories]?.map((sub) => (
+                                <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
 
-                  <div>
-                    <Label className="text-xs font-semibold text-gray-700">
-                      Description <span className="text-red-500">*</span>
-                    </Label>
-                    <Textarea
-                      placeholder="Describe your idea in detail..."
-                      className="mt-1.5 text-sm min-h-[100px] resize-none"
-                      {...register("description")}
-                    />
-                    {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
+                    <FormField control={form.control} name="description" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Description *</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Describe your idea in detail — what problem it solves, who it's for, and why it's unique..." className="min-h-[140px] resize-none border-gray-200 focus:border-yellow-400" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
                   </div>
-                </div>
-              </section>
+                </CardContent>
+              </Card>
 
               {/* Contact Information */}
-              <section>
-                <h3 className="font-semibold text-sm text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  Contact Information
-                </h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs font-semibold text-gray-700">
-                        Name <span className="text-red-500">*</span>
-                      </Label>
-                      <Input placeholder="Your full name" className="mt-1.5 h-9 text-sm" {...register("name")} />
-                      {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-5 pb-3 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <User className="h-4 w-4 text-blue-600" />
                     </div>
-                    <div>
-                      <Label className="text-xs font-semibold text-gray-700">
-                        Email <span className="text-red-500">*</span>
-                      </Label>
-                      <Input type="email" placeholder="your.email@example.com" className="mt-1.5 h-9 text-sm" {...register("email")} />
-                      {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
-                    </div>
+                    <h2 className="text-lg font-bold text-gray-900">Contact Information</h2>
                   </div>
-                  <div className="sm:w-1/2">
-                    <Label className="text-xs font-semibold text-gray-700">
-                      Phone Number <span className="text-red-500">*</span>
-                    </Label>
-                    <Input type="tel" placeholder="1234567890" className="mt-1.5 h-9 text-sm" {...register("phone")} />
-                    {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <FormField control={form.control} name="name" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Full Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your full name" className="border-gray-200" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="email" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Email *</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="your@email.com" className="border-gray-200" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="phone" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Phone *</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="1234567890" className="border-gray-200" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
                   </div>
-                </div>
-              </section>
+                </CardContent>
+              </Card>
 
               {/* Business Details */}
-              <section>
-                <h3 className="font-semibold text-sm text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  Business Details
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-xs font-semibold text-gray-700">
-                      Knowledge Level <span className="text-red-500">*</span>
-                    </Label>
-                    <Select onValueChange={(v) => setValue("knowledge", v)}>
-                      <SelectTrigger className="mt-1.5 h-9 text-sm">
-                        <SelectValue placeholder="Select knowledge level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {knowledgeLevels.map((l) => (
-                          <SelectItem key={l} value={l} className="text-sm">{l}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.knowledge && <p className="text-xs text-red-500 mt-1">{errors.knowledge.message}</p>}
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-5 pb-3 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Briefcase className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <h2 className="text-lg font-bold text-gray-900">Business Details</h2>
                   </div>
-                  <div>
-                    <Label className="text-xs font-semibold text-gray-700">
-                      Experience Level <span className="text-red-500">*</span>
-                    </Label>
-                    <Select onValueChange={(v) => setValue("experience", v)}>
-                      <SelectTrigger className="mt-1.5 h-9 text-sm">
-                        <SelectValue placeholder="Select experience level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {experienceLevels.map((l) => (
-                          <SelectItem key={l} value={l} className="text-sm">{l}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.experience && <p className="text-xs text-red-500 mt-1">{errors.experience.message}</p>}
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <FormField control={form.control} name="knowledge" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Knowledge Level *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="border-gray-200">
+                              <SelectValue placeholder="Select knowledge level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {knowledgeLevels.map((l) => (<SelectItem key={l} value={l}>{l}</SelectItem>))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="experience" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Experience Level *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="border-gray-200">
+                              <SelectValue placeholder="Select experience level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {experienceLevels.map((l) => (<SelectItem key={l} value={l}>{l}</SelectItem>))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
                   </div>
-                </div>
-              </section>
+                  <FormField control={form.control} name="operations" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">Operations <span className="text-gray-400 font-normal">(Optional)</span></FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Describe your planned operations and implementation strategy..." className="min-h-[100px] resize-none border-gray-200" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </CardContent>
+              </Card>
 
               {/* Tags */}
-              <section>
-                <h3 className="font-semibold text-sm text-gray-900 mb-1 pb-2 border-b border-gray-200">
-                  Tags <span className="text-gray-400 font-normal">(Optional)</span>
-                </h3>
-                <p className="text-xs text-gray-500 mb-3">Click to select tags that describe your idea</p>
-                <div className="flex flex-wrap gap-2">
-                  {availableTags.map((tag) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => toggleTag(tag)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                        selectedTags.includes(tag)
-                          ? "bg-yellow-500 text-white border-yellow-500"
-                          : "bg-gray-50 text-gray-700 border-gray-200 hover:border-yellow-400 hover:text-yellow-600"
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              </section>
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-5 pb-3 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Tag className="h-4 w-4 text-green-600" />
+                    </div>
+                    <h2 className="text-lg font-bold text-gray-900">Tags <span className="text-gray-400 text-sm font-normal">(Optional)</span></h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {availableTags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant={selectedTags.includes(tag) ? "default" : "outline"}
+                        className={`cursor-pointer transition-all text-sm px-3 py-1 ${selectedTags.includes(tag) ? 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600' : 'bg-white text-gray-600 border-gray-300 hover:border-yellow-400 hover:text-yellow-600'}`}
+                        onClick={() => handleTagToggle(tag)}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* Operations */}
-              <section>
-                <h3 className="font-semibold text-sm text-gray-900 mb-1 pb-2 border-b border-gray-200">
-                  Operations <span className="text-gray-400 font-normal">(Optional)</span>
-                </h3>
-                <Textarea
-                  placeholder="Describe your planned operations and implementation strategy..."
-                  className="mt-3 text-sm min-h-[90px] resize-none"
-                  {...register("operations")}
-                />
-              </section>
-
-              {/* Buttons */}
-              <div className="flex items-center gap-3 pt-2">
+              {/* Submit Button */}
+              <div className="flex gap-4 pb-4">
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 h-9 text-sm font-semibold"
-                  onClick={() => {
-                    reset();
-                    setSelectedCategory("");
-                    setSelectedTags([]);
-                    setShowForm(false);
-                  }}
+                  className="flex-1 py-6 text-base border-gray-300"
+                  onClick={() => form.reset()}
                 >
-                  Cancel
+                  Clear Form
                 </Button>
                 <Button
                   type="submit"
                   disabled={submitIdeaMutation.isPending}
-                  className="flex-1 h-9 text-sm font-semibold bg-yellow-500 hover:bg-yellow-600 text-white"
+                  className="flex-1 py-6 text-base bg-yellow-500 hover:bg-yellow-600 text-white font-semibold shadow-lg"
                 >
-                  {submitIdeaMutation.isPending ? "Submitting..." : "Submit Idea"}
+                  {submitIdeaMutation.isPending ? "Submitting..." : "Submit Idea →"}
                 </Button>
               </div>
-            </form>
-          </div>
-        )}
 
-        {/* Ideas List */}
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-yellow-500 mx-auto"></div>
-            <p className="mt-4 text-gray-500 text-sm">Loading your ideas...</p>
-          </div>
-        ) : !user ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-            <Lightbulb className="h-14 w-14 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">Sign in to see your ideas</h3>
-            <p className="text-sm text-gray-500">Please log in to submit and manage your ideas.</p>
-          </div>
-        ) : filteredIdeas.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-            <Lightbulb className="h-14 w-14 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">No ideas yet</h3>
-            <p className="text-sm text-gray-500 mb-5">Start by uploading your first business idea</p>
-            <Button
-              onClick={() => setShowForm(true)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Upload Your First Idea
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredIdeas.map((idea: any) => (
-              <div key={idea.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h3 className="font-semibold text-gray-900 text-sm truncate">{idea.ideaTitle}</h3>
-                      {getStatusBadge(idea.status)}
-                    </div>
-                    <p className="text-xs text-gray-500 line-clamp-2 mb-3">{idea.description}</p>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      {idea.category && (
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                          {idea.category}
-                        </span>
-                      )}
-                      {idea.tags?.slice(0, 3).map((tag: string) => (
-                        <span key={tag} className="text-xs bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-full border border-yellow-200">
-                          {tag}
-                        </span>
-                      ))}
-                      <span className="text-xs text-gray-400 flex items-center gap-1 ml-auto">
-                        <Clock className="h-3 w-3" />
-                        {new Date(idea.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="p-1 rounded hover:bg-gray-100 text-gray-400">
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="gap-2 text-sm">
-                        <Edit className="h-4 w-4" /> Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="gap-2 text-sm text-red-600"
-                        onClick={() => { setDeletingIdea(idea); setIsDeleteModalOpen(true); }}
-                      >
-                        <Trash2 className="h-4 w-4" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            ))}
-          </div>
+            </form>
+          </Form>
         )}
       </div>
-
-      {/* Delete Confirmation */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-red-600">Delete Idea</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{deletingIdea?.ideaTitle}"? This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
-            <Button
-              variant="destructive"
-              onClick={() => deletingIdea && deleteIdeaMutation.mutate(deletingIdea.id)}
-              disabled={deleteIdeaMutation.isPending}
-            >
-              {deleteIdeaMutation.isPending ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <NewFooter />
     </div>

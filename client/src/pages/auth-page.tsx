@@ -15,6 +15,7 @@ import {
   Mail,
   Lock,
   User,
+  Phone,
   ArrowRight,
   CheckCircle,
   AlertTriangle,
@@ -35,6 +36,7 @@ const loginSchema = z.object({
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
+  phone: z.string().min(7, "Please enter a valid phone number"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -141,6 +143,7 @@ export default function AuthPage() {
       await registerMutation.mutateAsync({
         name: data.name,
         email: data.email,
+        phone: data.phone,
         password: data.password,
       });
 
@@ -628,6 +631,25 @@ export default function AuthPage() {
                       {signupForm.formState.errors.email && (
                         <p className="text-red-500 text-sm mt-1">
                           {signupForm.formState.errors.email.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="signup-phone">Phone Number</Label>
+                      <div className="relative mt-1">
+                        <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="signup-phone"
+                          type="tel"
+                          placeholder="Enter your phone number"
+                          className="pl-10"
+                          {...signupForm.register("phone")}
+                        />
+                      </div>
+                      {signupForm.formState.errors.phone && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {signupForm.formState.errors.phone.message}
                         </p>
                       )}
                     </div>

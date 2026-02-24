@@ -521,3 +521,4 @@ export function setupAuth(app: Express) {
 function sendOtpEmail(email: any, otp: string) {
   throw new Error("Function not implemented.");
 }
+

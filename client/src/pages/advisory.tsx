@@ -165,6 +165,43 @@ export default function Advisory() {
         </div>
       </section>
 
+      {/* Advisory Categories Grid */}
+      <section className="py-10 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-200">
+              🚀 Comprehensive Services
+            </Badge>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Advisory Categories</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Explore our comprehensive range of advisory services designed to accelerate your business growth and success.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {advisoryCategories.map((category, index) => (
+              <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 bg-gradient-to-br from-white to-gray-50 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-blue-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CardContent className="p-6 text-center relative z-10">
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-blue-100 group-hover:to-indigo-100 transition-all duration-300 group-hover:scale-110">
+                      {category.icon}
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors">{category.title}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors">{category.description}</p>
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                      Learn More <ArrowRight className="ml-1 h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Description Section */}
       <section className="py-8 bg-white">
         <div className="container mx-auto px-4">
@@ -259,43 +296,6 @@ export default function Advisory() {
                 <p className="text-gray-600 leading-relaxed">We build long-term relationships with our clients, working as trusted partners to achieve sustained growth and long-term success through every stage of your journey.</p>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Advisory Categories Grid */}
-      <section className="py-10 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-200">
-              🚀 Comprehensive Services
-            </Badge>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Advisory Categories</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Explore our comprehensive range of advisory services designed to accelerate your business growth and success.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {advisoryCategories.map((category, index) => (
-              <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 bg-gradient-to-br from-white to-gray-50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-blue-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardContent className="p-6 text-center relative z-10">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-blue-100 group-hover:to-indigo-100 transition-all duration-300 group-hover:scale-110">
-                      {category.icon}
-                    </div>
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors">{category.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors">{category.description}</p>
-                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                      Learn More <ArrowRight className="ml-1 h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>

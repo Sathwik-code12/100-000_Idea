@@ -18,6 +18,7 @@ const AllIdeas = lazy(() => import("@/pages/all-ideas"));
 const SubmitIdea = lazy(() => import("@/pages/submit-idea"));
 const Advisory = lazy(() => import("@/pages/advisory"));
 const Contact = lazy(() => import("@/pages/contact"));
+const FundraisingPage = lazy(() => import("@/pages/fundraising"));
 const Blog = lazy(() => import("@/pages/blog"));
 const BlogArticle = lazy(() => import("@/pages/blog-article"));
 const About = lazy(() => import("@/pages/about"));
@@ -28,6 +29,7 @@ const Dashboard = lazy(() => import("@/pages/dashboardold"));
 const StartCampaign = lazy(() => import("@/pages/start-campaign"));
 const CampaignSetup = lazy(() => import("@/pages/campaign-setup"));
 const InvestPage = lazy(() => import("@/pages/invest"));
+const HowToUse = lazy(() => import("@/pages/how-to-use"));
 
 // Admin pages
 const AdminLogin = lazy(() => import("@/pages/admin-login"));
@@ -842,7 +844,8 @@ function Router() {
         <Route path="/about" component={About} />
         <Route path="/idea/:id" component={IdeaDetail} />
         <Route path="/auth" component={Auth} />
-        <Route path="/fundraising" component={() => <FundraisingSimple />} />
+        <Route path="/fundraising" component={FundraisingPage} />
+        <Route path="/how-to-use" component={HowToUse} />
         {/* /////// */}
         <Route path="/business-opportunities" component={() => <NewBusinessOpportunities />} />
         <Route path="/partnership-available" component={() => <PartnershipAvailable />} />

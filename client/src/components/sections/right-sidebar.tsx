@@ -3,6 +3,46 @@ import { Clock, TrendingUp, FileText, Users, Target, BarChart3, Scale, UserCheck
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "../ui/button";
+
+function TrendingSection({ latestItems, popularItems }: { latestItems: any[], popularItems: any[] }) {
+  const [activeTab, setActiveTab] = useState<"latest" | "popular">("latest");
+  const items = activeTab === "latest" ? latestItems : popularItems;
+  return (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-red-800 text-white px-4 py-2 font-bold text-sm">
+        TRENDING GADGETS AND TOPICS
+      </div>
+      <div className="flex border-b border-gray-200">
+        <button
+          onClick={() => setActiveTab("latest")}
+          className={`flex-1 py-2 text-sm font-bold transition-colors ${activeTab === "latest" ? "text-gray-900 border-b-2 border-yellow-500" : "text-gray-400 hover:text-gray-600"}`}
+        >
+          Latest
+        </button>
+        <button
+          onClick={() => setActiveTab("popular")}
+          className={`flex-1 py-2 text-sm font-bold transition-colors ${activeTab === "popular" ? "text-gray-900 border-b-2 border-yellow-500" : "text-gray-400 hover:text-gray-600"}`}
+        >
+          Popular
+        </button>
+      </div>
+      <div className="px-4 py-2 divide-y divide-gray-100">
+        {items.length === 0 ? (
+          <p className="text-gray-400 text-sm py-4 text-center">No items yet.</p>
+        ) : (
+          items.map((item: any) => (
+            <div key={item.id} className="py-2">
+              <a href={item.path || "#"} className="text-sm text-blue-700 hover:underline font-medium">
+                {item.description}
+              </a>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function RightSidebar() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const classifieds = [
@@ -190,43 +230,7 @@ const popularItems =
       </div> */}
 
         {/* Trending Gadgets & Topics */}
-<div className="bg-white rounded-lg shadow-lg overflow-hidden">
-  {/* Header */}
-  <div className="bg-red-800 text-white px-4 py-2 font-bold text-sm">
-    TRENDING GADGETS AND TOPICS
-  </div>
-
-  {/* Table */}
-  <div className="overflow-x-auto">
-    <table className="w-full text-sm">
-      <thead className="bg-gray-100 text-gray-600">
-        <tr>
-          <th className="text-left font-bold text-lg px-4 py-2">Latest</th>
-          <th className="text-center font-bold text-lg px-4 py-2">Popular</th>
-        </tr>
-      </thead>
-
-      <tbody className="divide-y">
-  {Array.from({
-    length: Math.max(latestItems.length, popularItems.length),
-  }).map((_, index) => (
-    <tr key={index} className="hover:bg-gray-50">
-      {/* Latest column */}
-      <td className="px-4  py-3 text-gray-800">
-        {latestItems[index]?.description ?? ""}
-      </td>
-
-      {/* Popular column */}
-      <td className="px-4 py-3 text-gray-800 text-center">
-        {popularItems[index]?.description ?? ""}
-      </td>
-    </tr>
-  ))}
-</tbody>
-
-    </table>
-  </div>
-</div>
+<TrendingSection latestItems={latestItems} popularItems={popularItems} />
 
       {/* Resources Section */}
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">

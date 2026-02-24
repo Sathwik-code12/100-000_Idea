@@ -126,9 +126,9 @@
 //   };
 
 //   return (
-//     <section className="bg-blue-600 py-3">
+//     <section className="bg-blue-600 py-1.5">
 //       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 lg:gap-4 items-stretch sm:items-center">
+//         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
 //           {/* Search Input */}
 //           <div className="relative flex-1 min-w-0">
 //             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -137,14 +137,14 @@
 //               placeholder="Search ideas..."
 //               value={searchTerm}
 //               onChange={(e) => setSearchTerm(e.target.value)}
-//               className="pl-10 pr-3 py-2.5 text-sm lg:text-base border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
+//               className="pl-10 pr-3 py-1.5 text-xs lg:text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
 //             />
 //           </div>
 
 //           {/* Category Select */}
-//           <div className="w-full sm:w-48 lg:w-64">
+//           <div className="w-full sm:w-36 lg:w-44">
 //             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-//               <SelectTrigger className="py-2.5 text-sm lg:text-base border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+//               <SelectTrigger className="py-1.5 text-xs lg:text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
 //                 <SelectValue placeholder="Select Category" />
 //               </SelectTrigger>
 //               <SelectContent>
@@ -161,9 +161,9 @@
 //           </div>
 
 //           {/* Location Select */}
-//           <div className="w-full sm:w-48 lg:w-64">
+//           <div className="w-full sm:w-36 lg:w-44">
 //             <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-//               <SelectTrigger className="py-2.5 text-sm lg:text-base border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+//               <SelectTrigger className="py-1.5 text-xs lg:text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
 //                 <SelectValue placeholder="Select Location" />
 //               </SelectTrigger>
 //               <SelectContent>
@@ -183,7 +183,7 @@
 //           {/* Search Button */}
 //           <Button
 //             type="submit"
-//             className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold px-6 lg:px-8 py-2.5 text-sm lg:text-base rounded-lg transition-colors"
+//             className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold px-6 lg:px-8 py-1.5 text-xs lg:text-sm rounded-lg transition-colors"
 //           >
 //             Search
 //           </Button>
@@ -192,7 +192,7 @@
 //               type="button"
 //               variant="outline"
 //               onClick={handleClear}
-//               className="w-full sm:w-auto border-white text-black hover:bg-blue-700 px-4 lg:px-6 py-2.5 text-sm lg:text-base rounded-lg transition-colors"
+//               className="w-full sm:w-auto border-white text-black hover:bg-blue-700 px-4 lg:px-6 py-1.5 text-xs lg:text-sm rounded-lg transition-colors"
 //             >
 //               <X className="h-4 w-4 mr-1" />
 //               Clear
@@ -368,9 +368,9 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
   };
 
   return (
-    <section className="bg-blue-600 py-3">
+    <section className="bg-blue-600 py-1.5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 lg:gap-4 items-stretch sm:items-center">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
           {/* Search Input */}
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -384,7 +384,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
                 fetchSuggestions(value); // 👈 autosuggest call
               }}
               onFocus={() => suggestions.length && setShowSuggestions(true)}
-              className="pl-10 pr-3 py-2.5 text-sm lg:text-base border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
+              className="pl-10 pr-3 py-1.5 text-xs lg:text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
             />
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
@@ -417,9 +417,9 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
           </div>
 
           {/* Category Select */}
-          <div className="w-full sm:w-48 lg:w-64">
+          <div className="w-full sm:w-36 lg:w-44">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="py-2.5 text-sm lg:text-base border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+              <SelectTrigger className="py-1.5 text-xs lg:text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
               <SelectContent>
@@ -436,9 +436,9 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
           </div>
 
           {/* Location Select */}
-          <div className="w-full sm:w-48 lg:w-64">
+          <div className="w-full sm:w-36 lg:w-44">
             <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger className="py-2.5 text-sm lg:text-base border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+              <SelectTrigger className="py-1.5 text-xs lg:text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                 <SelectValue placeholder="Select Location" />
               </SelectTrigger>
               <SelectContent>
@@ -458,7 +458,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
           {/* Search Button */}
           <Button
             type="submit"
-            className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold px-6 lg:px-8 py-2.5 text-sm lg:text-base rounded-lg transition-colors"
+            className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold px-6 lg:px-8 py-1.5 text-xs lg:text-sm rounded-lg transition-colors"
             disabled={usersLoading}
           >
             {usersLoading ? "Searching..." : "Search"}
@@ -468,7 +468,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
               type="button"
               variant="outline"
               onClick={handleClear}
-              className="w-full sm:w-auto border-white text-black hover:bg-blue-700 px-4 lg:px-6 py-2.5 text-sm lg:text-base rounded-lg transition-colors"
+              className="w-full sm:w-auto border-white text-black hover:bg-blue-700 px-4 lg:px-6 py-1.5 text-xs lg:text-sm rounded-lg transition-colors"
             >
               <X className="h-4 w-4 mr-1" />
               Clear

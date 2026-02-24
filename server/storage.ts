@@ -68,11 +68,19 @@ export interface IStorage {
   getCampaignById(id: string): Promise<Campaign | undefined>;
   updateCampaign(id: string, updates: Partial<Campaign>): Promise<Campaign | undefined>;
   getActiveCampaigns(): Promise<Campaign[]>;
+  getFeaturedCampaigns(): Promise<Campaign[]>;
+  getCampaignStats(): Promise<{
+    totalRaised: string;
+    totalCampaigns: number;
+    activeInvestors: number;
+    successRate: string;
+  }>;
 
   // Investment methods
   createInvestment(investment: Partial<InsertInvestment> & { campaignId: string, investorId: string }): Promise<Investment>;
   getUserInvestments(userId: string): Promise<Investment[]>;
   getCampaignInvestments(campaignId: string): Promise<Investment[]>;
+  updateInvestmentStatus(id: string, status: string): Promise<Investment | undefined>;
 
   // Payment transaction methods
   createPaymentTransaction(transaction: Partial<InsertPaymentTransaction> & { userId: string }): Promise<PaymentTransaction>;
@@ -285,7 +293,62 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveCampaigns(): Promise<Campaign[]> {
-    return await db.select().from(campaigns);
+    return await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.status, "active"))
+      .orderBy(campaigns.createdAt);
+  }
+
+  async getFeaturedCampaigns(): Promise<Campaign[]> {
+    return await db
+      .select()
+      .from(campaigns)
+      .where(and(eq(campaigns.status, "active"), eq(campaigns.isFeatured, "true")))
+      .orderBy(campaigns.createdAt);
+  }
+
+  async getCampaignStats(): Promise<{
+    totalRaised: string;
+    totalCampaigns: number;
+    activeInvestors: number;
+    successRate: string;
+  }> {
+    const raisedResult = await db
+      .select({ total: sql<string>`COALESCE(SUM(CAST(raised_amount AS NUMERIC)), 0)` })
+      .from(campaigns);
+    const totalRaised = parseFloat(raisedResult[0]?.total ?? "0");
+
+    const campaignCountResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(campaigns)
+      .where(sql`status != 'draft'`);
+    const totalCampaigns = Number(campaignCountResult[0]?.count ?? 0);
+
+    const investorResult = await db
+      .select({ count: sql<number>`COUNT(DISTINCT investor_id)` })
+      .from(investments);
+    const activeInvestors = Number(investorResult[0]?.count ?? 0);
+
+    const completedResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(campaigns)
+      .where(eq(campaigns.status, "completed"));
+    const completedCount = Number(completedResult[0]?.count ?? 0);
+    const successRate =
+      totalCampaigns > 0
+        ? `${Math.round((completedCount / totalCampaigns) * 100)}%`
+        : "0%";
+
+    let formattedRaised: string;
+    if (totalRaised >= 10_000_000)
+      formattedRaised = `₹${(totalRaised / 10_000_000).toFixed(1)}Cr+`;
+    else if (totalRaised >= 100_000)
+      formattedRaised = `₹${(totalRaised / 100_000).toFixed(1)}L+`;
+    else
+      formattedRaised = `₹${totalRaised}`;
+
+    return { totalRaised: formattedRaised, totalCampaigns, activeInvestors, successRate };
   }
 
   // Investment methods
@@ -302,6 +365,17 @@ export class DatabaseStorage implements IStorage {
     };
 
     const [newInvestment] = await db.insert(investments).values([investmentData]).returning();
+
+    // Update campaign raisedAmount and backerCount atomically
+    await db.execute(sql`
+      UPDATE campaigns
+      SET
+        raised_amount = (CAST(COALESCE(raised_amount, '0') AS NUMERIC) + ${parseFloat(investmentData.amount)})::TEXT,
+        backer_count  = (CAST(COALESCE(backer_count,  '0') AS INTEGER) + 1)::TEXT,
+        updated_at    = NOW()
+      WHERE id = ${investmentData.campaignId}
+    `);
+
     return newInvestment;
   }
 
@@ -311,6 +385,15 @@ export class DatabaseStorage implements IStorage {
 
   async getCampaignInvestments(campaignId: string): Promise<Investment[]> {
     return await db.select().from(investments).where(eq(investments.campaignId, campaignId));
+  }
+
+  async updateInvestmentStatus(id: string, status: string): Promise<Investment | undefined> {
+    const [updated] = await db
+      .update(investments)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(investments.id, id))
+      .returning();
+    return updated;
   }
 
   // Payment transaction methods

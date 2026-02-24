@@ -59,11 +59,34 @@ const FAQItem = memo(({ question, answer }: { question: string; answer: string }
 });
 FAQItem.displayName = 'FAQItem';
 
+const partnerCompanies = [
+  { name: "TechCorp India", sector: "Technology", description: "Partnering to provide cutting-edge tech solutions and startup mentorship programs.", logo: "TC", color: "from-blue-500 to-blue-700" },
+  { name: "GreenVentures", sector: "Clean Energy", description: "Collaborating on sustainable business ideas and green investment opportunities.", logo: "GV", color: "from-green-500 to-green-700" },
+  { name: "HealthBridge", sector: "Healthcare", description: "Joint initiatives to surface healthcare innovation and connect medical entrepreneurs.", logo: "HB", color: "from-red-500 to-red-700" },
+  { name: "AgroFund Partners", sector: "Agriculture", description: "Supporting agri-tech startups with funding guidance and market access.", logo: "AF", color: "from-yellow-500 to-yellow-700" },
+  { name: "EduGrowth Network", sector: "Education", description: "Building the next generation of edu-tech entrepreneurs across India.", logo: "EG", color: "from-purple-500 to-purple-700" },
+  { name: "FinScale Capital", sector: "Finance", description: "Connecting promising fintech ideas with early-stage investment opportunities.", logo: "FS", color: "from-indigo-500 to-indigo-700" },
+  { name: "RetailNext", sector: "E-Commerce", description: "Enabling online retail entrepreneurs with distribution and logistics support.", logo: "RN", color: "from-pink-500 to-pink-700" },
+  { name: "BuildRight Group", sector: "Construction", description: "Supporting construction and real estate entrepreneurs with industry insights.", logo: "BR", color: "from-orange-500 to-orange-700" },
+  { name: "MediaHub", sector: "Media & Marketing", description: "Helping businesses grow their brand presence and reach target audiences.", logo: "MH", color: "from-teal-500 to-teal-700" },
+];
+
+const govtCollabs = [
+  { name: "Startup India", ministry: "DPIIT, Govt. of India", description: "Aligned with the Startup India initiative to promote entrepreneurship and simplify regulations for new businesses.", logo: "SI", color: "from-orange-500 to-orange-600", scheme: "Recognition & Tax Benefits" },
+  { name: "Make in India", ministry: "Ministry of Commerce", description: "Supporting the Make in India mission by encouraging manufacturing-based business ideas and local production.", logo: "MI", color: "from-blue-600 to-blue-700", scheme: "Manufacturing Support" },
+  { name: "MSME Ministry", ministry: "Ministry of MSME", description: "Collaborating with MSME schemes to help small businesses access credit, training, and market linkages.", logo: "MS", color: "from-green-600 to-green-700", scheme: "Credit & Training" },
+  { name: "Skill India", ministry: "Ministry of Skill Development", description: "Partnering with Skill India to bridge the gap between business ideas and skilled workforce availability.", logo: "SK", color: "from-purple-600 to-purple-700", scheme: "Skill Development" },
+  { name: "Digital India", ministry: "Ministry of Electronics & IT", description: "Promoting digital-first business ideas in alignment with India's digital transformation mission.", logo: "DI", color: "from-indigo-600 to-indigo-700", scheme: "Digital Transformation" },
+  { name: "SIDBI", ministry: "Small Industries Dev. Bank", description: "Facilitating access to micro and small enterprise financing through SIDBI's network and schemes.", logo: "SB", color: "from-red-600 to-red-700", scheme: "Micro Finance" },
+];
+
 export default function About() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
+
+      {/* WHO ARE WE content */}
       {/* Enhanced Hero Section */}
       <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 py-8 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -123,6 +146,92 @@ export default function About() {
           </div>
         </div>
       </section>
+
+      {/* COMPANY COLLABS SECTION */}
+      <div className="py-10 container mx-auto px-4">
+
+        {/* Government Collaborations */}
+        <div className="mb-14">
+          <div className="text-center mb-8">
+            <Badge className="mb-3 bg-orange-100 text-orange-800">🏛️ Government</Badge>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Government Collaborations</h2>
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+              Aligned with key national missions and government schemes to empower entrepreneurs across India.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {govtCollabs.map((g) => (
+              <Card key={g.name} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 group overflow-hidden">
+                <div className={`h-1.5 bg-gradient-to-r ${g.color}`} />
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${g.color} flex items-center justify-center text-white font-bold text-sm shadow group-hover:scale-110 transition-transform duration-300`}>
+                      {g.logo}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors text-sm">{g.name}</h3>
+                      <p className="text-xs text-gray-400">{g.ministry}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed mb-3">{g.description}</p>
+                  <Badge className="bg-orange-50 text-orange-700 text-xs">{g.scheme}</Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-14">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-gray-400 text-sm font-medium">Partner Companies</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        {/* Partner Companies */}
+        <div className="mb-10">
+          <div className="text-center mb-8">
+            <Badge className="mb-3 bg-blue-100 text-blue-800">🤝 Partners</Badge>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Partner Companies</h2>
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+              Industry leaders and innovators we collaborate with to bring better opportunities to our community.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {partnerCompanies.map((c) => (
+              <Card key={c.name} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 group overflow-hidden">
+                <div className={`h-1.5 bg-gradient-to-r ${c.color}`} />
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center text-white font-bold text-sm shadow group-hover:scale-110 transition-transform duration-300`}>
+                      {c.logo}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors text-sm">{c.name}</h3>
+                      <Badge className="bg-blue-50 text-blue-700 text-xs mt-0.5">{c.sector}</Badge>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">{c.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-center text-white">
+          <h3 className="text-2xl font-bold mb-2">Want to Collaborate With Us?</h3>
+          <p className="text-blue-100 mb-6 max-w-xl mx-auto">
+            Join our growing network of government bodies and private partners helping empower entrepreneurs across India.
+          </p>
+          <Link href="/contact">
+            <Button className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8 py-3 rounded-lg shadow-lg">
+              Get in Touch <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+
+      </div>
 
       {/* Enhanced Stats Section */}
       <section className="py-8 bg-gradient-to-r from-gray-50 to-blue-50">

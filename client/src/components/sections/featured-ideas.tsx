@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import IdeaCard from "@/components/ui/idea-card";
+import { IdeaCardItem } from "@/components/sections/idea-grid";
 import { featuredIdeas } from "@/lib/data";
 
 export default function FeaturedIdeas() {
@@ -12,10 +12,14 @@ export default function FeaturedIdeas() {
             View All <ArrowRight className="w-4 h-4" />
           </button>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {featuredIdeas.map((idea, index) => (
-            <IdeaCard key={index} idea={idea} />
+            <IdeaCardItem
+              key={index}
+              idea={idea}
+              index={index}
+            />
           ))}
         </div>
       </div>
