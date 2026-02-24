@@ -298,14 +298,14 @@ export function setupAuth(app: Express) {
   //   }
   // );
   const transporter = nodemailer.createTransport({
-    host: "mail.10000ideas.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: "info@10000ideas.com",
-      pass: "Ideas@7890",
-    },
-  });
+  host: process.env.EMAIL_HOST,
+  port: parseInt(process.env.EMAIL_PORT || "465"),
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
   transporter.verify((error, success) => {
     if (error) {
       console.error("SMTP connection error:", error);
@@ -317,7 +317,7 @@ export function setupAuth(app: Express) {
   async function sendOtpEmail(email: string, otp: string) {
     try {
       const info = await transporter.sendMail({
-        from: `"10000Ideas" <${process.env.EMAIL_USER}>`,
+        from: `"10000Ideas" <info@10000ideas.com>`,
         to: email,
         subject: "Email Verification - 10000Ideas",
         html: `
@@ -518,7 +518,3 @@ export function setupAuth(app: Express) {
     });
   });
 }
-function sendOtpEmail(email: any, otp: string) {
-  throw new Error("Function not implemented.");
-}
-
