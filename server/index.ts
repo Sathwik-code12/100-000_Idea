@@ -8,6 +8,18 @@ import dotenv from "dotenv";
 dotenv.config();
 const app = express();
 
+import cors from 'cors';
+
+app.use(cors({
+  origin: [
+    'https://100-000-ide.vercel.app',  // your Vercel frontend URL
+    'http://localhost:5173',            // local dev
+    'http://localhost:5000',
+  ],
+  credentials: true,  // needed for cookies/sessions
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 AdminAuthService.initializeAdminUsers();
 
 // Trust proxy for proper IP handling in production
