@@ -292,20 +292,24 @@ export function setupAuth(app: Express) {
   //     auth: {
   //       // user: process.env.EMAIL_USER,
   //       // pass: process.env.EMAIL_PASS,
-  //       user:"jeeva.smiksystems@gmail.com",
+  //       user:"jeeva.smiksystems@gmail.com"
   //       pass:"hoag cgsp vbwr svdr"
   //     },
   //   }
   // );
+  const port = parseInt(process.env.EMAIL_PORT || "587");
   const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || "465"),
-  secure: true,
+  port: port,
+  secure: port === 465,  // false for 587, true for 465
+  tls: {
+    rejectUnauthorized: false  // needed for custom mail servers
+  },
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-});
+})  
   transporter.verify((error, success) => {
     if (error) {
       console.error("SMTP connection error:", error);

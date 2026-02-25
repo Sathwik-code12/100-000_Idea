@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from 'cors';
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite-setup.js";
 import { AdminAuthService } from "./admin-auth.js";
@@ -8,15 +9,15 @@ import dotenv from "dotenv";
 dotenv.config();
 const app = express();
 
-import cors from 'cors';
 
-app.use(cors({
+
+app.use(cors({                                    // ← right after app = express()
   origin: [
-    'https://100-000-ide.vercel.app',  // your Vercel frontend URL
-    'http://localhost:5173',            // local dev
+    'https://100-000-ide.vercel.app',
+    'http://localhost:5173',
     'http://localhost:5000',
   ],
-  credentials: true,  // needed for cookies/sessions
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
