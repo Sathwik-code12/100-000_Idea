@@ -1,1005 +1,18 @@
-// import { useState, useMemo, memo, useEffect } from "react";
-// import { useRoute, Link } from "wouter";
-// import Header from "@/components/layout/header";
-// import NewFooter from "@/components/sections/new-footer";
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { Separator } from "@/components/ui/separator";
-// import { Progress } from "@/components/ui/progress";
-// import {
-//   Star,
-//   Heart,
-//   Share2,
-//   Download,
-//   MapPin,
-//   ChevronRight,
-//   MessageCircle,
-//   BookOpen,
-//   BarChart3,
-//   PiggyBank,
-//   DollarSign,
-//   Shield,
-//   Clock,
-//   User,
-//   Target,
-//   CheckCircle,
-//   Zap,
-//   TrendingUp,
-//   FileText,
-//   Phone,
-//   Building2,
-//   Users,
-//   Calendar,
-//   IndianRupee,
-//   Award,
-//   Lightbulb,
-//   Globe,
-//   Briefcase,
-//   GraduationCap
-// } from "lucide-react";
-// import { useAuth } from "@/hooks/use-auth";
-
-// interface IdeaCard {
-//   id: string;
-//   title: string;
-//   description: string;
-//   image: string;
-//   category: string;
-//   difficulty: string;
-//   investment: string;
-//   tags: string[];
-//   profitability: string;
-//   timeToMarket: string;
-//   rating: number;
-//   marketScore: number;
-//   painPointScore: number;
-//   timingScore: number;
-// }
-
-// interface heroProps {
-//   idea: any;
-//   onhandleShare: (summary: string) => void;
-//   averageRating: any;
-//   totalReviews: any
-// }
-
-// const parseInvestment = (investment: any) => {
-//   if (typeof investment === 'string') {
-//     try {
-//       const parsed = JSON.parse(investment);
-//       return parsed.display || investment;
-//     } catch (e) {
-//       return investment;
-//     }
-//   }
-//   return investment.display || '₹0';
-// };
-
-// // Enhanced Hero Section matching the image design
-// const HeroSection = memo(({ idea, onhandleShare, averageRating, totalReviews }: heroProps) => (
-//   <div className="bg-white">
-//     <div className="container mx-auto px-4 py-0 mt-3">
-//       {/* Hero Image with Overlays */}
-//       <div className="relative w-full h-96 rounded-lg overflow-hidden border border-red shadow-md">
-//         <img
-//           src={idea?.images || idea?.heroImage || idea?.images?.[0]}
-//           alt={idea?.title}
-//           className="w-full h-full object-cover"
-//         />
-//         {/* Investment Badge - Top Left */}
-//         <div className="absolute top-4 bg-yellow-500 left-4 px-4 py-1 m-2 font-bold rounded-sm shadow-lg">
-//           {parseInvestment(idea.investment)}
-//         </div>
-//         {/* Category Badge - Top Right */}
-//         <div className="absolute top-4 right-4 bg-gray-900 text-white px-4 py-1 m-2 font-bold rounded-sm shadow-lg">
-//           {idea?.category}
-//         </div>
-//       </div>
-
-//       {/* Title and Meta Information */}
-//       <div className="py-6 ms-9">
-//         <h1 className="text-3xl font-bold text-gray-900 mb-3">{idea?.title}</h1>
-
-//         {/* Rating */}
-//         <div className="flex items-center gap-2 mb-4">
-//           <div className="flex items-center">
-//             <span className="text-2xl font-bold text-gray-900">
-//               {averageRating.toFixed(1) || "0.0"}
-//             </span>
-//             <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 ml-1" />
-//           </div>
-//           <span className="text-gray-500">
-//             ({totalReviews || 0} reviews)
-//           </span>
-//         </div>
-
-//         {/* Info Grid */}
-//         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-//           <div className="border border-gray-200 rounded-lg p-4 bg-white">
-//             <div className="flex items-center gap-2 mb-2">
-//               <Clock className="h-5 w-5 text-yellow-500" />
-//               <div className="text-sm font-medium text-gray-600">Time to Start</div>
-//             </div>
-//             <div className="text-lg font-semibold text-gray-900">
-//               {idea?.timeframe || "1-2 years"}
-//             </div>
-//           </div>
-
-//           <div className="border border-gray-200 rounded-lg p-4 bg-white">
-//             <div className="flex items-center gap-2 mb-2">
-//               <Users className="h-5 w-5 text-yellow-500" />
-//               <div className="text-sm font-medium text-gray-600">Target Audience</div>
-//             </div>
-//             <div className="text-sm text-gray-900">
-//               {idea?.user_personas?.target_users?.[0] || "Medical schools, hospitals, healthcare training centers"}
-//             </div>
-//           </div>
-
-//           <div className="border border-gray-200 rounded-lg p-4 bg-white">
-//             <div className="flex items-center gap-2 mb-2">
-//               <Globe className="h-5 w-5 text-yellow-500" />
-//               <div className="text-sm font-medium text-gray-600">Market Size</div>
-//             </div>
-//             <div className="text-sm text-gray-900">
-//               {idea?.market_analysis?.growth || "International"}
-//             </div>
-//           </div>
-
-//           <div className="border border-gray-200 rounded-lg p-4 bg-white">
-//             <div className="flex items-center gap-2 mb-2">
-//               <Heart className="h-5 w-5 text-yellow-500" />
-//               <div className="text-sm font-medium text-gray-600">Category</div>
-//             </div>
-//             <div className="text-sm text-gray-900">
-//               {idea?.category || "Healthcare"}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   </div>
-// ));
-// HeroSection.displayName = 'HeroSection';
-
-// export default function IdeaDetail() {
-//   const [, params] = useRoute("/idea/:id");
-//   const ideaId = params?.id || "1";
-
-//   const [idea, setIdea] = useState<any>(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
-//   const [selectedRating, setSelectedRating] = useState(0);
-//   const [hoverRating, setHoverRating] = useState(0);
-//   const [comment, setComment] = useState('');
-//   const [activeTab, setActiveTab] = useState("overview");
-//   const [userReview, setUserReview] = useState<any>(null);
-//   const [isEditingReview, setIsEditingReview] = useState(false);
-//   // Add state for reviews
-//   const [reviews, setReviews] = useState<any[]>([]);
-//   const [averageRating, setAverageRating] = useState(0);
-//   const [totalReviews, setTotalReviews] = useState(0);
-//   const [loadingReviews, setLoadingReviews] = useState(false);
-//   const { user } = useAuth();
-
-//   const fetchIdea = async () => {
-//     try {
-//       setLoading(true);
-//       const response = await fetch(`/api/platformideas`);
-//       if (response.ok) {
-//         const data = await response.json();
-//         const ideaData = data?.ideas?.find((idea: any) => String(idea.id) === String(ideaId));
-//         console.log("ideaData:", ideaData)
-//         let avgValue = 0;
-//         let totalReviewscount = 0;
-
-//         if (Array.isArray(ideaData?.ratings_reviews)) {
-//           const avgStr = ideaData.ratings_reviews.find((s: any) => s.startsWith("average_rating:"));
-//           const totalStr = ideaData.ratings_reviews.find((s: any) => s.startsWith("total_reviews:"));
-
-//           avgValue = avgStr ? parseFloat(avgStr.split(":")[1].trim()) : 0;
-//           totalReviewscount = totalStr ? parseInt(totalStr.split(":")[1].trim()) : 0;
-//           setAverageRating(avgValue);
-//           setTotalReviews(totalReviewscount);
-//         }
-//         else {
-//           console.log("idea", ideaData)
-//           setAverageRating(ideaData?.ratings_reviews?.average_rating);
-//           setTotalReviews(ideaData?.ratings_reviews?.total_reviews);
-//         }
-
-//         setIdea(ideaData);
-//       } else {
-//         setError('Failed to fetch idea details');
-//       }
-//     } catch (err) {
-//       console.error('Failed to fetch idea:', err);
-//       setError('An error occurred while fetching the idea');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchIdea();
-//   }, [ideaId]);
-
-//   useEffect(() => {
-//     console.log("averageRating", averageRating)
-//   }, [averageRating])
-
-//   // Fetch reviews when the component loads or idea changes
-//   useEffect(() => {
-//     const fetchReviews = async () => {
-//       if (!idea) return;
-
-//       setLoadingReviews(true);
-//       try {
-//         const response = await fetch(`/api/ideas/${idea.id}/reviews`);
-//         if (response.ok) {
-//           const data = await response.json();
-//           setReviews(data.reviews || []);
-//         }
-//       } catch (error) {
-//         console.error("Error fetching reviews:", error);
-//       } finally {
-//         setLoadingReviews(false);
-//       }
-//     };
-
-//     fetchReviews();
-//   }, [idea]);
-
-//   useEffect(() => {
-//     const fetchUserReview = async () => {
-//       if (!idea || !user) return;
-
-//       try {
-//         const response = await fetch(`/api/ideas/${idea.id}/user-review`);
-//         if (response.ok) {
-//           const data = await response.json();
-//           if (data.review) {
-//             setUserReview(data.review);
-//             setSelectedRating(data.review.rating);
-//             setComment(data.review.comment);
-//           }
-//         }
-//       } catch (error) {
-//         console.error("Error fetching user review:", error);
-//       }
-//     };
-
-//     fetchUserReview();
-//   }, [idea, user]);
-
-//   const handleDeleteReview = async () => {
-//     if (!user || !userReview || !idea) return;
-
-//     if (!confirm('Are you sure you want to delete your review?')) return;
-
-//     try {
-//       const response = await fetch(`/api/ideas/${idea.id}/reviews/${userReview.id}`, {
-//         method: 'DELETE',
-//       });
-
-//       if (response.ok) {
-//         // Refresh reviews
-//         const reviewsResponse = await fetch(`/api/ideas/${idea.id}/reviews`);
-//         if (reviewsResponse.ok) {
-//           fetchIdea();
-//           const reviewsData = await reviewsResponse.json();
-//           setReviews(reviewsData.reviews || []);
-//           setAverageRating(reviewsData.averageRating || 0);
-//           setTotalReviews(reviewsData.totalReviews || 0);
-//         }
-
-//         // Reset form and state
-//         setUserReview(null);
-//         setSelectedRating(0);
-//         setComment('');
-//         alert('Review deleted successfully!');
-//       } else {
-//         const errorData = await response.json();
-//         alert(errorData.message || 'Failed to delete review');
-//       }
-//     } catch (error) {
-//       console.error('Error deleting review:', error);
-//       alert('An error occurred while deleting your review');
-//     }
-//   };
-
-//   // Update the review submission function
-//   const handleSubmitReview = async () => {
-//     if (selectedRating === 0) {
-//       alert('Please select a rating');
-//       return;
-//     }
-//     if (!user) {
-//       window.location.href = '/auth';
-//       return;
-//     }
-
-//     if (!idea) return;
-
-//     try {
-//       let response;
-
-//       if (userReview) {
-//         // Update existing review
-//         response = await fetch(`/api/ideas/${idea.id}/reviews/${userReview.id}`, {
-//           method: 'PUT',
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
-//           body: JSON.stringify({
-//             rating: selectedRating,
-//             comment: comment
-//           }),
-//         });
-//       } else {
-//         // Create new review
-//         response = await fetch(`/api/ideas/${idea.id}/reviews`, {
-//           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
-//           body: JSON.stringify({
-//             rating: selectedRating,
-//             comment: comment
-//           }),
-//         });
-//       }
-
-//       if (response.ok) {
-//         const data = await response.json();
-
-//         // Refresh reviews
-//         const reviewsResponse = await fetch(`/api/ideas/${idea.id}/reviews`);
-//         if (reviewsResponse.ok) {
-//           fetchIdea();
-//           const reviewsData = await reviewsResponse.json();
-//           // setReviews(reviewsData.reviews || []);
-//           // setAverageRating(reviewsData.averageRating || 0);
-//           // setTotalReviews(reviewsData.totalReviews || 0);
-//         }
-
-//         // Update user review state
-//         if (userReview) {
-//           setUserReview(data.review);
-//           setIsEditingReview(false);
-//           alert('Review updated successfully!');
-//         } else {
-//           setUserReview(data.review);
-//           alert('Review submitted successfully!');
-//         }
-//       } else {
-//         const errorData = await response.json();
-//         alert(errorData.message || 'Failed to submit review');
-//       }
-//     } catch (error) {
-//       console.error('Error submitting review:', error);
-//       alert('An error occurred while submitting your review');
-//     }
-//   };
-
-//   const handleShare = async (summary: string) => {
-//     if (navigator.share) {
-//       try {
-//         await navigator.share({
-//           text: summary
-//         });
-//       } catch (error) {
-//         console.log('Error sharing:', error);
-//       }
-//     } else {
-//       navigator.clipboard.writeText(summary);
-//       alert('Content copied to clipboard!');
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-50">
-//       <Header />
-
-//       {/* Breadcrumb */}
-//       <div className="bg-white border-b border-gray-200 mt-3">
-//         {/* <div className="container mx-auto px-4 py-3">
-//           <div className="flex items-center gap-2 text-sm">
-//             <Link href="/" className="text-gray-600 hover:text-blue-600">Home</Link>
-//             <ChevronRight className="h-4 w-4 text-gray-400" />
-//             <Link href="/all-ideas" className="text-gray-600 hover:text-blue-600">Business Ideas</Link>
-//             <ChevronRight className="h-4 w-4 text-gray-400" />
-//             <span className="text-gray-900 font-medium truncate">{idea?.title}</span>
-//           </div>
-//         </div> */}
-//       </div>
-
-//       {loading && (
-//         <div className="container mx-auto px-4 py-8 text-center">
-//           <div className="text-lg">Loading idea details...</div>
-//         </div>
-//       )}
-
-//       {error && (
-//         <div className="container mx-auto px-4 py-8 text-center">
-//           <div className="text-lg text-red-500">Error: {error}</div>
-//           <Button onClick={() => window.location.reload()} className="mt-4">
-//             Retry
-//           </Button>
-//         </div>
-//       )}
-
-//       {!loading && !error && idea && (
-//         <>
-//           {/* Hero Section */}
-//           <HeroSection idea={idea} averageRating={averageRating} totalReviews={totalReviews} onhandleShare={handleShare} />
-
-//           {/* Tab Navigation */}
-//           <div className="bg-white border-b sticky top-16 z-40 ms-9">
-//             <div className="container mx-auto px-4">
-//               <div className="flex space-x-8 overflow-x-auto">
-//                 {[
-//                   { key: "overview", label: "Overview", icon: BookOpen },
-//                   { key: "details", label: "Details", icon: FileText },
-//                   { key: "reviews", label: "Reviews", icon: Star },
-//                   { key: "ai-analysis", label: "AI Analysis", icon: BarChart3 }
-//                 ].map((tab) => {
-//                   const Icon = tab.icon;
-//                   return (
-//                     <button
-//                       key={tab.key}
-//                       onClick={() => setActiveTab(tab.key)}
-//                       className={`flex items-center gap-2 py-4 px-2 border-b-2 whitespace-nowrap text-sm font-medium transition-colors ${activeTab === tab.key
-//                         ? "border-yellow-600 text-yellow-600"
-//                         : "border-transparent text-gray-500 hover:text-gray-700"
-//                         }`}
-//                     >
-//                       {tab.label}
-//                     </button>
-//                   );
-//                 })}
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Main Content */}
-//           <div className="py-8 ms-7">
-//             <div className="container mx-auto px-4">
-//               {activeTab === "overview" && (
-//                 <div className="space-y-6">
-//                   {/* Description Card */}
-//                   <Card>
-//                     <CardHeader>
-//                       <CardTitle className="flex items-center gap-2">
-//                         <FileText className="h-5 w-5 text-gray-600" />
-//                         Description
-//                       </CardTitle>
-//                     </CardHeader>
-//                     <CardContent>
-//                       <p className="text-gray-700 leading-relaxed">
-//                         {idea?.description || idea?.product_narrative?.problem}
-//                       </p>
-//                     </CardContent>
-//                   </Card>
-
-//                   {/* Key Features */}
-//                   <Card>
-//                     <CardHeader>
-//                       <CardTitle className="flex items-center gap-2">
-//                         <Zap className="h-5 w-5 text-gray-600" />
-//                         Key Features
-//                       </CardTitle>
-//                     </CardHeader>
-//                     <CardContent>
-//                       <div className="grid md:grid-cols-2 gap-4">
-//                         {idea?.key_features?.map((feature: string, idx: number) => (
-//                           <div key={idx} className="flex items-start gap-3 bg-yellow-50 p-3 rounded-lg">
-//                             <CheckCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-//                             <span className="text-gray-700">{feature}</span>
-//                           </div>
-//                         ))}
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-
-//                   {/* Business Model & Revenue Streams Side by Side */}
-//                   <div className="grid md:grid-cols-2 gap-6">
-//                     <Card>
-//                       <CardHeader>
-//                         <CardTitle className="flex items-center gap-2">
-//                           <Briefcase className="h-5 w-5 text-gray-600" />
-//                           Business Model
-//                         </CardTitle>
-//                       </CardHeader>
-//                       <CardContent>
-//                         <div className="bg-gray-50 p-4 rounded-lg">
-//                           <p className="text-sm font-semibold text-gray-900 mb-2">
-//                             {idea?.business_model?.pricing_strategy?.split('.')[0] || "B2B (Business to Business)"}
-//                           </p>
-//                           <p className="text-sm text-gray-600">
-//                             {idea?.business_model?.pricing_strategy || "Direct sales to businesses and institutions"}
-//                           </p>
-//                         </div>
-//                       </CardContent>
-//                     </Card>
-
-//                     <Card>
-//                       <CardHeader>
-//                         <CardTitle className="flex items-center gap-2">
-//                           <IndianRupee className="h-5 w-5 text-gray-600" />
-//                           Revenue Streams
-//                         </CardTitle>
-//                       </CardHeader>
-//                       <CardContent>
-//                         <ul className="space-y-2">
-//                           {idea?.business_model?.revenue_streams?.map((stream: string, idx: number) => (
-//                             <li key={idx} className="flex items-start gap-2">
-//                               <span className="text-orange-600 font-bold">•</span>
-//                               <span className="text-sm text-gray-700">{stream}</span>
-//                             </li>
-//                           ))}
-//                         </ul>
-//                       </CardContent>
-//                     </Card>
-//                   </div>
-//                 </div>
-//               )}
-
-//               {activeTab === "details" && (
-//                 <div className="space-y-6">
-//                   {/* Investment Breakdown */}
-//                   <Card>
-//                     <CardHeader>
-//                       <CardTitle className="flex items-center gap-2">
-//                         <PiggyBank className="h-5 w-5 text-green-600" />
-//                         Investment Breakdown
-//                       </CardTitle>
-//                     </CardHeader>
-//                     <CardContent>
-//                       <div className="text-center mb-6">
-//                         <div className="text-4xl font-bold text-green-600 mb-2">
-//                           {parseInvestment(idea?.investment)}
-//                         </div>
-//                         <p className="text-gray-600">{idea?.investment?.description || "Total Investment Required"}</p>
-//                       </div>
-
-//                       <div className="grid md:grid-cols-2 gap-6">
-//                         <div>
-//                           <h4 className="font-semibold mb-4 text-blue-700">
-//                             Fixed Capital (₹{idea?.investment_breakdown?.fixed_capital?.total_fixed_capital})
-//                           </h4>
-//                           <div className="space-y-3">
-//                             {Object.entries(idea?.investment_breakdown?.fixed_capital || {})
-//                               .filter(([key]) => key !== 'total_fixed_capital')
-//                               .map(([item, amount]) => (
-//                                 <div key={item} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-//                                   <span className="text-sm font-medium">
-//                                     {item.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-//                                   </span>
-//                                   <span className="text-sm font-bold text-blue-600">{amount as string}</span>
-//                                 </div>
-//                               ))}
-//                           </div>
-//                         </div>
-
-//                         <div>
-//                           <h4 className="font-semibold mb-4 text-purple-700">
-//                             Working Capital (₹{idea?.investment_breakdown?.working_capital?.total_working_capital})
-//                           </h4>
-//                           <div className="space-y-3">
-//                             {Object.entries(idea?.investment_breakdown?.working_capital || {})
-//                               .filter(([key]) => key !== 'total_working_capital')
-//                               .map(([item, amount]) => (
-//                                 <div key={item} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-//                                   <span className="text-sm font-medium">
-//                                     {item.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-//                                   </span>
-//                                   <span className="text-sm font-bold text-purple-600">{amount as string}</span>
-//                                 </div>
-//                               ))}
-//                           </div>
-//                         </div>
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-
-//                   {/* Market Analysis */}
-//                   <Card>
-//                     <CardHeader>
-//                       <CardTitle className="flex items-center gap-2">
-//                         <BarChart3 className="h-5 w-5 text-blue-600" />
-//                         Market Analysis
-//                       </CardTitle>
-//                     </CardHeader>
-//                     <CardContent>
-//                       <div className="grid md:grid-cols-4 gap-4">
-//                         <div className="bg-blue-50 p-4 rounded-lg text-center">
-//                           <div className="text-xl font-bold text-blue-600">{idea?.market_analysis?.TAM}</div>
-//                           <div className="text-xs text-gray-600 mt-1">Total Addressable Market</div>
-//                         </div>
-//                         <div className="bg-green-50 p-4 rounded-lg text-center">
-//                           <div className="text-xl font-bold text-green-600">{idea?.market_analysis?.SAM}</div>
-//                           <div className="text-xs text-gray-600 mt-1">Serviceable Available Market</div>
-//                         </div>
-//                         <div className="bg-purple-50 p-4 rounded-lg text-center">
-//                           <div className="text-xl font-bold text-purple-600">{idea?.market_analysis?.SOM}</div>
-//                           <div className="text-xs text-gray-600 mt-1">Serviceable Obtainable Market</div>
-//                         </div>
-//                         <div className="bg-orange-50 p-4 rounded-lg text-center">
-//                           <div className="text-xl font-bold text-orange-600">{idea?.market_analysis?.growth}</div>
-//                           <div className="text-xs text-gray-600 mt-1">Annual Growth Rate</div>
-//                         </div>
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-
-//                   {/* Skills Required */}
-//                   <Card>
-//                     <CardHeader>
-//                       <CardTitle className="flex items-center gap-2">
-//                         <GraduationCap className="h-5 w-5 text-blue-600" />
-//                         Skills Required
-//                       </CardTitle>
-//                     </CardHeader>
-//                     <CardContent>
-//                       <div className="grid md:grid-cols-3 gap-6">
-//                         <div>
-//                           <h4 className="font-semibold mb-3 text-blue-700">Technical Skills</h4>
-//                           <ul className="space-y-2">
-//                             {idea?.skills_required?.technical_skills?.map((skill: string, idx: number) => (
-//                               <li key={idx} className="flex items-center gap-2">
-//                                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-//                                 <span className="text-sm text-gray-600">{skill}</span>
-//                               </li>
-//                             ))}
-//                           </ul>
-//                         </div>
-//                         <div>
-//                           <h4 className="font-semibold mb-3 text-green-700">Business Skills</h4>
-//                           <ul className="space-y-2">
-//                             {idea?.skills_required?.business_skills?.map((skill: string, idx: number) => (
-//                               <li key={idx} className="flex items-center gap-2">
-//                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-//                                 <span className="text-sm text-gray-600">{skill}</span>
-//                               </li>
-//                             ))}
-//                           </ul>
-//                         </div>
-//                         <div>
-//                           <h4 className="font-semibold mb-3 text-purple-700">Soft Skills</h4>
-//                           <ul className="space-y-2">
-//                             {idea?.skills_required?.soft_skills?.map((skill: string, idx: number) => (
-//                               <li key={idx} className="flex items-center gap-2">
-//                                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-//                                 <span className="text-sm text-gray-600">{skill}</span>
-//                               </li>
-//                             ))}
-//                           </ul>
-//                         </div>
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-//                 </div>
-//               )}
-
-//               {activeTab === "reviews" && (
-//                 <div className="space-y-6">
-//                   {/* Rating Summary */}
-//                   <Card>
-//                     <CardHeader>
-//                       <CardTitle className="flex items-center gap-2">
-//                         <Star className="h-5 w-5 text-yellow-600" />
-//                         Reviews & Ratings
-//                       </CardTitle>
-//                     </CardHeader>
-//                     <CardContent>
-//                       <div className="flex flex-col md:flex-row items-center gap-8">
-//                         <div className="text-center flex">
-//                           <div>
-//                             <div className="text-5xl font-bold text-gray-900 mb-2">
-//                               {averageRating.toFixed(1)}
-//                             </div>
-//                             <div className="flex items-center justify-center gap-1 mb-1">
-//                               {[1, 2, 3, 4, 5].map((star) => (
-//                                 <Star
-//                                   key={star}
-//                                   className={`h-5 w-5 ${star <= Math.round(averageRating)
-//                                     ? 'text-yellow-500 fill-yellow-500'
-//                                     : 'text-gray-300'
-//                                     }`}
-//                                 />
-//                               ))}
-//                             </div>
-//                           </div>
-//                           <p className="text-gray-600 flex items-center">
-//                             Based on {totalReviews}
-//                           </p>
-//                         </div>
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-
-//                   {/* User's Review Section */}
-//                   {user ? (
-//                     <Card>
-//                       <CardHeader>
-//                         <CardTitle>
-//                           {userReview ? (isEditingReview ? "Edit Your Review" : "Your Review") : "Write a Review"}
-//                         </CardTitle>
-//                       </CardHeader>
-//                       <CardContent>
-//                         {userReview && !isEditingReview ? (
-//                           // Display existing review
-//                           <div className="space-y-4">
-//                             <div className="flex items-center gap-2">
-//                               <div className="flex items-center">
-//                                 {[1, 2, 3, 4, 5].map((star) => (
-//                                   <Star
-//                                     key={star}
-//                                     className={`h-5 w-5 ${star <= userReview.rating
-//                                       ? 'text-yellow-500 fill-yellow-500'
-//                                       : 'text-gray-300'
-//                                       }`}
-//                                   />
-//                                 ))}
-//                               </div>
-//                               <span className="text-sm text-gray-600">
-//                                 {userReview.rating} star{userReview.rating !== 1 ? 's' : ''}
-//                               </span>
-//                             </div>
-//                             {userReview.comment && (
-//                               <p className="text-gray-700">{userReview.comment}</p>
-//                             )}
-//                             <div className="flex gap-2">
-//                               <Button
-//                                 variant="outline"
-//                                 onClick={() => setIsEditingReview(true)}
-//                               >
-//                                 Edit Review
-//                               </Button>
-//                               <Button
-//                                 variant="outline"
-//                                 onClick={handleDeleteReview}
-//                                 className="text-red-600 hover:text-red-700"
-//                               >
-//                                 Delete Review
-//                               </Button>
-//                             </div>
-//                           </div>
-//                         ) : (
-//                           // Review form (for new review or editing)
-//                           <div className="space-y-4">
-//                             <div>
-//                               <label className="block text-sm font-medium text-gray-700 mb-2">
-//                                 Rating
-//                               </label>
-//                               <div className="flex items-center gap-1">
-//                                 {[1, 2, 3, 4, 5].map((star) => (
-//                                   <Star
-//                                     key={star}
-//                                     className={`h-6 w-6 cursor-pointer transition-all duration-200 hover:scale-110 ${star <= (hoverRating || selectedRating)
-//                                       ? 'text-yellow-500 fill-yellow-500'
-//                                       : 'text-gray-300'
-//                                       }`}
-//                                     onClick={() => setSelectedRating(star)}
-//                                     onMouseEnter={() => setHoverRating(star)}
-//                                     onMouseLeave={() => setHoverRating(0)}
-//                                   />
-//                                 ))}
-//                                 {selectedRating > 0 && (
-//                                   <span className="ml-2 text-sm text-gray-600">
-//                                     {selectedRating} star{selectedRating !== 1 ? 's' : ''}
-//                                   </span>
-//                                 )}
-//                               </div>
-//                             </div>
-
-//                             <div>
-//                               <label className="block text-sm font-medium text-gray-700 mb-2">
-//                                 Comment
-//                               </label>
-//                               <textarea
-//                                 value={comment}
-//                                 onChange={(e) => setComment(e.target.value)}
-//                                 placeholder="Share your thoughts about this idea..."
-//                                 className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-//                               />
-//                             </div>
-
-//                             <div className="flex gap-2">
-//                               <button
-//                                 onClick={handleSubmitReview}
-//                                 className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-//                                 disabled={selectedRating === 0}
-//                               >
-//                                 {userReview ? "Update Review" : "Submit Review"}
-//                               </button>
-//                               {userReview && (
-//                                 <Button
-//                                   variant="outline"
-//                                   onClick={() => {
-//                                     setIsEditingReview(false);
-//                                     setSelectedRating(userReview.rating);
-//                                     setComment(userReview.comment);
-//                                   }}
-//                                 >
-//                                   Cancel
-//                                 </Button>
-//                               )}
-//                             </div>
-//                           </div>
-//                         )}
-//                       </CardContent>
-//                     </Card>
-//                   ) : (
-//                     <Card>
-//                       <CardContent className="text-center py-8">
-//                         <p className="text-gray-600 mb-4">Please log in to write a review</p>
-//                         <Link href="/auth">
-//                           <Button>Log In</Button>
-//                         </Link>
-//                       </CardContent>
-//                     </Card>
-//                   )}
-
-//                   {/* All Reviews */}
-//                   {/* <Card>
-//                     <CardHeader>
-//                       <CardTitle>All Reviews</CardTitle>
-//                     </CardHeader>
-//                     <CardContent>
-//                       {loadingReviews ? (
-//                         <div className="text-center py-4">Loading reviews...</div>
-//                       ) : reviews.length > 0 ? (
-//                         <div className="space-y-4">
-//                           {reviews.map((review) => (
-//                             <div key={review.id} className="border-b pb-4 last:border-b-0">
-//                               <div className="flex items-center gap-2 mb-2">
-//                                 <div className="flex items-center">
-//                                   {[1, 2, 3, 4, 5].map((star) => (
-//                                     <Star
-//                                       key={star}
-//                                       className={`h-4 w-4 ${star <= review.rating
-//                                         ? 'text-yellow-500 fill-yellow-500'
-//                                         : 'text-gray-300'
-//                                         }`}
-//                                     />
-//                                   ))}
-//                                 </div>
-//                                 <span className="text-sm text-gray-600">
-//                                   {review.rating} star{review.rating !== 1 ? 's' : ''}
-//                                 </span>
-//                               </div>
-//                               {review.comment && (
-//                                 <p className="text-gray-700">{review.comment}</p>
-//                               )}
-//                               <p className="text-xs text-gray-500 mt-2">
-//                                 Reviewed on {new Date(review.createdAt).toLocaleDateString()}
-//                               </p>
-//                             </div>
-//                           ))}
-//                         </div>
-//                       ) : (
-//                         <p className="text-center text-gray-500 py-4">No reviews yet. Be the first to review!</p>
-//                       )}
-//                     </CardContent>
-//                   </Card> */}
-//                 </div>
-//               )}
-
-//               {activeTab === "ai-analysis" && (
-//                 <Card>
-//                   <CardHeader>
-//                     <CardTitle className="flex items-center gap-2">
-//                       <BarChart3 className="h-5 w-5 text-gray-900" />
-//                       AI Market Analysis
-//                     </CardTitle>
-//                     <p className="text-sm text-gray-600 mt-2">
-//                       Get AI-powered insights about competitors and market analysis
-//                     </p>
-//                   </CardHeader>
-//                   <CardContent>
-//                     <div className="text-center py-12">
-//                       <div className="inline-flex items-center justify-center w-20 h-20 bg-yellow-100 rounded-full mb-4">
-//                         <BarChart3 className="h-10 w-10 text-yellow-600" />
-//                       </div>
-//                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-//                         Get AI-Powered Market Analysis
-//                       </h3>
-//                       <p className="text-gray-600 mb-6 max-w-md mx-auto">
-//                         Discover current companies in this space, their revenue models, and market opportunities
-//                       </p>
-//                       <Button className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold">
-//                         <BarChart3 className="h-4 w-4 mr-2" />
-//                         Analyze Market
-//                       </Button>
-//                     </div>
-//                   </CardContent>
-//                 </Card>
-//               )}
-
-//               {/* Action Buttons */}
-//               <div className="mt-8 flex flex-wrap gap-3 justify-center">
-//                 <Link href="/auth">
-//                   <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-//                     <Download className="h-4 w-4 mr-2" />
-//                     Download Business Plan
-//                   </Button>
-//                 </Link>
-//                 <Link href="/advisory">
-//                   <Button variant="outline">
-//                     <MessageCircle className="h-4 w-4 mr-2" />
-//                     Ask AI about this idea
-//                   </Button>
-//                 </Link>
-//                 <Button variant="outline" onClick={() => handleShare(idea.summary || idea.description)}>
-//                   <Share2 className="h-4 w-4 mr-2" />
-//                   Share
-//                 </Button>
-//               </div>
-//             </div>
-//           </div>
-//         </>
-//       )}
-
-//       <NewFooter />
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-import { useState, useMemo, memo, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRoute, Link } from "wouter";
 import Header from "@/components/layout/header";
 import NewFooter from "@/components/sections/new-footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import {
-  Star,
-  Heart,
-  Share2,
-  Download,
-  MapPin,
-  ChevronRight,
-  MessageCircle,
-  BookOpen,
-  BarChart3,
-  PiggyBank,
-  DollarSign,
-  Shield,
-  Clock,
-  User,
-  Target,
-  CheckCircle,
-  Zap,
-  TrendingUp,
-  FileText,
-  Phone,
-  Building2,
-  Users,
-  Calendar,
-  IndianRupee,
-  Award,
-  Lightbulb,
-  Globe,
-  Briefcase,
-  GraduationCap
+  Star, Heart, Share2, Download, MapPin, ChevronRight, MessageCircle,
+  BarChart3, DollarSign, Clock, CheckCircle, Zap, TrendingUp, FileText,
+  Phone, Building2, Users, IndianRupee, Award, Lightbulb, Briefcase,
+  GraduationCap, Target, Shield, ChevronDown, ArrowRight, Sparkles,
+  PiggyBank, Globe, User
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
-// Type definitions
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface Idea {
   id: string | number;
   title: string;
@@ -1008,118 +21,38 @@ interface Idea {
   categories?: string[];
   location?: string;
   difficulty_level?: string;
-  investment?: {
-    amount?: number;
-    currency?: string;
-    display?: string;
-    description?: string;
-  };
-  market_analysis?: {
-    TAM?: string;
-    SAM?: string;
-    SOM?: string;
-    growth?: string;
-  };
+  investment?: any;
+  market_analysis?: { TAM?: string; SAM?: string; SOM?: string; growth?: string };
   time_to_market?: string;
   timeframe?: string;
   heroImage?: string;
   images?: string[];
-  ratings_reviews?: {
-    average_rating?: number;
-    total_reviews?: number;
-  } | string[];
+  ratings_reviews?: any;
   key_features?: string[];
-  business_model?: {
-    pricing_strategy?: string;
-    revenue_streams?: string[];
-  };
-  product_narrative?: {
-    problem?: string;
-    solution?: string;
-    market?: string;
-  };
-  features?: string[];
-  developing_your_idea?: {
-    concept?: string;
-    innovation?: string;
-    differentiation?: string;
-    timeline?: string;
-  };
-  industry_structure?: {
-    competitors?: string[];
-    barriers?: string[];
-    trends?: string[];
-    opportunities?: string[];
-  };
-  user_personas?: {
-    target_users?: string[];
-    pain_points?: string[];
-  };
+  business_model?: { pricing_strategy?: string; revenue_streams?: string[] };
+  product_narrative?: { problem?: string; solution?: string; market?: string };
+  developing_your_idea?: { concept?: string; innovation?: string; differentiation?: string; timeline?: string };
+  industry_structure?: { competitors?: string[]; barriers?: string[]; trends?: string[]; opportunities?: string[] };
+  user_personas?: { target_users?: string[]; pain_points?: string[] };
   investment_breakdown?: {
-    fixed_capital?: {
-      [key: string]: string | number;
-      total_fixed_capital?: string | number;
-    };
-    working_capital?: {
-      [key: string]: string | number;
-      total_working_capital?: string | number;
-    };
-    means_of_finance?: {
-      [key: string]: string | number;
-      total?: string | number;
-    };
+    fixed_capital?: { [key: string]: any; total_fixed_capital?: any };
+    working_capital?: { [key: string]: any; total_working_capital?: any };
+    means_of_finance?: { [key: string]: any; total?: any };
   };
-  employment_generation?: {
-    total?: number;
-    skilled?: number;
-    semi_skilled?: number;
-    unskilled?: number;
-  };
+  employment_generation?: { total?: number; skilled?: number; semi_skilled?: number; unskilled?: number };
   funding_options?: Array<{
-    type: string;
-    display_amount: string;
-    timeline?: string;
-    repayment_period?: string;
-    processing_time?: string;
-    sources?: Array<{
-      label: string;
-      amount: string;
-    }>;
-    options?: Array<{
-      label: string;
-      rate: string;
-    }>;
-    schemes?: Array<{
-      name: string;
-      amount: string;
-    }>;
+    type: string; display_amount: string; timeline?: string;
+    repayment_period?: string; processing_time?: string;
+    sources?: Array<{ label: string; amount: string }>;
+    options?: Array<{ label: string; rate: string }>;
+    schemes?: Array<{ name: string; amount: string }>;
   }>;
-  pmegp_summary?: {
-    project_viability?: {
-      [key: string]: string | number;
-    };
-    benefits?: string[];
-    eligibility?: string[];
-  };
-  value_proposition?: {
-    primary?: string;
-    secondary?: string[];
-    competitive_advantage?: string;
-  };
-  scale_path?: {
-    timeline?: string;
-    milestones?: string[];
-  };
+  pmegp_summary?: { project_viability?: any; benefits?: string[]; eligibility?: string[] };
+  value_proposition?: { primary?: string; secondary?: string[]; competitive_advantage?: string };
+  scale_path?: { timeline?: string; milestones?: string[] };
   business_moats?: string[];
-  skills_required?: {
-    technical_skills?: string[];
-    business_skills?: string[];
-    soft_skills?: string[];
-  };
-  key_metrics?: {
-    customer_metrics?: string[];
-    financial_metrics?: string[];
-  };
+  skills_required?: { technical_skills?: string[]; business_skills?: string[]; soft_skills?: string[] };
+  key_metrics?: { customer_metrics?: string[]; financial_metrics?: string[] };
   tech_stack?: string;
   category?: string;
 }
@@ -1132,1285 +65,955 @@ interface Review {
   userId?: string | number;
 }
 
-interface User {
-  id: string | number;
-  name?: string;
-  email?: string;
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function getInvestmentDisplay(inv: any): string {
+  if (!inv) return "₹0";
+  if (typeof inv === "string") {
+    try { const p = JSON.parse(inv); return p?.display || inv; } catch { return inv; }
+  }
+  return inv.display || (inv.amount ? `₹${inv.amount}` : "₹0");
+}
+function getInvestmentDescription(inv: any): string {
+  if (!inv) return "";
+  if (typeof inv === "string") {
+    try { const p = JSON.parse(inv); return p?.description || ""; } catch { return ""; }
+  }
+  return inv.description || "";
+}
+function getDiffColor(level?: string) {
+  if (!level) return "bg-gray-100 text-gray-700";
+  const l = level.toLowerCase();
+  if (l === "easy") return "bg-emerald-100 text-emerald-700";
+  if (l === "hard") return "bg-red-100 text-red-700";
+  return "bg-amber-100 text-amber-700";
 }
 
-interface ApiResponse {
-  ideas: Idea[];
-}
+// ─── Section anchor helper ─────────────────────────────────────────────────────
+const sections = [
+  { id: "story", label: "The Story" },
+  { id: "market", label: "Market" },
+  { id: "investment", label: "Investment" },
+  { id: "funding", label: "Funding" },
+  { id: "business", label: "Business" },
+  { id: "skills", label: "Skills" },
+  { id: "reviews", label: "Reviews" },
+];
 
-interface ReviewsResponse {
-  reviews: Review[];
-  averageRating?: number;
-  totalReviews?: number;
-}
-
-interface UserReviewResponse {
-  review?: Review;
-}
-
-interface HeroSectionProps {
-  idea: Idea | null;
-  onhandleShare: (summary: string) => void;
-  averageRating: number;
-  totalReviews: number;
-}
-
-// Enhanced Hero Section matching file 1 design
-const HeroSection = memo(({ idea, onhandleShare, averageRating, totalReviews ,getInvestmentDisplay}: HeroSectionProps) => (
-  <div className="bg-white border-b">
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid lg:grid-cols-2 gap-8 items-center">
-        {/* Left Half - Image */}
-        <div className="relative">
-          <img
-            src={idea?.heroImage || idea?.images?.[0] || '/placeholder-image.jpg'}
-            alt={idea?.title || 'Business Idea'}
-            className="w-full h-80 lg:h-96 object-cover rounded-lg shadow-lg"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
-            }}
-          />
-          <div className="absolute top-4 left-4 flex gap-2">
-            {idea?.categories?.map((category: string, idx: number) => (
-              <Badge key={idx} className="bg-white/90 text-gray-800 backdrop-blur-sm">
-                {category}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {/* Right Half - Key Information */}
-        <div className="space-y-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin className="h-4 w-4 text-blue-600" />
-              <span className="text-sm text-gray-600">{idea?.location || 'India'}</span>
-              <Badge className="bg-green-100 text-green-800">{idea?.difficulty_level || 'Medium'}</Badge>
-            </div>
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{idea?.title}</h1>
-            <p className="text-lg text-gray-600 leading-relaxed">{idea?.summary || idea?.description}</p>
-          </div>
-
-          {/* Key Metrics Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {getInvestmentDisplay(idea?.investment)}
-              </div>
-              <div className="text-sm text-gray-600">Investment Required</div>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-green-600">{idea?.market_analysis?.growth || "0%"}</div>
-              <div className="text-sm text-gray-600">Market Growth</div>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-purple-600">{idea?.time_to_market || idea?.timeframe || "0 months"}</div>
-              <div className="text-sm text-gray-600">Time to Market</div>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg text-center">
-              <div className="flex items-center justify-center gap-1">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-2xl font-bold text-yellow-600">{averageRating?.toFixed(1) || "0.0"}</span>
-              </div>
-              <div className="text-sm text-gray-600">{totalReviews || 0} Reviews</div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <Link href="/auth">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Download className="h-4 w-4 mr-2" />
-                Download Detailed Report & Business Plan
-              </Button>
-            </Link>
-            <Link href="/advisory">
-              <Button variant="outline">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Ask Expert
-              </Button>
-            </Link>
-            <Button variant="outline" onClick={() => onhandleShare(idea?.summary || idea?.description || '')}>
-              <Share2 className="h-4 w-4 mr-2" />
-              Share
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-));
-HeroSection.displayName = 'HeroSection';
-
+// ─── Main Component ────────────────────────────────────────────────────────────
 export default function IdeaDetail(): JSX.Element {
   const [, params] = useRoute("/idea/:id");
   const ideaId = params?.id || "1";
 
   const [idea, setIdea] = useState<Idea | null>(null);
-  console.log("Idea Data:", idea);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedRating, setSelectedRating] = useState<number>(0);
-  const [hoverRating, setHoverRating] = useState<number>(0);
-  const [comment, setComment] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<string>("overview");
+  const [activeSection, setActiveSection] = useState("story");
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
   const [userReview, setUserReview] = useState<Review | null>(null);
-  const [isEditingReview, setIsEditingReview] = useState<boolean>(false);
+  const [isEditingReview, setIsEditingReview] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [averageRating, setAverageRating] = useState<number>(0);
-  const [totalReviews, setTotalReviews] = useState<number>(0);
-  const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
-  const { user } = useAuth<{ user: User | null }>();
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const { user } = useAuth<{ user: any }>();
+  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
-  const fetchIdea = async (): Promise<void> => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/platformideas`);
-      if (response.ok) {
-        const data: ApiResponse = await response.json();
-        const ideaData = data?.ideas?.find((idea: Idea) => String(idea.id) === String(ideaId));
-
-        let avgValue = 0;
-        let totalReviewscount = 0;
-
-        if (Array.isArray(ideaData?.ratings_reviews)) {
-          const avgStr = ideaData.ratings_reviews.find((s: string) => s.startsWith("average_rating:"));
-          const totalStr = ideaData.ratings_reviews.find((s: string) => s.startsWith("total_reviews:"));
-
-          avgValue = avgStr ? parseFloat(avgStr.split(":")[1].trim()) : 0;
-          totalReviewscount = totalStr ? parseInt(totalStr.split(":")[1].trim()) : 0;
-          setAverageRating(avgValue);
-          setTotalReviews(totalReviewscount);
-        }
-        else {
-          setAverageRating(ideaData?.ratings_reviews?.average_rating || 0);
-          setTotalReviews(ideaData?.ratings_reviews?.total_reviews || 0);
-        }
-
-        setIdea(ideaData || null);
-      } else {
-        setError('Failed to fetch idea details');
-      }
-    } catch (err) {
-      console.error('Failed to fetch idea:', err);
-      setError('An error occurred while fetching the idea');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Safely extract investment display/description from either a JSON string or object
-    function getInvestmentDisplay(investment: any): string {
-      if (!investment) return '₹0';
-      if (typeof investment === 'string') {
-        const trimmed = investment.trim();
-        if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
-          try {
-            const parsed = JSON.parse(trimmed);
-            return parsed?.display || investment;
-          } catch (e) {
-            // not JSON — return raw string
-            return investment;
-          }
-        }
-        return investment;
-      }
-  
-      // object with display property
-      if (investment.display) return investment.display;
-  
-      // fallback: format amount if present
-      if (typeof investment.amount === 'number') return `₹${investment.amount}`;
-      return '₹0';
-    }
-  
-    function getInvestmentDescription(investment: any): string {
-      if (!investment) return '';
-      if (typeof investment === 'string') {
-        const trimmed = investment.trim();
-        if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
-          try {
-            const parsed = JSON.parse(trimmed);
-            return parsed?.description || '';
-          } catch (e) {
-            return '';
-          }
-        }
-        return '';
-      }
-      return investment.description || '';
-    }
-
+  // Fetch idea
   useEffect(() => {
-    fetchIdea();
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/platformideas");
+        if (res.ok) {
+          const data = await res.json();
+          const found = data?.ideas?.find((i: Idea) => String(i.id) === String(ideaId));
+          if (found) {
+            if (Array.isArray(found.ratings_reviews)) {
+              const avgStr = found.ratings_reviews.find((s: string) => s.startsWith("average_rating:"));
+              const totStr = found.ratings_reviews.find((s: string) => s.startsWith("total_reviews:"));
+              setAverageRating(avgStr ? parseFloat(avgStr.split(":")[1]) : 0);
+              setTotalReviews(totStr ? parseInt(totStr.split(":")[1]) : 0);
+            } else {
+              setAverageRating(found.ratings_reviews?.average_rating || 0);
+              setTotalReviews(found.ratings_reviews?.total_reviews || 0);
+            }
+            setIdea(found);
+          }
+        } else setError("Failed to load");
+      } catch { setError("Something went wrong"); }
+      finally { setLoading(false); }
+    })();
   }, [ideaId]);
 
-  // Fetch reviews when the component loads or idea changes
+  // Fetch reviews
   useEffect(() => {
-    const fetchReviews = async (): Promise<void> => {
-      if (!idea) return;
-
-      setLoadingReviews(true);
+    if (!idea) return;
+    (async () => {
       try {
-        const response = await fetch(`/api/ideas/${idea.id}/reviews`);
-        if (response.ok) {
-          const data: ReviewsResponse = await response.json();
-          setReviews(data.reviews || []);
-        }
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-      } finally {
-        setLoadingReviews(false);
-      }
-    };
-
-    fetchReviews();
+        const res = await fetch(`/api/ideas/${idea.id}/reviews`);
+        if (res.ok) { const d = await res.json(); setReviews(d.reviews || []); }
+      } catch {}
+    })();
   }, [idea]);
 
+  // Fetch user review
   useEffect(() => {
-    const fetchUserReview = async (): Promise<void> => {
-      if (!idea || !user) return;
-
+    if (!idea || !user) return;
+    (async () => {
       try {
-        const response = await fetch(`/api/ideas/${idea.id}/user-review`);
-        if (response.ok) {
-          const data: UserReviewResponse = await response.json();
-          if (data.review) {
-            setUserReview(data.review);
-            setSelectedRating(data.review.rating);
-            setComment(data.review.comment || '');
-          }
+        const res = await fetch(`/api/ideas/${idea.id}/user-review`);
+        if (res.ok) {
+          const d = await res.json();
+          if (d.review) { setUserReview(d.review); setSelectedRating(d.review.rating); setComment(d.review.comment || ""); }
         }
-      } catch (error) {
-        console.error("Error fetching user review:", error);
-      }
-    };
-
-    fetchUserReview();
+      } catch {}
+    })();
   }, [idea, user]);
 
-  const handleDeleteReview = async (): Promise<void> => {
-    if (!user || !userReview || !idea) return;
+  // Scroll spy
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) setActiveSection(e.target.id); });
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+    sections.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+  }, [idea]);
 
-    if (!confirm('Are you sure you want to delete your review?')) return;
-
-    try {
-      const response = await fetch(`/api/ideas/${idea.id}/reviews/${userReview.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        // Refresh reviews
-        const reviewsResponse = await fetch(`/api/ideas/${idea.id}/reviews`);
-        if (reviewsResponse.ok) {
-          fetchIdea();
-          const reviewsData: ReviewsResponse = await reviewsResponse.json();
-          setReviews(reviewsData.reviews || []);
-          setAverageRating(reviewsData.averageRating || 0);
-          setTotalReviews(reviewsData.totalReviews || 0);
-        }
-
-        // Reset form and state
-        setUserReview(null);
-        setSelectedRating(0);
-        setComment('');
-        alert('Review deleted successfully!');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.message || 'Failed to delete review');
-      }
-    } catch (error) {
-      console.error('Error deleting review:', error);
-      alert('An error occurred while deleting your review');
-    }
+  const handleShare = async (text: string) => {
+    if (navigator.share) { try { await navigator.share({ text }); } catch {} }
+    else { navigator.clipboard.writeText(text); alert("Copied to clipboard!"); }
   };
 
-  // Update the review submission function
-  const handleSubmitReview = async (): Promise<void> => {
-    if (selectedRating === 0) {
-      alert('Please select a rating');
-      return;
-    }
-    if (!user) {
-      window.location.href = '/auth';
-      return;
-    }
-
+  const handleSubmitReview = async () => {
+    if (!selectedRating) { alert("Please select a rating"); return; }
+    if (!user) { window.location.href = "/auth"; return; }
     if (!idea) return;
-
     try {
-      let response: Response;
-
-      if (userReview) {
-        // Update existing review
-        response = await fetch(`/api/ideas/${idea.id}/reviews/${userReview.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            rating: selectedRating,
-            comment: comment
-          }),
-        });
-      } else {
-        // Create new review
-        response = await fetch(`/api/ideas/${idea.id}/reviews`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            rating: selectedRating,
-            comment: comment
-          }),
-        });
+      const url = userReview ? `/api/ideas/${idea.id}/reviews/${userReview.id}` : `/api/ideas/${idea.id}/reviews`;
+      const method = userReview ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method, headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: selectedRating, comment }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setUserReview(d.review); setIsEditingReview(false);
+        alert(userReview ? "Review updated!" : "Review submitted!");
       }
-
-      if (response.ok) {
-        const data = await response.json();
-
-        // Refresh reviews
-        const reviewsResponse = await fetch(`/api/ideas/${idea.id}/reviews`);
-        if (reviewsResponse.ok) {
-          fetchIdea();
-          const reviewsData: ReviewsResponse = await reviewsResponse.json();
-        }
-
-        // Update user review state
-        if (userReview) {
-          setUserReview(data.review);
-          setIsEditingReview(false);
-          alert('Review updated successfully!');
-        } else {
-          setUserReview(data.review);
-          alert('Review submitted successfully!');
-        }
-      } else {
-        const errorData = await response.json();
-        alert(errorData.message || 'Failed to submit review');
-      }
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('An error occurred while submitting your review');
-    }
+    } catch {}
   };
 
-  const handleShare = async (summary: string): Promise<void> => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          text: summary
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      navigator.clipboard.writeText(summary);
-      alert('Content copied to clipboard!');
-    }
+  const handleDeleteReview = async () => {
+    if (!idea || !userReview || !confirm("Delete your review?")) return;
+    try {
+      const res = await fetch(`/api/ideas/${idea.id}/reviews/${userReview.id}`, { method: "DELETE" });
+      if (res.ok) { setUserReview(null); setSelectedRating(0); setComment(""); alert("Deleted!"); }
+    } catch {}
   };
 
+  // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Header />
 
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center gap-2 text-sm">
-            <Link href="/" className="text-blue-600 hover:text-blue-800">Home</Link>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
-            <Link href="/all-ideas" className="text-blue-600 hover:text-blue-800">Business Ideas</Link>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
-            <span className="text-gray-600 font-medium truncate">{idea?.title}</span>
-          </div>
+      <div className="bg-gray-50 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-1.5 text-xs text-gray-500">
+          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <ChevronRight className="w-3 h-3" />
+          <Link href="/all-ideas" className="hover:text-blue-600 transition-colors">Ideas</Link>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-gray-800 font-medium truncate max-w-xs">{idea?.title}</span>
         </div>
       </div>
 
+      {/* Loading */}
       {loading && (
-        <div className="container mx-auto px-4 py-8 text-center">
-          <div className="text-lg">Loading idea details...</div>
+        <div className="flex flex-col items-center justify-center py-40 gap-4">
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+          <p className="text-gray-500 font-medium">Loading idea...</p>
         </div>
       )}
 
+      {/* Error */}
       {error && (
-        <div className="container mx-auto px-4 py-8 text-center">
-          <div className="text-lg text-red-500">Error: {error}</div>
-          <Button onClick={() => window.location.reload()} className="mt-4">
-            Retry
-          </Button>
+        <div className="flex flex-col items-center justify-center py-40 gap-4">
+          <p className="text-red-500 text-lg">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
         </div>
       )}
 
       {!loading && !error && idea && (
         <>
-          {/* Hero Section */}
-          <HeroSection
-            idea={idea}
-            averageRating={averageRating}
-            totalReviews={totalReviews}
-            onhandleShare={handleShare}
-            getInvestmentDisplay={getInvestmentDisplay}
-          />
+          {/* ══════════════════════════════════════════════════
+              HERO — Cinematic full-width with floating stats
+          ══════════════════════════════════════════════════ */}
+          <section className="relative w-full overflow-hidden" style={{ height: "92vh", minHeight: 560 }}>
+            {/* Background image */}
+            <img
+              src={idea.heroImage || idea.images?.[0] || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&h=900&fit=crop"}
+              alt={idea.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-900/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent" />
 
-          {/* Tab Navigation */}
-          <div className="bg-white border-b sticky top-16 z-40">
-            <div className="container mx-auto px-4">
-              <div className="flex space-x-8 overflow-x-auto">
+            {/* Content */}
+            <div className="relative h-full max-w-7xl mx-auto px-6 flex flex-col justify-end pb-14">
+              {/* Badges */}
+              <div className="flex items-center gap-3 mb-5">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getDiffColor(idea.difficulty_level)}`}>
+                  {idea.difficulty_level || "Medium"}
+                </span>
+                {idea.categories?.slice(0, 2).map((c, i) => (
+                  <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white backdrop-blur-sm border border-white/20">
+                    {c}
+                  </span>
+                ))}
+                {idea.location && (
+                  <span className="flex items-center gap-1 text-xs text-white/70">
+                    <MapPin className="w-3 h-3" /> {idea.location}
+                  </span>
+                )}
+              </div>
+
+              {/* Title */}
+              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight mb-4 max-w-3xl">
+                {idea.title}
+              </h1>
+
+              {/* Description */}
+              <p className="text-lg text-white/80 max-w-2xl mb-8 leading-relaxed">
+                {idea.summary || idea.description}
+              </p>
+
+              {/* Stat pills row */}
+              <div className="flex flex-wrap gap-4 mb-8">
                 {[
-                  { key: "overview", label: "Overview", icon: BookOpen },
-                  { key: "market", label: "Market Analysis", icon: BarChart3 },
-                  { key: "investment", label: "Investment", icon: PiggyBank },
-                  { key: "funding", label: "Funding", icon: DollarSign },
-                  { key: "business", label: "Business Model", icon: Briefcase },
-                  { key: "skills", label: "Skills Required", icon: GraduationCap }
-                ].map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.key}
-                      onClick={() => setActiveTab(tab.key)}
-                      className={`flex items-center gap-2 py-4 px-2 border-b-2 whitespace-nowrap text-sm font-medium transition-colors ${activeTab === tab.key
-                        ? "border-blue-600 text-blue-600"
-                        : "border-transparent text-gray-500 hover:text-gray-700"
-                        }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {tab.label}
-                    </button>
-                  );
-                })}
+                  { icon: IndianRupee, label: "Investment", value: getInvestmentDisplay(idea.investment), color: "from-yellow-400 to-orange-400" },
+                  { icon: TrendingUp, label: "Market CAGR", value: idea.market_analysis?.growth || "—", color: "from-emerald-400 to-teal-400" },
+                  { icon: Clock, label: "Time to Market", value: idea.time_to_market || idea.timeframe || "—", color: "from-blue-400 to-indigo-400" },
+                  { icon: Star, label: "Rating", value: `${averageRating?.toFixed(1) || "0.0"} (${totalReviews})`, color: "from-purple-400 to-pink-400" },
+                ].map((s, i) => (
+                  <div key={i} className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3">
+                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center flex-shrink-0`}>
+                      <s.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/60 uppercase tracking-wider font-semibold">{s.label}</p>
+                      <p className="text-sm font-bold text-white">{s.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-3 items-center">
+                <Link href="/auth">
+                  <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5">
+                    <Download className="w-4 h-4" />
+                    Download Business Plan
+                  </button>
+                </Link>
+                <Link href="/advisory">
+                  <button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-xl border border-white/30 backdrop-blur-sm transition-all">
+                    <MessageCircle className="w-4 h-4" />
+                    Ask Expert
+                  </button>
+                </Link>
+                <button
+                  onClick={() => setLiked(!liked)}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all ${liked ? "bg-red-500 border-red-500" : "bg-white/10 border-white/30 hover:bg-white/20"}`}
+                >
+                  <Heart className={`w-5 h-5 ${liked ? "fill-white text-white" : "text-white"}`} />
+                </button>
+                <button
+                  onClick={() => handleShare(idea.summary || idea.description || "")}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/10 border border-white/30 hover:bg-white/20 transition-all"
+                >
+                  <Share2 className="w-5 h-5 text-white" />
+                </button>
               </div>
             </div>
-          </div>
 
-          {/* Main Content */}
-          <div className="py-8">
-            <div className="container mx-auto px-4">
-              <div className="grid lg:grid-cols-4 gap-8">
+            {/* Scroll indicator */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce">
+              <span className="text-white/40 text-xs">Scroll to explore</span>
+              <ChevronDown className="w-4 h-4 text-white/40" />
+            </div>
+          </section>
 
-                {/* Main Content - 3 columns */}
-                <div className="lg:col-span-3 space-y-8">
+          {/* ══════════════════════════════════════════════════
+              BODY — Sticky nav + scrollable content
+          ══════════════════════════════════════════════════ */}
+          <div className="max-w-7xl mx-auto px-4 py-12 relative">
+            <div className="flex gap-8">
 
-                  {activeTab === "overview" && (
-                    <div className="space-y-6">
-                      {/* Product Narrative */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Target className="h-5 w-5 text-blue-600" />
-                            Product Narrative
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold mb-2 text-red-700">Problem</h4>
-                            <p className="text-gray-600">{idea?.product_narrative?.problem}</p>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold mb-2 text-green-700">Solution</h4>
-                            <p className="text-gray-600">{idea?.product_narrative?.solution}</p>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold mb-2 text-blue-700">Market</h4>
-                            <p className="text-gray-600">{idea?.product_narrative?.market}</p>
-                          </div>
-                        </CardContent>
-                      </Card>
+              {/* ── Sticky left nav (desktop) ── */}
+              <aside className="hidden xl:flex flex-col gap-1 w-36 flex-shrink-0 sticky top-24 self-start h-fit">
+                {sections.map((s) => (
+                  <a
+                    key={s.id}
+                    href={`#${s.id}`}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all group ${
+                      activeSection === s.id
+                        ? "bg-blue-50 text-blue-700"
+                        : "text-gray-400 hover:text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all ${
+                      activeSection === s.id ? "bg-blue-600 scale-125" : "bg-gray-300 group-hover:bg-gray-500"
+                    }`} />
+                    {s.label}
+                  </a>
+                ))}
+              </aside>
 
-                      {/* Key Features */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-purple-600" />
-                            Key Features
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            {idea?.key_features?.map((feature: string, idx: number) => (
-                              <div key={idx} className="flex items-start gap-3">
-                                <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                                <span className="text-gray-600">{feature}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
+              {/* ── Main scrollable content ── */}
+              <main className="flex-1 min-w-0 space-y-20">
 
-                      {/* Development Strategy */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Lightbulb className="h-5 w-5 text-yellow-600" />
-                            Developing Your Idea
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                              <h4 className="font-semibold mb-2">Concept</h4>
-                              <p className="text-sm text-gray-600">{idea?.developing_your_idea?.concept}</p>
+                {/* ── SECTION 1: The Story ── */}
+                <section id="story">
+                  <SectionLabel icon={Lightbulb} color="yellow" text="The Story" />
+
+                  {/* Problem → Solution → Market strip */}
+                  <div className="grid md:grid-cols-3 gap-px bg-gray-100 rounded-2xl overflow-hidden shadow-sm mt-6">
+                    {[
+                      { label: "Problem", color: "bg-red-50", textColor: "text-red-700", text: idea.product_narrative?.problem, icon: "🔥" },
+                      { label: "Solution", color: "bg-emerald-50", textColor: "text-emerald-700", text: idea.product_narrative?.solution, icon: "💡" },
+                      { label: "Market", color: "bg-blue-50", textColor: "text-blue-700", text: idea.product_narrative?.market, icon: "🌍" },
+                    ].map((block, i) => (
+                      <div key={i} className={`${block.color} p-7`}>
+                        <div className="text-2xl mb-2">{block.icon}</div>
+                        <h3 className={`font-bold text-sm uppercase tracking-wider mb-3 ${block.textColor}`}>{block.label}</h3>
+                        <p className="text-gray-700 text-sm leading-relaxed">{block.text}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Key Features */}
+                  {idea.key_features && idea.key_features.length > 0 && (
+                    <div className="mt-10">
+                      <h3 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-purple-500" /> Key Features
+                      </h3>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {idea.key_features.map((feat, i) => (
+                          <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-gray-50 hover:bg-purple-50 transition-colors group">
+                            <div className="w-6 h-6 rounded-full bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <CheckCircle className="w-3.5 h-3.5 text-purple-600" />
                             </div>
-                            <div>
-                              <h4 className="font-semibold mb-2">Innovation</h4>
-                              <p className="text-sm text-gray-600">{idea?.developing_your_idea?.innovation}</p>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold mb-2">Differentiation</h4>
-                              <p className="text-sm text-gray-600">{idea?.developing_your_idea?.differentiation}</p>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold mb-2">Timeline</h4>
-                              <p className="text-sm text-gray-600">{idea?.developing_your_idea?.timeline}</p>
-                            </div>
+                            <span className="text-sm text-gray-700 font-medium">{feat}</span>
                           </div>
-                        </CardContent>
-                      </Card>
+                        ))}
+                      </div>
                     </div>
                   )}
 
-                  {activeTab === "market" && (
-                    <div className="space-y-6">
-                      {/* Market Size */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <BarChart3 className="h-5 w-5 text-blue-600" />
-                            Market Analysis
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                            <div className="bg-blue-50 p-4 rounded-lg text-center">
-                              <div className="text-xl font-bold text-blue-600">{idea?.market_analysis?.TAM}</div>
-                              <div className="text-xs text-gray-600">Total Addressable Market</div>
-                            </div>
-                            <div className="bg-green-50 p-4 rounded-lg text-center">
-                              <div className="text-xl font-bold text-green-600">{idea?.market_analysis?.SAM}</div>
-                              <div className="text-xs text-gray-600">Serviceable Available Market</div>
-                            </div>
-                            <div className="bg-purple-50 p-4 rounded-lg text-center">
-                              <div className="text-xl font-bold text-purple-600">{idea?.market_analysis?.SOM}</div>
-                              <div className="text-xs text-gray-600">Serviceable Obtainable Market</div>
-                            </div>
-                            <div className="bg-orange-50 p-4 rounded-lg text-center">
-                              <div className="text-xl font-bold text-orange-600">{idea?.market_analysis?.growth}</div>
-                              <div className="text-xs text-gray-600">Annual Growth Rate</div>
-                            </div>
+                  {/* Developing the Idea */}
+                  {idea.developing_your_idea && (
+                    <div className="mt-10 p-8 rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white">
+                      <h3 className="text-xl font-bold text-gray-900 mb-6">Building This Business</h3>
+                      <div className="grid sm:grid-cols-2 gap-6">
+                        {[
+                          { label: "Concept", value: idea.developing_your_idea.concept },
+                          { label: "Innovation", value: idea.developing_your_idea.innovation },
+                          { label: "Differentiation", value: idea.developing_your_idea.differentiation },
+                          { label: "Launch Timeline", value: idea.developing_your_idea.timeline },
+                        ].map((item, i) => item.value ? (
+                          <div key={i}>
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">{item.label}</h4>
+                            <p className="text-sm text-gray-700 leading-relaxed">{item.value}</p>
                           </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Industry Structure */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Industry Structure</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                              <h4 className="font-semibold mb-3 text-red-700">Key Competitors</h4>
-                              <ul className="space-y-2">
-                                {idea?.industry_structure?.competitors?.map((competitor: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <Building2 className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-600">{competitor}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold mb-3 text-orange-700">Market Barriers</h4>
-                              <ul className="space-y-2">
-                                {idea?.industry_structure?.barriers?.map((barrier: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <Shield className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-600">{barrier}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-
-                          <Separator className="my-6" />
-
-                          <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                              <h4 className="font-semibold mb-3 text-green-700">Market Trends</h4>
-                              <ul className="space-y-2">
-                                {idea?.industry_structure?.trends?.map((trend: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <TrendingUp className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-600">{trend}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold mb-3 text-blue-700">Opportunities</h4>
-                              <ul className="space-y-2">
-                                {idea?.industry_structure?.opportunities?.map((opportunity: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <Target className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-600">{opportunity}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* User Personas */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Users className="h-5 w-5 text-purple-600" />
-                            Target Users & Pain Points
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                              <h4 className="font-semibold mb-3 text-blue-700">Target Users</h4>
-                              <ul className="space-y-2">
-                                {idea?.user_personas?.target_users?.map((user: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <User className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-600">{user}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold mb-3 text-red-700">Pain Points</h4>
-                              <ul className="space-y-2">
-                                {idea?.user_personas?.pain_points?.map((pain: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <Zap className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-600">{pain}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        ) : null)}
+                      </div>
                     </div>
                   )}
+                </section>
 
-                  {activeTab === "investment" && (
-                    <div className="space-y-6">
-                      {/* Investment Overview */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <PiggyBank className="h-5 w-5 text-green-600" />
-                            Investment Breakdown
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-center mb-6">
-                            <div className="text-4xl font-bold text-green-600 mb-2">
-                              {getInvestmentDisplay(idea?.investment)}
-                            </div>
-                              {/* i want write here for description */}
-                            <div className="text-gray-600">{getInvestmentDescription(idea?.investment)}</div>
-                          </div>
+                {/* ── SECTION 2: Market ── */}
+                <section id="market">
+                  <SectionLabel icon={BarChart3} color="blue" text="Market Opportunity" />
 
-                          <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                              <h4 className="font-semibold mb-4 text-blue-700">Fixed Capital (₹{idea?.investment_breakdown?.fixed_capital?.total_fixed_capital})</h4>
-                              <div className="space-y-3">
-                                {Object.entries(idea?.investment_breakdown?.fixed_capital || {})
-                                  .filter(([key]) => key !== 'total_fixed_capital')
-                                  .map(([item, amount]) => (
-                                    <div key={item} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                      <span className="text-sm font-medium">{item.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                                      <span className="text-sm font-bold text-blue-600">{amount}</span>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
+                  {/* TAM / SAM / SOM / Growth big numbers */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                    {[
+                      { label: "Total Market (TAM)", value: idea.market_analysis?.TAM, gradient: "from-blue-500 to-blue-700" },
+                      { label: "Serviceable (SAM)", value: idea.market_analysis?.SAM, gradient: "from-teal-500 to-emerald-600" },
+                      { label: "Your Slice (SOM)", value: idea.market_analysis?.SOM, gradient: "from-violet-500 to-purple-700" },
+                      { label: "Annual Growth", value: idea.market_analysis?.growth, gradient: "from-orange-500 to-red-500" },
+                    ].map((m, i) => (
+                      <div key={i} className={`bg-gradient-to-br ${m.gradient} rounded-2xl p-6 text-white shadow-lg`}>
+                        <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-2">{m.label}</p>
+                        <p className="text-xl font-black leading-tight">{m.value || "—"}</p>
+                      </div>
+                    ))}
+                  </div>
 
-                            <div>
-                              <h4 className="font-semibold mb-4 text-purple-700">Working Capital (₹{idea?.investment_breakdown?.working_capital?.total_working_capital})</h4>
-                              <div className="space-y-3">
-                                {Object.entries(idea?.investment_breakdown?.working_capital || {})
-                                  .filter(([key]) => key !== 'total_working_capital')
-                                  .map(([item, amount]) => (
-                                    <div key={item} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                                      <span className="text-sm font-medium">{item.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                                      <span className="text-sm font-bold text-purple-600">{amount}</span>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Financing Structure */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <IndianRupee className="h-5 w-5 text-orange-600" />
-                            Financing Structure
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-3 gap-4">
-                            {Object.entries(idea?.investment_breakdown?.means_of_finance || {})
-                              .filter(([key]) => key !== 'total')
-                              .map(([source, amount]) => (
-                                <div key={source} className="bg-gray-50 p-4 rounded-lg text-center">
-                                  <div className="text-xl font-bold text-gray-700">{amount}</div>
-                                  <div className="text-sm text-gray-600 mt-1">{source.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
-                                </div>
-                              ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Employment Generation */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Users className="h-5 w-5 text-teal-600" />
-                            Employment Generation
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-4 gap-4 text-center">
-                            <div className="bg-teal-50 p-4 rounded-lg">
-                              <div className="text-2xl font-bold text-teal-600">{idea?.employment_generation?.total}</div>
-                              <div className="text-sm text-gray-600">Total Jobs</div>
-                            </div>
-                            <div className="bg-blue-50 p-4 rounded-lg">
-                              <div className="text-2xl font-bold text-blue-600">{idea?.employment_generation?.skilled}</div>
-                              <div className="text-sm text-gray-600">Skilled</div>
-                            </div>
-                            <div className="bg-green-50 p-4 rounded-lg">
-                              <div className="text-2xl font-bold text-green-600">{idea?.employment_generation?.semi_skilled}</div>
-                              <div className="text-sm text-gray-600">Semi-Skilled</div>
-                            </div>
-                            <div className="bg-yellow-50 p-4 rounded-lg">
-                              <div className="text-2xl font-bold text-yellow-600">{idea?.employment_generation?.unskilled}</div>
-                              <div className="text-sm text-gray-600">Unskilled</div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )}
-
-                  {activeTab === "funding" && (
-                    <div className="space-y-6">
-                      {/* Funding Options */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <DollarSign className="h-5 w-5 text-green-600" />
-                            Funding Options
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-6">
-                            {idea?.funding_options?.map((option, idx) => (
-                              <div key={idx} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
-                                <div className="flex justify-between items-start mb-4">
-                                  <h4 className="text-lg font-semibold text-gray-900">{option.type}</h4>
-                                  <Badge className="bg-green-100 text-green-800 text-lg px-3 py-1">{option.display_amount}</Badge>
-                                </div>
-
-                                {option.sources && (
-                                  <div className="mb-3">
-                                    <span className="text-sm font-medium text-gray-700">Sources:</span>
-                                    {option.sources.map((source, sourceIdx) => (
-                                      <div key={sourceIdx} className="ml-4 text-sm text-gray-600">
-                                        • {source.label}: {source.amount}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {option.options && (
-                                  <div className="mb-3">
-                                    <span className="text-sm font-medium text-gray-700">Options:</span>
-                                    {option.options.map((opt, optIdx) => (
-                                      <div key={optIdx} className="ml-4 text-sm text-gray-600">
-                                        • {opt.label}: {opt.rate}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {option.schemes && (
-                                  <div className="mb-3">
-                                    <span className="text-sm font-medium text-gray-700">Government Schemes:</span>
-                                    {option.schemes.map((scheme, schemeIdx) => (
-                                      <div key={schemeIdx} className="ml-4 text-sm text-gray-600">
-                                        • {scheme.name}: {scheme.amount}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-
-                                <div className="flex justify-between text-sm text-gray-500 mt-4">
-                                  <span>Timeline: {option.timeline}</span>
-                                  {option.repayment_period && <span>Repayment: {option.repayment_period}</span>}
-                                  {option.processing_time && <span>Processing: {option.processing_time}</span>}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* PMEGP Details (for bakery only) */}
-                      {idea?.pmegp_summary && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <Award className="h-5 w-5 text-blue-600" />
-                              PMEGP Scheme Details
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-6">
-                            <div className="grid md:grid-cols-2 gap-6">
-                              <div>
-                                <h4 className="font-semibold mb-3 text-blue-700">Project Viability</h4>
-                                <div className="space-y-2">
-                                  {Object.entries(idea.pmegp_summary.project_viability || {}).map(([key, value]) => (
-                                    <div key={key} className="flex justify-between">
-                                      <span className="text-sm text-gray-600">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
-                                      <span className="text-sm font-medium">{value}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-
-                              <div>
-                                <h4 className="font-semibold mb-3 text-green-700">Benefits</h4>
-                                <ul className="space-y-1">
-                                  {idea.pmegp_summary.benefits?.map((benefit, idx) => (
-                                    <li key={idx} className="flex items-start gap-2">
-                                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                                      <span className="text-sm text-gray-600">{benefit}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </div>
-
-                            <div>
-                              <h4 className="font-semibold mb-3 text-purple-700">Eligibility Criteria</h4>
-                              <ul className="grid md:grid-cols-2 gap-2">
-                                {idea.pmegp_summary.eligibility?.map((criteria, idx) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <Shield className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-600">{criteria}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
-                  )}
-
-                  {activeTab === "business" && (
-                    <div className="space-y-6">
-                      {/* Value Proposition */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Target className="h-5 w-5 text-blue-600" />
-                            Value Proposition
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="mb-4">
-                            <h4 className="font-semibold mb-2 text-blue-700">Primary Value Proposition</h4>
-                            <p className="text-gray-600 text-lg">{idea?.value_proposition?.primary}</p>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold mb-3 text-green-700">Secondary Benefits</h4>
-                            <ul className="space-y-2">
-                              {idea?.value_proposition?.secondary?.map((benefit, idx) => (
-                                <li key={idx} className="flex items-start gap-2">
-                                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                                  <span className="text-gray-600">{benefit}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                            <h4 className="font-semibold mb-2 text-blue-700">Competitive Advantage</h4>
-                            <p className="text-gray-600">{idea?.value_proposition?.competitive_advantage}</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Business Model */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Briefcase className="h-5 w-5 text-green-600" />
-                            Business Model
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                              <h4 className="font-semibold mb-3 text-green-700">Revenue Streams</h4>
-                              <ul className="space-y-2">
-                                {idea?.business_model?.revenue_streams?.map((stream, idx) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <IndianRupee className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-600">{stream}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold mb-3 text-blue-700">Pricing Strategy</h4>
-                              <p className="text-gray-600">{idea?.business_model?.pricing_strategy}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Scale Path */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-purple-600" />
-                            Scale Path & Milestones
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="mb-4">
-                            <h4 className="font-semibold mb-3 text-purple-700">Growth Timeline</h4>
-                            <p className="text-gray-600 mb-4">{idea?.scale_path?.timeline}</p>
-                          </div>
-                          <div className="space-y-3">
-                            {idea?.scale_path?.milestones?.map((milestone, idx) => (
-                              <div key={idx} className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-semibold">
-                                  {idx + 1}
-                                </div>
-                                <div className="flex-1">
-                                  <span className="text-gray-600">{milestone}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Business Moats */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Shield className="h-5 w-5 text-orange-600" />
-                            Business Moats
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="space-y-3">
-                            {idea?.business_moats?.map((moat, idx) => (
-                              <li key={idx} className="flex items-start gap-3">
-                                <Shield className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
-                                <span className="text-gray-600">{moat}</span>
+                  {/* Industry Structure 2-col */}
+                  {idea.industry_structure && (
+                    <div className="mt-10 grid md:grid-cols-2 gap-6">
+                      {[
+                        { title: "Key Competitors", items: idea.industry_structure.competitors, icon: Building2, color: "text-red-600", bg: "bg-red-50" },
+                        { title: "Market Barriers", items: idea.industry_structure.barriers, icon: Shield, color: "text-orange-600", bg: "bg-orange-50" },
+                        { title: "Market Trends", items: idea.industry_structure.trends, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+                        { title: "Opportunities", items: idea.industry_structure.opportunities, icon: Target, color: "text-blue-600", bg: "bg-blue-50" },
+                      ].map((group, i) => (
+                        <div key={i} className={`${group.bg} rounded-2xl p-6`}>
+                          <h3 className={`font-bold text-sm uppercase tracking-wider mb-4 ${group.color}`}>{group.title}</h3>
+                          <ul className="space-y-2.5">
+                            {group.items?.map((item, j) => (
+                              <li key={j} className="flex items-start gap-2.5">
+                                <group.icon className={`w-4 h-4 ${group.color} mt-0.5 flex-shrink-0`} />
+                                <span className="text-sm text-gray-700">{item}</span>
                               </li>
                             ))}
                           </ul>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      ))}
                     </div>
                   )}
 
-                  {activeTab === "skills" && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <GraduationCap className="h-5 w-5 text-blue-600" />
-                          Skills Required
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid md:grid-cols-3 gap-6">
-                          <div>
-                            <h4 className="font-semibold mb-4 text-blue-700">Technical Skills</h4>
-                            <ul className="space-y-2">
-                              {idea?.skills_required?.technical_skills?.map((skill, idx) => (
-                                <li key={idx} className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                  <span className="text-sm text-gray-600">{skill}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold mb-4 text-green-700">Business Skills</h4>
-                            <ul className="space-y-2">
-                              {idea?.skills_required?.business_skills?.map((skill, idx) => (
-                                <li key={idx} className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                  <span className="text-sm text-gray-600">{skill}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold mb-4 text-purple-700">Soft Skills</h4>
-                            <ul className="space-y-2">
-                              {idea?.skills_required?.soft_skills?.map((skill, idx) => (
-                                <li key={idx} className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                  <span className="text-sm text-gray-600">{skill}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-
-                {/* Sidebar - 1 column */}
-                <div className="space-y-6">
-
-                  {/* Quick Actions */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Quick Actions</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <Button variant="outline" className="w-full justify-start">
-                        <FileText className="h-4 w-4 mr-2" />
-                        Business Plan Template
-                      </Button>
-                      <Link href="/contact" className="w-full">
-                        <Button variant="outline" className="w-full justify-start">
-                          <Phone className="h-4 w-4 mr-2" />
-                          Expert Consultation
-                        </Button>
-                      </Link>
-                      <Button variant="outline" className="w-full justify-start">
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Find Partners
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  {/* Key Metrics */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Key Metrics to Track</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="font-medium text-sm text-blue-700 mb-2">Customer Metrics</h4>
-                          <ul className="text-xs text-gray-600 space-y-1">
-                            {idea?.key_metrics?.customer_metrics?.slice(0, 2).map((metric, idx) => (
-                              <li key={idx}>• {metric}</li>
-                            )) || <li>No metrics available</li>}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-sm text-green-700 mb-2">Financial Metrics</h4>
-                          <ul className="text-xs text-gray-600 space-y-1">
-                            {idea?.key_metrics?.financial_metrics?.slice(0, 2).map((metric, idx) => (
-                              <li key={idx}>• {metric}</li>
-                            )) || <li>No metrics available</li>}
-                          </ul>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Tech Stack */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Technology Stack</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-600 leading-relaxed">{idea?.tech_stack}</p>
-                    </CardContent>
-                  </Card>
-
-                  {/* Expert Help */}
-                  <Card className="bg-blue-50 border-blue-200">
-                    <CardHeader>
-                      <CardTitle className="text-lg text-blue-900">Need Expert Guidance?</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-blue-700 mb-4">
-                        Get personalized advice from our business experts
-                      </p>
-                      <Link href="/advisory" className="w-full">
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Contact Expert
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
-
-                  {/* Reviews Section */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Reviews & Ratings</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col items-center mb-4">
-                        <div className="flex items-center gap-1 mb-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-5 w-5 ${star <= Math.round(averageRating)
-                                ? 'text-yellow-500 fill-yellow-500'
-                                : 'text-gray-300'
-                                }`}
-                            />
+                  {/* Target Users & Pain Points */}
+                  {idea.user_personas && (
+                    <div className="mt-8 grid md:grid-cols-2 gap-6">
+                      <div className="rounded-2xl border border-blue-100 p-6">
+                        <h3 className="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                          <Users className="w-4 h-4" /> Target Users
+                        </h3>
+                        <div className="space-y-2">
+                          {idea.user_personas.target_users?.map((u, i) => (
+                            <div key={i} className="flex items-center gap-2.5 py-2 px-3 rounded-lg bg-blue-50">
+                              <User className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                              <span className="text-sm text-gray-700">{u}</span>
+                            </div>
                           ))}
                         </div>
-                        <span className="text-lg font-semibold">{averageRating?.toFixed(1) || "0.0"}</span>
-                        <span className="text-sm text-gray-500">({totalReviews || 0} reviews)</span>
                       </div>
-
-                      {user ? (
-                        <div className="space-y-3">
-                          {userReview && !isEditingReview ? (
-                            // Display existing review
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <div className="flex items-center">
-                                  {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star
-                                      key={star}
-                                      className={`h-4 w-4 ${star <= userReview.rating
-                                        ? 'text-yellow-500 fill-yellow-500'
-                                        : 'text-gray-300'
-                                        }`}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-sm text-gray-600">
-                                  {userReview.rating} star{userReview.rating !== 1 ? 's' : ''}
-                                </span>
-                              </div>
-                              {userReview.comment && (
-                                <p className="text-sm text-gray-700">{userReview.comment}</p>
-                              )}
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setIsEditingReview(true)}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={handleDeleteReview}
-                                  className="text-red-600 hover:text-red-700"
-                                >
-                                  Delete
-                                </Button>
-                              </div>
+                      <div className="rounded-2xl border border-red-100 p-6">
+                        <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
+                          <Zap className="w-4 h-4" /> Pain Points
+                        </h3>
+                        <div className="space-y-2">
+                          {idea.user_personas.pain_points?.map((p, i) => (
+                            <div key={i} className="flex items-center gap-2.5 py-2 px-3 rounded-lg bg-red-50">
+                              <Zap className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+                              <span className="text-sm text-gray-700">{p}</span>
                             </div>
-                          ) : (
-                            // Review form (for new review or editing)
-                            <div className="space-y-3">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Your Rating
-                                </label>
-                                <div className="flex items-center gap-1">
-                                  {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star
-                                      key={star}
-                                      className={`h-5 w-5 cursor-pointer transition-all duration-200 hover:scale-110 ${star <= (hoverRating || selectedRating)
-                                        ? 'text-yellow-500 fill-yellow-500'
-                                        : 'text-gray-300'
-                                        }`}
-                                      onClick={() => setSelectedRating(star)}
-                                      onMouseEnter={() => setHoverRating(star)}
-                                      onMouseLeave={() => setHoverRating(0)}
-                                    />
-                                  ))}
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </section>
+
+                {/* ── SECTION 3: Investment ── */}
+                <section id="investment">
+                  <SectionLabel icon={IndianRupee} color="green" text="Investment Breakdown" />
+
+                  {/* Big investment number */}
+                  <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-8 text-white shadow-xl">
+                      <p className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-1">Total Investment Required</p>
+                      <p className="text-5xl font-black mb-2">{getInvestmentDisplay(idea.investment)}</p>
+                      <p className="text-white/80 text-sm">{getInvestmentDescription(idea.investment)}</p>
+                    </div>
+
+                    {/* Employment stats */}
+                    {idea.employment_generation && (
+                      <div className="sm:w-72 bg-gray-900 rounded-2xl p-6 text-white">
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">Jobs Created</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { label: "Total", value: idea.employment_generation.total, color: "text-yellow-400" },
+                            { label: "Skilled", value: idea.employment_generation.skilled, color: "text-blue-400" },
+                            { label: "Semi-Skilled", value: idea.employment_generation.semi_skilled, color: "text-emerald-400" },
+                            { label: "Unskilled", value: idea.employment_generation.unskilled, color: "text-pink-400" },
+                          ].map((e, i) => (
+                            <div key={i}>
+                              <p className={`text-3xl font-black ${e.color}`}>{e.value ?? "—"}</p>
+                              <p className="text-gray-500 text-xs mt-0.5">{e.label}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Fixed + Working capital breakdown */}
+                  {idea.investment_breakdown && (
+                    <div className="mt-6 grid md:grid-cols-2 gap-6">
+                      {[
+                        { title: `Fixed Capital (₹${idea.investment_breakdown.fixed_capital?.total_fixed_capital ?? ""})`, data: idea.investment_breakdown.fixed_capital, skip: "total_fixed_capital", color: "blue" },
+                        { title: `Working Capital (₹${idea.investment_breakdown.working_capital?.total_working_capital ?? ""})`, data: idea.investment_breakdown.working_capital, skip: "total_working_capital", color: "purple" },
+                      ].map((group, gi) => group.data ? (
+                        <div key={gi} className="rounded-2xl border border-gray-100 p-6">
+                          <h3 className={`font-bold text-${group.color}-700 mb-4`}>{group.title}</h3>
+                          <div className="space-y-2.5">
+                            {Object.entries(group.data)
+                              .filter(([k]) => k !== group.skip)
+                              .map(([k, v], i) => (
+                                <div key={i} className="flex justify-between items-center py-1.5 border-b border-gray-50 last:border-0">
+                                  <span className="text-sm text-gray-600">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                  <span className="text-sm font-bold text-gray-900">₹{v}</span>
                                 </div>
-                              </div>
+                              ))}
+                          </div>
+                        </div>
+                      ) : null)}
+                    </div>
+                  )}
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Your Review
-                                </label>
-                                <textarea
-                                  value={comment}
-                                  onChange={(e) => setComment(e.target.value)}
-                                  placeholder="Share your thoughts about this idea..."
-                                  className="w-full min-h-[80px] p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
-                                />
-                              </div>
+                  {/* Financing structure */}
+                  {idea.investment_breakdown?.means_of_finance && (
+                    <div className="mt-6 rounded-2xl border border-gray-100 p-6">
+                      <h3 className="font-bold text-gray-900 mb-4">Financing Structure</h3>
+                      <div className="flex flex-wrap gap-3">
+                        {Object.entries(idea.investment_breakdown.means_of_finance)
+                          .filter(([k]) => k !== "total")
+                          .map(([k, v], i) => (
+                            <div key={i} className="flex-1 min-w-32 bg-gray-50 rounded-xl p-4 text-center">
+                              <p className="text-xl font-black text-gray-800">₹{v}</p>
+                              <p className="text-xs text-gray-500 mt-1">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</p>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </section>
 
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  onClick={handleSubmitReview}
-                                  disabled={selectedRating === 0}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                  {userReview ? "Update" : "Submit"}
-                                </Button>
-                                {userReview && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setIsEditingReview(false);
-                                      setSelectedRating(userReview.rating);
-                                      setComment(userReview.comment || '');
-                                    }}
-                                  >
-                                    Cancel
-                                  </Button>
-                                )}
+                {/* ── SECTION 4: Funding ── */}
+                <section id="funding">
+                  <SectionLabel icon={DollarSign} color="orange" text="Funding Options" />
+
+                  <div className="mt-6 space-y-4">
+                    {idea.funding_options?.map((opt, i) => (
+                      <div key={i} className="rounded-2xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <h3 className="font-bold text-gray-900 text-lg">{opt.type}</h3>
+                          <span className="text-xl font-black text-orange-600 bg-orange-50 px-4 py-1 rounded-full">
+                            {opt.display_amount}
+                          </span>
+                        </div>
+                        <div className="grid sm:grid-cols-3 gap-4 text-sm">
+                          {opt.timeline && <InfoPill label="Timeline" value={opt.timeline} />}
+                          {opt.repayment_period && <InfoPill label="Repayment" value={opt.repayment_period} />}
+                          {opt.processing_time && <InfoPill label="Processing" value={opt.processing_time} />}
+                        </div>
+                        {opt.sources && (
+                          <div className="mt-4">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Sources</p>
+                            <div className="flex flex-wrap gap-2">
+                              {opt.sources.map((s, si) => (
+                                <span key={si} className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
+                                  {s.label}: {s.amount}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {opt.schemes && (
+                          <div className="mt-4">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Government Schemes</p>
+                            <div className="flex flex-wrap gap-2">
+                              {opt.schemes.map((s, si) => (
+                                <span key={si} className="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-medium">
+                                  {s.name}: {s.amount}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* PMEGP */}
+                    {idea.pmegp_summary && (
+                      <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-6">
+                        <h3 className="font-bold text-blue-900 text-lg mb-5 flex items-center gap-2">
+                          <Award className="w-5 h-5 text-blue-600" /> PMEGP Scheme Details
+                        </h3>
+                        <div className="grid md:grid-cols-3 gap-6">
+                          {idea.pmegp_summary.project_viability && (
+                            <div>
+                              <h4 className="font-semibold text-blue-700 text-xs uppercase tracking-wider mb-3">Project Viability</h4>
+                              <div className="space-y-2">
+                                {Object.entries(idea.pmegp_summary.project_viability).map(([k, v], i) => (
+                                  <div key={i} className="flex justify-between text-sm">
+                                    <span className="text-gray-600">{k.replace(/_/g, " ")}</span>
+                                    <span className="font-bold">{v as string}</span>
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           )}
+                          {idea.pmegp_summary.benefits && (
+                            <div>
+                              <h4 className="font-semibold text-emerald-700 text-xs uppercase tracking-wider mb-3">Benefits</h4>
+                              <ul className="space-y-1.5">
+                                {idea.pmegp_summary.benefits.map((b, i) => (
+                                  <li key={i} className="flex items-start gap-2 text-sm">
+                                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                    <span className="text-gray-700">{b}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {idea.pmegp_summary.eligibility && (
+                            <div>
+                              <h4 className="font-semibold text-purple-700 text-xs uppercase tracking-wider mb-3">Eligibility</h4>
+                              <ul className="space-y-1.5">
+                                {idea.pmegp_summary.eligibility.map((e, i) => (
+                                  <li key={i} className="flex items-start gap-2 text-sm">
+                                    <Shield className="w-3.5 h-3.5 text-purple-500 mt-0.5 flex-shrink-0" />
+                                    <span className="text-gray-700">{e}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="text-center py-4">
-                          <p className="text-sm text-gray-600 mb-3">Please log in to write a review</p>
-                          <Link href="/auth">
-                            <Button size="sm">Log In</Button>
-                          </Link>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                {/* ── SECTION 5: Business Model ── */}
+                <section id="business">
+                  <SectionLabel icon={Briefcase} color="purple" text="Business Model" />
+
+                  {/* Value prop hero card */}
+                  {idea.value_proposition?.primary && (
+                    <div className="mt-6 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 text-white p-8">
+                      <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-2">Primary Value Proposition</p>
+                      <p className="text-2xl font-bold leading-relaxed">{idea.value_proposition.primary}</p>
+                      {idea.value_proposition.competitive_advantage && (
+                        <div className="mt-5 p-4 bg-white/10 rounded-xl">
+                          <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-1">Competitive Advantage</p>
+                          <p className="text-sm text-white/90">{idea.value_proposition.competitive_advantage}</p>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  )}
+
+                  {/* Secondary benefits as pills */}
+                  {idea.value_proposition?.secondary && idea.value_proposition.secondary.length > 0 && (
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {idea.value_proposition.secondary.map((b, i) => (
+                        <span key={i} className="flex items-center gap-1.5 bg-purple-50 text-purple-700 text-sm font-medium px-4 py-2 rounded-full">
+                          <CheckCircle className="w-3.5 h-3.5" /> {b}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-8 grid md:grid-cols-2 gap-6">
+                    {/* Revenue Streams */}
+                    {idea.business_model?.revenue_streams && (
+                      <div className="rounded-2xl border border-gray-100 p-6">
+                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <IndianRupee className="w-4 h-4 text-emerald-600" /> Revenue Streams
+                        </h3>
+                        <div className="space-y-2">
+                          {idea.business_model.revenue_streams.map((s, i) => (
+                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors">
+                              <ArrowRight className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                              <span className="text-sm text-gray-700">{s}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Pricing + Moats */}
+                    <div className="space-y-5">
+                      {idea.business_model?.pricing_strategy && (
+                        <div className="rounded-2xl border border-gray-100 p-6">
+                          <h3 className="font-bold text-gray-900 mb-2">Pricing Strategy</h3>
+                          <p className="text-sm text-gray-600 leading-relaxed">{idea.business_model.pricing_strategy}</p>
+                        </div>
+                      )}
+                      {idea.tech_stack && (
+                        <div className="rounded-2xl bg-gray-900 p-5">
+                          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Tech Stack</p>
+                          <p className="text-sm text-gray-300 leading-relaxed">{idea.tech_stack}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Scale path & milestones */}
+                  {idea.scale_path?.milestones && idea.scale_path.milestones.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="font-bold text-gray-900 mb-5 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-blue-600" /> Growth Milestones
+                      </h3>
+                      {idea.scale_path.timeline && (
+                        <p className="text-sm text-gray-500 mb-5">{idea.scale_path.timeline}</p>
+                      )}
+                      <div className="relative pl-6 border-l-2 border-blue-100 space-y-6">
+                        {idea.scale_path.milestones.map((m, i) => (
+                          <div key={i} className="relative">
+                            <div className="absolute -left-[1.65rem] w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-black flex items-center justify-center shadow-md">
+                              {i + 1}
+                            </div>
+                            <p className="text-sm text-gray-700 leading-relaxed">{m}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Business Moats */}
+                  {idea.business_moats && idea.business_moats.length > 0 && (
+                    <div className="mt-8 rounded-2xl border border-orange-100 bg-orange-50 p-6">
+                      <h3 className="font-bold text-orange-900 mb-4 flex items-center gap-2">
+                        <Shield className="w-4 h-4" /> Business Moats (Unfair Advantages)
+                      </h3>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {idea.business_moats.map((m, i) => (
+                          <div key={i} className="flex items-start gap-2.5 bg-white rounded-xl p-4 shadow-sm">
+                            <Shield className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-gray-700">{m}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </section>
+
+                {/* ── SECTION 6: Skills ── */}
+                <section id="skills">
+                  <SectionLabel icon={GraduationCap} color="indigo" text="Skills Required" />
+
+                  <div className="mt-6 grid md:grid-cols-3 gap-6">
+                    {[
+                      { label: "Technical Skills", items: idea.skills_required?.technical_skills, color: "blue", bg: "bg-blue-50", dot: "bg-blue-500" },
+                      { label: "Business Skills", items: idea.skills_required?.business_skills, color: "emerald", bg: "bg-emerald-50", dot: "bg-emerald-500" },
+                      { label: "Soft Skills", items: idea.skills_required?.soft_skills, color: "purple", bg: "bg-purple-50", dot: "bg-purple-500" },
+                    ].map((group, i) => (
+                      <div key={i} className={`${group.bg} rounded-2xl p-6`}>
+                        <h3 className={`font-bold text-${group.color}-700 text-sm uppercase tracking-wider mb-4`}>{group.label}</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {group.items?.map((skill, j) => (
+                            <span key={j} className={`inline-flex items-center gap-1.5 bg-white text-gray-700 text-xs font-medium px-3 py-1.5 rounded-full shadow-sm`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${group.dot}`} />
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* ── SECTION 7: Reviews ── */}
+                <section id="reviews">
+                  <SectionLabel icon={Star} color="yellow" text="Community Reviews" />
+
+                  {/* Rating summary */}
+                  <div className="mt-6 flex items-center gap-6 p-6 bg-gray-50 rounded-2xl">
+                    <div className="text-center">
+                      <p className="text-6xl font-black text-gray-900">{averageRating.toFixed(1)}</p>
+                      <div className="flex gap-0.5 mt-1 justify-center">
+                        {[1,2,3,4,5].map(s => (
+                          <Star key={s} className={`w-4 h-4 ${s <= Math.round(averageRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{totalReviews} reviews</p>
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      {[5,4,3,2,1].map(s => {
+                        const count = reviews.filter(r => Math.round(r.rating) === s).length;
+                        const pct = totalReviews ? (count / totalReviews) * 100 : 0;
+                        return (
+                          <div key={s} className="flex items-center gap-3">
+                            <span className="text-xs text-gray-500 w-3">{s}</span>
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 flex-shrink-0" />
+                            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-yellow-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-xs text-gray-400 w-6 text-right">{count}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Write a review */}
+                  <div className="mt-6 rounded-2xl border border-gray-100 p-6">
+                    <h3 className="font-bold text-gray-900 mb-4">{userReview && !isEditingReview ? "Your Review" : "Write a Review"}</h3>
+                    {user ? (
+                      userReview && !isEditingReview ? (
+                        <div>
+                          <div className="flex gap-0.5 mb-2">
+                            {[1,2,3,4,5].map(s => <Star key={s} className={`w-5 h-5 ${s <= userReview.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />)}
+                          </div>
+                          {userReview.comment && <p className="text-sm text-gray-700 mb-3">{userReview.comment}</p>}
+                          <div className="flex gap-2">
+                            <button onClick={() => setIsEditingReview(true)} className="text-sm text-blue-600 hover:underline">Edit</button>
+                            <button onClick={handleDeleteReview} className="text-sm text-red-500 hover:underline">Delete</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex gap-1">
+                            {[1,2,3,4,5].map(s => (
+                              <Star
+                                key={s}
+                                className={`w-7 h-7 cursor-pointer transition-transform hover:scale-110 ${s <= (hoverRating || selectedRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                                onClick={() => setSelectedRating(s)}
+                                onMouseEnter={() => setHoverRating(s)}
+                                onMouseLeave={() => setHoverRating(0)}
+                              />
+                            ))}
+                          </div>
+                          <textarea
+                            value={comment}
+                            onChange={e => setComment(e.target.value)}
+                            placeholder="Share what you think about this idea..."
+                            className="w-full min-h-24 p-4 border border-gray-200 rounded-xl resize-none text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                          />
+                          <div className="flex gap-2">
+                            <button onClick={handleSubmitReview} disabled={!selectedRating} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors">
+                              {userReview ? "Update Review" : "Submit Review"}
+                            </button>
+                            {userReview && (
+                              <button onClick={() => { setIsEditingReview(false); setSelectedRating(userReview.rating); setComment(userReview.comment || ""); }} className="text-sm text-gray-500 hover:text-gray-700 px-4 py-2.5 rounded-xl border border-gray-200">Cancel</button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    ) : (
+                      <div className="text-center py-6">
+                        <p className="text-gray-500 text-sm mb-3">Log in to share your thoughts</p>
+                        <Link href="/auth"><button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl">Log In</button></Link>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Recent reviews list */}
+                  {reviews.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                      {reviews.slice(0, 5).map((r, i) => (
+                        <div key={i} className="p-4 rounded-xl bg-gray-50">
+                          <div className="flex gap-0.5 mb-1">
+                            {[1,2,3,4,5].map(s => <Star key={s} className={`w-3.5 h-3.5 ${s <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />)}
+                          </div>
+                          {r.comment && <p className="text-sm text-gray-700">{r.comment}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+              </main>
+
+              {/* ── Sticky right sidebar ── */}
+              <aside className="hidden lg:block w-72 flex-shrink-0 sticky top-24 self-start h-fit space-y-4">
+
+                {/* CTA card */}
+                <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6">
+                  <Sparkles className="w-6 h-6 mb-3 text-blue-200" />
+                  <h3 className="font-bold text-lg mb-1">Ready to Start?</h3>
+                  <p className="text-blue-200 text-xs mb-4">Get the full business plan with financials, market research & roadmap.</p>
+                  <Link href="/auth" className="block">
+                    <button className="w-full flex items-center justify-center gap-2 bg-white text-blue-700 font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors text-sm">
+                      <Download className="w-4 h-4" /> Download Full Report
+                    </button>
+                  </Link>
                 </div>
-              </div>
+
+                {/* Quick actions */}
+                <div className="rounded-2xl border border-gray-100 p-5 space-y-2">
+                  <h3 className="font-bold text-gray-900 text-sm mb-3">Quick Actions</h3>
+                  {[
+                    { icon: FileText, label: "Business Plan Template" },
+                    { icon: Phone, label: "Expert Consultation", href: "/contact" },
+                    { icon: Building2, label: "Find Partners" },
+                  ].map((a, i) => (
+                    <button key={i} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-left">
+                      <a.icon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                      <span className="text-sm text-gray-700 font-medium">{a.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Key metrics */}
+                {idea.key_metrics && (
+                  <div className="rounded-2xl border border-gray-100 p-5">
+                    <h3 className="font-bold text-gray-900 text-sm mb-4">Key Metrics to Track</h3>
+                    {[
+                      { label: "Customer", items: idea.key_metrics.customer_metrics, color: "text-blue-600" },
+                      { label: "Financial", items: idea.key_metrics.financial_metrics, color: "text-emerald-600" },
+                    ].map((g, i) => g.items && g.items.length > 0 ? (
+                      <div key={i} className="mb-4 last:mb-0">
+                        <p className={`text-xs font-bold uppercase tracking-wider ${g.color} mb-2`}>{g.label}</p>
+                        <ul className="space-y-1">
+                          {g.items.slice(0, 3).map((m, j) => <li key={j} className="text-xs text-gray-600">• {m}</li>)}
+                        </ul>
+                      </div>
+                    ) : null)}
+                  </div>
+                )}
+
+                {/* Expert CTA */}
+                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                  <p className="font-bold text-blue-900 text-sm mb-1">Need Expert Guidance?</p>
+                  <p className="text-xs text-blue-600 mb-3">Get personalized advice for this business idea</p>
+                  <Link href="/advisory" className="block">
+                    <button className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+                      <MessageCircle className="w-4 h-4" /> Contact Expert
+                    </button>
+                  </Link>
+                </div>
+
+              </aside>
+
             </div>
           </div>
         </>
       )}
 
       <NewFooter />
+    </div>
+  );
+}
+
+// ─── Mini components ──────────────────────────────────────────────────────────
+function SectionLabel({ icon: Icon, color, text }: { icon: any; color: string; text: string }) {
+  const colorMap: Record<string, string> = {
+    yellow: "text-yellow-600 bg-yellow-50",
+    blue: "text-blue-600 bg-blue-50",
+    green: "text-emerald-600 bg-emerald-50",
+    orange: "text-orange-600 bg-orange-50",
+    purple: "text-purple-600 bg-purple-50",
+    indigo: "text-indigo-600 bg-indigo-50",
+  };
+  const cls = colorMap[color] || "text-gray-600 bg-gray-50";
+  return (
+    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${cls} font-bold text-sm`}>
+      <Icon className="w-4 h-4" />
+      {text}
+    </div>
+  );
+}
+
+function InfoPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-gray-50 rounded-xl px-3 py-2">
+      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
+      <p className="text-sm text-gray-700 font-semibold">{value}</p>
     </div>
   );
 }
