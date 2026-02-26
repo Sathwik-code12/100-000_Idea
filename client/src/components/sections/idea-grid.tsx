@@ -119,7 +119,6 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
             {/* ── Investment pill ── */}
             <div className="group relative flex-1 min-w-0">
               <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
-                <DollarSign className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate leading-none">{parseInvestment(idea.investment)}</span>
               </div>
               {/* Bubble tooltip */}
@@ -148,7 +147,6 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
             {/* ── Skills pill ── */}
             <div className="group relative flex-1 min-w-0">
               <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
-                <Star className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate leading-none">{skillsCount}</span>
               </div>
               {/* Bubble tooltip */}
@@ -176,7 +174,6 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
             {/* ── Time pill ── */}
             <div className="group relative flex-1 min-w-0">
               <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
-                <Clock className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate leading-none">{idea.timeframe || "3-6 months"}</span>
               </div>
               {/* Bubble tooltip */}
