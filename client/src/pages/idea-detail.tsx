@@ -230,18 +230,28 @@ export default function IdeaDetail(): JSX.Element {
 
       {!loading && !error && idea && (
         <>
-          {/* ══ HERO — info only ══ */}
+          {/* ══ HERO — compact split layout ══ */}
           <section className="bg-white border-b border-gray-100">
             <div className="max-w-7xl mx-auto px-4 py-6">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-                {/* Info */}
-                <div className="w-full">
-                  {/* Category + location + difficulty row */}
+                {/* Left: image — compact */}
+                <div className="relative flex-shrink-0 w-full lg:w-80 xl:w-96">
+                  <img
+                    src={idea.heroImage || idea.images?.[0] || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop"}
+                    alt={idea.title}
+                    className="w-full h-52 lg:h-60 object-cover rounded-xl shadow-sm"
+                    onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop"; }}
+                  />
+                  <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md ${getDiffStyle(idea.difficulty_level)}`}>
+                    {idea.difficulty_level || "Medium"}
+                  </span>
+                </div>
+
+                {/* Right: info */}
+                <div className="flex-1 min-w-0">
+                  {/* Category + location row */}
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${getDiffStyle(idea.difficulty_level)}`}>
-                      {idea.difficulty_level || "Medium"}
-                    </span>
                     {idea.categories?.slice(0, 2).map((c, i) => (
                       <span key={i} className="text-[10px] font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded">{c}</span>
                     ))}
@@ -306,26 +316,7 @@ export default function IdeaDetail(): JSX.Element {
             </div>
           </section>
 
-          {/* ══ Sticky Tab Nav ══ */}
-          <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-            <div className="max-w-7xl mx-auto px-4">
-              <div className="flex gap-0 overflow-x-auto scrollbar-none">
-                {NAV_SECTIONS.map(s => (
-                  <a
-                    key={s.id}
-                    href={`#${s.id}`}
-                    className={`flex-shrink-0 text-xs font-semibold px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
-                      activeSection === s.id
-                        ? "border-blue-600 text-blue-600"
-                        : "border-transparent text-gray-500 hover:text-gray-800"
-                    }`}
-                  >
-                    {s.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
+
 
           {/* ══ Body ══ */}
           <div className="max-w-7xl mx-auto px-4 py-6">
