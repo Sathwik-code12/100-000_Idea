@@ -67,7 +67,7 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
 
   return (
     <Link href={`/idea/${idea.id}`}>
-      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col w-full border border-gray-100">
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col w-full border border-gray-100 overflow-hidden">
 
         {/* ── Image Section ── */}
         <div className="relative overflow-hidden rounded-t-2xl">
@@ -117,7 +117,7 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
           <div className="flex items-center gap-2 mb-3 border-t border-gray-100 pt-3">
 
             {/* ── Investment pill ── */}
-            <div className="group relative flex-1">
+            <div className="group relative flex-1 min-w-0">
               <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
                 <DollarSign className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate leading-none">{parseInvestment(idea.investment)}</span>
@@ -146,7 +146,7 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
             </div>
 
             {/* ── Skills pill ── */}
-            <div className="group relative flex-1">
+            <div className="group relative flex-1 min-w-0">
               <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
                 <Star className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate leading-none">{skillsCount}</span>
@@ -174,7 +174,7 @@ export function IdeaCardItem({ idea, index }: { idea: IdeaCard; index: number })
             </div>
 
             {/* ── Time pill ── */}
-            <div className="group relative flex-1">
+            <div className="group relative flex-1 min-w-0">
               <div className="flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-yellow-950 text-[10px] font-extrabold px-2 py-2 rounded-lg cursor-default transition-all duration-150 shadow-sm hover:shadow-md ring-1 ring-yellow-300 hover:ring-yellow-400 select-none">
                 <Clock className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate leading-none">{idea.timeframe || "3-6 months"}</span>
