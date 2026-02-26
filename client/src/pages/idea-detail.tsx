@@ -230,29 +230,18 @@ export default function IdeaDetail(): JSX.Element {
 
       {!loading && !error && idea && (
         <>
-          {/* ══ HERO — compact split layout ══ */}
+          {/* ══ HERO — info only ══ */}
           <section className="bg-white border-b border-gray-100">
             <div className="max-w-7xl mx-auto px-4 py-6">
-              <div className="flex flex-col lg:flex-row gap-6 items-start">
+              <div className="flex flex-col gap-4">
 
-                {/* Left: image — compact */}
-                <div className="relative flex-shrink-0 w-full lg:w-80 xl:w-96">
-                  <img
-                    src={idea.heroImage || idea.images?.[0] || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop"}
-                    alt={idea.title}
-                    className="w-full h-52 lg:h-60 object-cover rounded-xl shadow-sm"
-                    onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop"; }}
-                  />
-                  {/* Difficulty badge on image */}
-                  <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md ${getDiffStyle(idea.difficulty_level)}`}>
-                    {idea.difficulty_level || "Medium"}
-                  </span>
-                </div>
-
-                {/* Right: info */}
-                <div className="flex-1 min-w-0">
-                  {/* Category + location row */}
+                {/* Info */}
+                <div className="w-full">
+                  {/* Category + location + difficulty row */}
                   <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${getDiffStyle(idea.difficulty_level)}`}>
+                      {idea.difficulty_level || "Medium"}
+                    </span>
                     {idea.categories?.slice(0, 2).map((c, i) => (
                       <span key={i} className="text-[10px] font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded">{c}</span>
                     ))}
@@ -474,26 +463,28 @@ export default function IdeaDetail(): JSX.Element {
                   <SectionTitle icon={IndianRupee} label="Investment Breakdown" color="green" />
 
                   {/* Main investment + jobs row — compact */}
-                  <div className="mt-3 grid sm:grid-cols-2 gap-3">
-                    <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white">
-                      <p className="text-[10px] text-white/70 font-bold uppercase tracking-widest mb-1">Total Investment Required</p>
-                      <p className="text-3xl font-black">{getInvestmentDisplay(idea.investment)}</p>
+                  <div className="mt-3 flex flex-col gap-2">
+                    <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg px-4 py-3 text-white flex items-center gap-4">
+                      <div>
+                        <p className="text-[10px] text-white/70 font-bold uppercase tracking-widest">Total Investment Required</p>
+                        <p className="text-xl font-black">{getInvestmentDisplay(idea.investment)}</p>
+                      </div>
                       {getInvestmentDescription(idea.investment) && (
-                        <p className="text-white/75 text-xs mt-1">{getInvestmentDescription(idea.investment)}</p>
+                        <p className="text-white/75 text-xs border-l border-white/20 pl-4">{getInvestmentDescription(idea.investment)}</p>
                       )}
                     </div>
                     {idea.employment_generation && (
-                      <div className="bg-gray-900 rounded-xl p-4 text-white">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Jobs Created</p>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                      <div className="bg-gray-900 rounded-lg px-4 py-3 text-white flex items-center gap-6">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex-shrink-0">Jobs Created</p>
+                        <div className="flex gap-6">
                           {[
                             { l: "Total", v: idea.employment_generation.total, c: "text-yellow-400" },
                             { l: "Skilled", v: idea.employment_generation.skilled, c: "text-blue-400" },
                             { l: "Semi-Skilled", v: idea.employment_generation.semi_skilled, c: "text-emerald-400" },
                             { l: "Unskilled", v: idea.employment_generation.unskilled, c: "text-pink-400" },
                           ].map((e, i) => (
-                            <div key={i}>
-                              <p className={`text-xl font-black ${e.c}`}>{e.v ?? "—"}</p>
+                            <div key={i} className="text-center">
+                              <p className={`text-base font-black ${e.c}`}>{e.v ?? "—"}</p>
                               <p className="text-gray-500 text-[10px]">{e.l}</p>
                             </div>
                           ))}
