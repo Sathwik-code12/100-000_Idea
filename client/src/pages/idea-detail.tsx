@@ -87,7 +87,6 @@ function getDiffStyle(level?: string) {
 const NAV_SECTIONS = [
   { id: "overview", label: "Overview" },
   { id: "market", label: "Market" },
-  { id: "investment", label: "Investment" },
   { id: "funding", label: "Funding" },
   { id: "business", label: "Business" },
   { id: "skills", label: "Skills" },
@@ -444,51 +443,6 @@ export default function IdeaDetail(): JSX.Element {
                             </div>
                           ))}
                         </div>
-                      </div>
-                    </div>
-                  )}
-                </section>
-
-                {/* ── INVESTMENT ── */}
-                <section id="investment">
-                  <SectionTitle icon={IndianRupee} label="Investment Breakdown" color="green" />
-
-                  {/* Fixed + Working capital */}
-                  {idea.investment_breakdown && (
-                    <div className="mt-3 grid md:grid-cols-2 gap-3">
-                      {[
-                        { title: `Fixed Capital`, total: idea.investment_breakdown.fixed_capital?.total_fixed_capital, data: idea.investment_breakdown.fixed_capital, skip: "total_fixed_capital", tc: "text-blue-700" },
-                        { title: `Working Capital`, total: idea.investment_breakdown.working_capital?.total_working_capital, data: idea.investment_breakdown.working_capital, skip: "total_working_capital", tc: "text-purple-700" },
-                      ].map((g, gi) => g.data ? (
-                        <div key={gi} className="bg-white border border-gray-100 rounded-xl p-4">
-                          <div className="flex justify-between items-center mb-3">
-                            <p className={`text-xs font-bold ${g.tc}`}>{g.title}</p>
-                            {g.total && <p className={`text-xs font-black ${g.tc}`}>₹{g.total}</p>}
-                          </div>
-                          <div className="space-y-1.5">
-                            {Object.entries(g.data).filter(([k]) => k !== g.skip).map(([k, v], i) => (
-                              <div key={i} className="flex justify-between items-center text-xs border-b border-gray-50 pb-1 last:border-0 last:pb-0">
-                                <span className="text-gray-500">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
-                                <span className="font-semibold text-gray-800">₹{v}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null)}
-                    </div>
-                  )}
-
-                  {/* Financing structure */}
-                  {idea.investment_breakdown?.means_of_finance && (
-                    <div className="mt-3 bg-white border border-gray-100 rounded-xl p-4">
-                      <p className="text-xs font-bold text-gray-700 mb-3">Financing Structure</p>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(idea.investment_breakdown.means_of_finance).filter(([k]) => k !== "total").map(([k, v], i) => (
-                          <div key={i} className="flex-1 min-w-28 bg-gray-50 rounded-lg px-3 py-2 text-center">
-                            <p className="text-base font-black text-gray-800">₹{v}</p>
-                            <p className="text-[10px] text-gray-500">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</p>
-                          </div>
-                        ))}
                       </div>
                     </div>
                   )}
