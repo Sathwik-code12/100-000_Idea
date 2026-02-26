@@ -453,37 +453,6 @@ export default function IdeaDetail(): JSX.Element {
                 <section id="investment">
                   <SectionTitle icon={IndianRupee} label="Investment Breakdown" color="green" />
 
-                  {/* Main investment + jobs row — compact */}
-                  <div className="mt-3 flex flex-col gap-2">
-                    <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg px-4 py-3 text-white flex items-center gap-4">
-                      <div>
-                        <p className="text-[10px] text-white/70 font-bold uppercase tracking-widest">Total Investment Required</p>
-                        <p className="text-xl font-black">{getInvestmentDisplay(idea.investment)}</p>
-                      </div>
-                      {getInvestmentDescription(idea.investment) && (
-                        <p className="text-white/75 text-xs border-l border-white/20 pl-4">{getInvestmentDescription(idea.investment)}</p>
-                      )}
-                    </div>
-                    {idea.employment_generation && (
-                      <div className="bg-gray-900 rounded-lg px-4 py-3 text-white flex items-center gap-6">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex-shrink-0">Jobs Created</p>
-                        <div className="flex gap-6">
-                          {[
-                            { l: "Total", v: idea.employment_generation.total, c: "text-yellow-400" },
-                            { l: "Skilled", v: idea.employment_generation.skilled, c: "text-blue-400" },
-                            { l: "Semi-Skilled", v: idea.employment_generation.semi_skilled, c: "text-emerald-400" },
-                            { l: "Unskilled", v: idea.employment_generation.unskilled, c: "text-pink-400" },
-                          ].map((e, i) => (
-                            <div key={i} className="text-center">
-                              <p className={`text-base font-black ${e.c}`}>{e.v ?? "—"}</p>
-                              <p className="text-gray-500 text-[10px]">{e.l}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
                   {/* Fixed + Working capital */}
                   {idea.investment_breakdown && (
                     <div className="mt-3 grid md:grid-cols-2 gap-3">
@@ -728,35 +697,6 @@ export default function IdeaDetail(): JSX.Element {
                 <section id="reviews">
                   <SectionTitle icon={Star} label="Community Reviews" color="yellow" />
 
-                  {/* Rating summary — compact */}
-                  <div className="mt-3 bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-6">
-                    <div className="text-center flex-shrink-0">
-                      <p className="text-4xl font-black text-gray-900 leading-none">{averageRating.toFixed(1)}</p>
-                      <div className="flex gap-0.5 mt-1 justify-center">
-                        {[1,2,3,4,5].map(s => (
-                          <Star key={s} className={`w-3.5 h-3.5 ${s <= Math.round(averageRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
-                        ))}
-                      </div>
-                      <p className="text-[10px] text-gray-400 mt-0.5">{totalReviews} reviews</p>
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      {[5,4,3,2,1].map(s => {
-                        const count = reviews.filter(r => Math.round(r.rating) === s).length;
-                        const pct = totalReviews ? (count / totalReviews) * 100 : 0;
-                        return (
-                          <div key={s} className="flex items-center gap-2">
-                            <span className="text-[10px] text-gray-400 w-2 text-right">{s}</span>
-                            <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400 flex-shrink-0" />
-                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                              <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
-                            </div>
-                            <span className="text-[10px] text-gray-400 w-3">{count}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
                   {/* Write review */}
                   <div className="mt-3 bg-white border border-gray-100 rounded-xl p-4">
                     <p className="text-xs font-bold text-gray-800 mb-3">
@@ -876,6 +816,36 @@ export default function IdeaDetail(): JSX.Element {
                     ) : null)}
                   </div>
                 )}
+
+                {/* Compact rating summary */}
+                <div className="bg-white border border-gray-100 rounded-xl p-3">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Community Rating</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      <p className="text-2xl font-black text-gray-900 leading-none">{averageRating.toFixed(1)}</p>
+                      <div className="flex gap-0.5 mt-1">
+                        {[1,2,3,4,5].map(s => (
+                          <Star key={s} className={`w-2.5 h-2.5 ${s <= Math.round(averageRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{totalReviews} reviews</p>
+                    </div>
+                    <div className="flex-1 space-y-0.5">
+                      {[5,4,3,2,1].map(s => {
+                        const count = reviews.filter(r => Math.round(r.rating) === s).length;
+                        const pct = totalReviews ? (count / totalReviews) * 100 : 0;
+                        return (
+                          <div key={s} className="flex items-center gap-1.5">
+                            <span className="text-[9px] text-gray-400 w-2">{s}</span>
+                            <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
 
                 {/* Expert help */}
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
