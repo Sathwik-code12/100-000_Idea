@@ -1,18 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import Header from "@/components/layout/header";
 import NewFooter from "@/components/sections/new-footer";
-import { Button } from "@/components/ui/button";
 import {
   Star, Heart, Share2, Download, MapPin, ChevronRight, MessageCircle,
   BarChart3, DollarSign, Clock, CheckCircle, Zap, TrendingUp, FileText,
   Phone, Building2, Users, IndianRupee, Award, Lightbulb, Briefcase,
-  GraduationCap, Target, Shield, ChevronDown, ArrowRight, Sparkles,
-  PiggyBank, Globe, User
+  GraduationCap, Target, Shield, ArrowRight, Sparkles, PiggyBank, User
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────
 interface Idea {
   id: string | number;
   title: string;
@@ -62,10 +60,9 @@ interface Review {
   rating: number;
   comment?: string;
   createdAt: string;
-  userId?: string | number;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────
 function getInvestmentDisplay(inv: any): string {
   if (!inv) return "₹0";
   if (typeof inv === "string") {
@@ -80,17 +77,15 @@ function getInvestmentDescription(inv: any): string {
   }
   return inv.description || "";
 }
-function getDiffColor(level?: string) {
-  if (!level) return "bg-gray-100 text-gray-700";
-  const l = level.toLowerCase();
+function getDiffStyle(level?: string) {
+  const l = (level || "").toLowerCase();
   if (l === "easy") return "bg-emerald-100 text-emerald-700";
   if (l === "hard") return "bg-red-100 text-red-700";
   return "bg-amber-100 text-amber-700";
 }
 
-// ─── Section anchor helper ─────────────────────────────────────────────────────
-const sections = [
-  { id: "story", label: "The Story" },
+const NAV_SECTIONS = [
+  { id: "overview", label: "Overview" },
   { id: "market", label: "Market" },
   { id: "investment", label: "Investment" },
   { id: "funding", label: "Funding" },
@@ -99,7 +94,7 @@ const sections = [
   { id: "reviews", label: "Reviews" },
 ];
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ─── Component ──────────────────────────────────────────────────────────────
 export default function IdeaDetail(): JSX.Element {
   const [, params] = useRoute("/idea/:id");
   const ideaId = params?.id || "1";
@@ -107,7 +102,7 @@ export default function IdeaDetail(): JSX.Element {
   const [idea, setIdea] = useState<Idea | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState("story");
+  const [activeSection, setActiveSection] = useState("overview");
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -118,9 +113,7 @@ export default function IdeaDetail(): JSX.Element {
   const [totalReviews, setTotalReviews] = useState(0);
   const [liked, setLiked] = useState(false);
   const { user } = useAuth<{ user: any }>();
-  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
-  // Fetch idea
   useEffect(() => {
     (async () => {
       try {
@@ -147,7 +140,6 @@ export default function IdeaDetail(): JSX.Element {
     })();
   }, [ideaId]);
 
-  // Fetch reviews
   useEffect(() => {
     if (!idea) return;
     (async () => {
@@ -158,7 +150,6 @@ export default function IdeaDetail(): JSX.Element {
     })();
   }, [idea]);
 
-  // Fetch user review
   useEffect(() => {
     if (!idea || !user) return;
     (async () => {
@@ -174,307 +165,275 @@ export default function IdeaDetail(): JSX.Element {
 
   // Scroll spy
   useEffect(() => {
+    if (!idea) return;
     const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => { if (e.isIntersecting) setActiveSection(e.target.id); });
-      },
-      { rootMargin: "-40% 0px -55% 0px" }
+      (entries) => { entries.forEach(e => { if (e.isIntersecting) setActiveSection(e.target.id); }); },
+      { rootMargin: "-30% 0px -65% 0px" }
     );
-    sections.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (el) obs.observe(el);
-    });
+    NAV_SECTIONS.forEach(({ id }) => { const el = document.getElementById(id); if (el) obs.observe(el); });
     return () => obs.disconnect();
   }, [idea]);
 
   const handleShare = async (text: string) => {
     if (navigator.share) { try { await navigator.share({ text }); } catch {} }
-    else { navigator.clipboard.writeText(text); alert("Copied to clipboard!"); }
+    else { navigator.clipboard.writeText(text); alert("Copied!"); }
   };
 
   const handleSubmitReview = async () => {
-    if (!selectedRating) { alert("Please select a rating"); return; }
+    if (!selectedRating) { alert("Select a rating"); return; }
     if (!user) { window.location.href = "/auth"; return; }
     if (!idea) return;
     try {
       const url = userReview ? `/api/ideas/${idea.id}/reviews/${userReview.id}` : `/api/ideas/${idea.id}/reviews`;
-      const method = userReview ? "PUT" : "POST";
       const res = await fetch(url, {
-        method, headers: { "Content-Type": "application/json" },
+        method: userReview ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating: selectedRating, comment }),
       });
-      if (res.ok) {
-        const d = await res.json();
-        setUserReview(d.review); setIsEditingReview(false);
-        alert(userReview ? "Review updated!" : "Review submitted!");
-      }
+      if (res.ok) { const d = await res.json(); setUserReview(d.review); setIsEditingReview(false); }
     } catch {}
   };
 
   const handleDeleteReview = async () => {
-    if (!idea || !userReview || !confirm("Delete your review?")) return;
+    if (!idea || !userReview || !confirm("Delete review?")) return;
     try {
       const res = await fetch(`/api/ideas/${idea.id}/reviews/${userReview.id}`, { method: "DELETE" });
-      if (res.ok) { setUserReview(null); setSelectedRating(0); setComment(""); alert("Deleted!"); }
+      if (res.ok) { setUserReview(null); setSelectedRating(0); setComment(""); }
     } catch {}
   };
 
-  // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
       {/* Breadcrumb */}
-      <div className="bg-gray-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-1.5 text-xs text-gray-500">
-          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center gap-1 text-xs text-gray-400">
+          <Link href="/" className="hover:text-blue-600">Home</Link>
           <ChevronRight className="w-3 h-3" />
-          <Link href="/all-ideas" className="hover:text-blue-600 transition-colors">Ideas</Link>
+          <Link href="/all-ideas" className="hover:text-blue-600">Ideas</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-gray-800 font-medium truncate max-w-xs">{idea?.title}</span>
+          <span className="text-gray-700 font-medium truncate max-w-xs">{idea?.title}</span>
         </div>
       </div>
 
-      {/* Loading */}
       {loading && (
-        <div className="flex flex-col items-center justify-center py-40 gap-4">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-gray-500 font-medium">Loading idea...</p>
+        <div className="flex items-center justify-center py-24">
+          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
         </div>
       )}
-
-      {/* Error */}
       {error && (
-        <div className="flex flex-col items-center justify-center py-40 gap-4">
-          <p className="text-red-500 text-lg">{error}</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        <div className="text-center py-24 text-red-500">{error}
+          <button onClick={() => window.location.reload()} className="ml-3 underline">Retry</button>
         </div>
       )}
 
       {!loading && !error && idea && (
         <>
-          {/* ══════════════════════════════════════════════════
-              HERO — Cinematic full-width with floating stats
-          ══════════════════════════════════════════════════ */}
-          <section className="relative w-full overflow-hidden" style={{ height: "92vh", minHeight: 560 }}>
-            {/* Background image */}
-            <img
-              src={idea.heroImage || idea.images?.[0] || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&h=900&fit=crop"}
-              alt={idea.title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-900/70 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent" />
+          {/* ══ HERO — compact split layout ══ */}
+          <section className="bg-white border-b border-gray-100">
+            <div className="max-w-7xl mx-auto px-4 py-6">
+              <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-            {/* Content */}
-            <div className="relative h-full max-w-7xl mx-auto px-6 flex flex-col justify-end pb-14">
-              {/* Badges */}
-              <div className="flex items-center gap-3 mb-5">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getDiffColor(idea.difficulty_level)}`}>
-                  {idea.difficulty_level || "Medium"}
-                </span>
-                {idea.categories?.slice(0, 2).map((c, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white backdrop-blur-sm border border-white/20">
-                    {c}
+                {/* Left: image — compact */}
+                <div className="relative flex-shrink-0 w-full lg:w-80 xl:w-96">
+                  <img
+                    src={idea.heroImage || idea.images?.[0] || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop"}
+                    alt={idea.title}
+                    className="w-full h-52 lg:h-60 object-cover rounded-xl shadow-sm"
+                    onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop"; }}
+                  />
+                  {/* Difficulty badge on image */}
+                  <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md ${getDiffStyle(idea.difficulty_level)}`}>
+                    {idea.difficulty_level || "Medium"}
                   </span>
-                ))}
-                {idea.location && (
-                  <span className="flex items-center gap-1 text-xs text-white/70">
-                    <MapPin className="w-3 h-3" /> {idea.location}
-                  </span>
-                )}
-              </div>
+                </div>
 
-              {/* Title */}
-              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight mb-4 max-w-3xl">
-                {idea.title}
-              </h1>
-
-              {/* Description */}
-              <p className="text-lg text-white/80 max-w-2xl mb-8 leading-relaxed">
-                {idea.summary || idea.description}
-              </p>
-
-              {/* Stat pills row */}
-              <div className="flex flex-wrap gap-4 mb-8">
-                {[
-                  { icon: IndianRupee, label: "Investment", value: getInvestmentDisplay(idea.investment), color: "from-yellow-400 to-orange-400" },
-                  { icon: TrendingUp, label: "Market CAGR", value: idea.market_analysis?.growth || "—", color: "from-emerald-400 to-teal-400" },
-                  { icon: Clock, label: "Time to Market", value: idea.time_to_market || idea.timeframe || "—", color: "from-blue-400 to-indigo-400" },
-                  { icon: Star, label: "Rating", value: `${averageRating?.toFixed(1) || "0.0"} (${totalReviews})`, color: "from-purple-400 to-pink-400" },
-                ].map((s, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3">
-                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center flex-shrink-0`}>
-                      <s.icon className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/60 uppercase tracking-wider font-semibold">{s.label}</p>
-                      <p className="text-sm font-bold text-white">{s.value}</p>
-                    </div>
+                {/* Right: info */}
+                <div className="flex-1 min-w-0">
+                  {/* Category + location row */}
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    {idea.categories?.slice(0, 2).map((c, i) => (
+                      <span key={i} className="text-[10px] font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded">{c}</span>
+                    ))}
+                    {idea.location && (
+                      <span className="flex items-center gap-0.5 text-[10px] text-gray-400">
+                        <MapPin className="w-2.5 h-2.5" />{idea.location}
+                      </span>
+                    )}
                   </div>
-                ))}
-              </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-3 items-center">
-                <Link href="/auth">
-                  <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5">
-                    <Download className="w-4 h-4" />
-                    Download Business Plan
-                  </button>
-                </Link>
-                <Link href="/advisory">
-                  <button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-xl border border-white/30 backdrop-blur-sm transition-all">
-                    <MessageCircle className="w-4 h-4" />
-                    Ask Expert
-                  </button>
-                </Link>
-                <button
-                  onClick={() => setLiked(!liked)}
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all ${liked ? "bg-red-500 border-red-500" : "bg-white/10 border-white/30 hover:bg-white/20"}`}
-                >
-                  <Heart className={`w-5 h-5 ${liked ? "fill-white text-white" : "text-white"}`} />
-                </button>
-                <button
-                  onClick={() => handleShare(idea.summary || idea.description || "")}
-                  className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/10 border border-white/30 hover:bg-white/20 transition-all"
-                >
-                  <Share2 className="w-5 h-5 text-white" />
-                </button>
-              </div>
-            </div>
+                  {/* Title */}
+                  <h1 className="text-2xl xl:text-3xl font-extrabold text-gray-900 leading-tight mb-2">{idea.title}</h1>
 
-            {/* Scroll indicator */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce">
-              <span className="text-white/40 text-xs">Scroll to explore</span>
-              <ChevronDown className="w-4 h-4 text-white/40" />
+                  {/* Description */}
+                  <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-3">{idea.summary || idea.description}</p>
+
+                  {/* 4 stat boxes */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                    {[
+                      { label: "Investment", value: getInvestmentDisplay(idea.investment), icon: IndianRupee, color: "text-yellow-600", bg: "bg-yellow-50" },
+                      { label: "Market Growth", value: idea.market_analysis?.growth || "—", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+                      { label: "Time to Market", value: idea.time_to_market || idea.timeframe || "—", icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
+                      { label: "Rating", value: `${averageRating.toFixed(1)} (${totalReviews})`, icon: Star, color: "text-purple-600", bg: "bg-purple-50" },
+                    ].map((s, i) => (
+                      <div key={i} className={`${s.bg} rounded-lg px-3 py-2`}>
+                        <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">{s.label}</p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <s.icon className={`w-3 h-3 ${s.color} flex-shrink-0`} />
+                          <p className={`text-sm font-bold ${s.color} truncate`}>{s.value}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link href="/auth">
+                      <button className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-sm">
+                        <Download className="w-3.5 h-3.5" /> Download Business Plan
+                      </button>
+                    </Link>
+                    <Link href="/advisory">
+                      <button className="flex items-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
+                        <MessageCircle className="w-3.5 h-3.5" /> Ask Expert
+                      </button>
+                    </Link>
+                    <button
+                      onClick={() => setLiked(!liked)}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${liked ? "bg-red-500 border-red-500" : "border-gray-200 hover:bg-gray-50"}`}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${liked ? "fill-white text-white" : "text-gray-500"}`} />
+                    </button>
+                    <button
+                      onClick={() => handleShare(idea.summary || idea.description || "")}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center border border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-gray-500" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
-          {/* ══════════════════════════════════════════════════
-              BODY — Sticky nav + scrollable content
-          ══════════════════════════════════════════════════ */}
-          <div className="max-w-7xl mx-auto px-4 py-12 relative">
-            <div className="flex gap-8">
-
-              {/* ── Sticky left nav (desktop) ── */}
-              <aside className="hidden xl:flex flex-col gap-1 w-36 flex-shrink-0 sticky top-24 self-start h-fit">
-                {sections.map((s) => (
+          {/* ══ Sticky Tab Nav ══ */}
+          <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex gap-0 overflow-x-auto scrollbar-none">
+                {NAV_SECTIONS.map(s => (
                   <a
                     key={s.id}
                     href={`#${s.id}`}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all group ${
+                    className={`flex-shrink-0 text-xs font-semibold px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
                       activeSection === s.id
-                        ? "bg-blue-50 text-blue-700"
-                        : "text-gray-400 hover:text-gray-700 hover:bg-gray-50"
+                        ? "border-blue-600 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-800"
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all ${
-                      activeSection === s.id ? "bg-blue-600 scale-125" : "bg-gray-300 group-hover:bg-gray-500"
-                    }`} />
                     {s.label}
                   </a>
                 ))}
-              </aside>
+              </div>
+            </div>
+          </div>
 
-              {/* ── Main scrollable content ── */}
-              <main className="flex-1 min-w-0 space-y-20">
+          {/* ══ Body ══ */}
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="flex gap-6">
 
-                {/* ── SECTION 1: The Story ── */}
-                <section id="story">
-                  <SectionLabel icon={Lightbulb} color="yellow" text="The Story" />
+              {/* Main content */}
+              <div className="flex-1 min-w-0 space-y-8">
 
-                  {/* Problem → Solution → Market strip */}
-                  <div className="grid md:grid-cols-3 gap-px bg-gray-100 rounded-2xl overflow-hidden shadow-sm mt-6">
+                {/* ── OVERVIEW ── */}
+                <section id="overview">
+                  <SectionTitle icon={Lightbulb} label="Overview" color="yellow" />
+                  <div className="mt-3 grid md:grid-cols-3 gap-3">
                     {[
-                      { label: "Problem", color: "bg-red-50", textColor: "text-red-700", text: idea.product_narrative?.problem, icon: "🔥" },
-                      { label: "Solution", color: "bg-emerald-50", textColor: "text-emerald-700", text: idea.product_narrative?.solution, icon: "💡" },
-                      { label: "Market", color: "bg-blue-50", textColor: "text-blue-700", text: idea.product_narrative?.market, icon: "🌍" },
-                    ].map((block, i) => (
-                      <div key={i} className={`${block.color} p-7`}>
-                        <div className="text-2xl mb-2">{block.icon}</div>
-                        <h3 className={`font-bold text-sm uppercase tracking-wider mb-3 ${block.textColor}`}>{block.label}</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">{block.text}</p>
+                      { label: "Problem", text: idea.product_narrative?.problem, border: "border-l-red-400", bg: "bg-red-50", lc: "text-red-600" },
+                      { label: "Solution", text: idea.product_narrative?.solution, border: "border-l-emerald-400", bg: "bg-emerald-50", lc: "text-emerald-600" },
+                      { label: "Market", text: idea.product_narrative?.market, border: "border-l-blue-400", bg: "bg-blue-50", lc: "text-blue-600" },
+                    ].map((b, i) => (
+                      <div key={i} className={`border-l-4 ${b.border} ${b.bg} rounded-r-lg p-4`}>
+                        <p className={`text-[10px] font-black uppercase tracking-widest mb-1.5 ${b.lc}`}>{b.label}</p>
+                        <p className="text-xs text-gray-700 leading-relaxed">{b.text}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Key Features */}
                   {idea.key_features && idea.key_features.length > 0 && (
-                    <div className="mt-10">
-                      <h3 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-purple-500" /> Key Features
+                    <div className="mt-5">
+                      <h3 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-purple-500" /> Key Features
                       </h3>
-                      <div className="grid sm:grid-cols-2 gap-3">
+                      <div className="grid sm:grid-cols-2 gap-2">
                         {idea.key_features.map((feat, i) => (
-                          <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-gray-50 hover:bg-purple-50 transition-colors group">
-                            <div className="w-6 h-6 rounded-full bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <CheckCircle className="w-3.5 h-3.5 text-purple-600" />
-                            </div>
-                            <span className="text-sm text-gray-700 font-medium">{feat}</span>
+                          <div key={i} className="flex items-start gap-2 bg-white border border-gray-100 rounded-lg p-3 hover:border-purple-200 transition-colors">
+                            <CheckCircle className="w-3.5 h-3.5 text-purple-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-xs text-gray-700">{feat}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Developing the Idea */}
+                  {/* Developing the idea */}
                   {idea.developing_your_idea && (
-                    <div className="mt-10 p-8 rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white">
-                      <h3 className="text-xl font-bold text-gray-900 mb-6">Building This Business</h3>
-                      <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="mt-5 bg-white border border-gray-100 rounded-xl p-4">
+                      <h3 className="text-sm font-bold text-gray-800 mb-3">Building This Business</h3>
+                      <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
                         {[
-                          { label: "Concept", value: idea.developing_your_idea.concept },
-                          { label: "Innovation", value: idea.developing_your_idea.innovation },
-                          { label: "Differentiation", value: idea.developing_your_idea.differentiation },
-                          { label: "Launch Timeline", value: idea.developing_your_idea.timeline },
-                        ].map((item, i) => item.value ? (
+                          { k: "Concept", v: idea.developing_your_idea.concept },
+                          { k: "Innovation", v: idea.developing_your_idea.innovation },
+                          { k: "Differentiation", v: idea.developing_your_idea.differentiation },
+                          { k: "Timeline", v: idea.developing_your_idea.timeline },
+                        ].filter(x => x.v).map((item, i) => (
                           <div key={i}>
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">{item.label}</h4>
-                            <p className="text-sm text-gray-700 leading-relaxed">{item.value}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">{item.k}</p>
+                            <p className="text-xs text-gray-700 leading-relaxed">{item.v}</p>
                           </div>
-                        ) : null)}
+                        ))}
                       </div>
                     </div>
                   )}
                 </section>
 
-                {/* ── SECTION 2: Market ── */}
+                {/* ── MARKET ── */}
                 <section id="market">
-                  <SectionLabel icon={BarChart3} color="blue" text="Market Opportunity" />
+                  <SectionTitle icon={BarChart3} label="Market Opportunity" color="blue" />
 
-                  {/* TAM / SAM / SOM / Growth big numbers */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  {/* TAM/SAM/SOM/Growth — compact horizontal */}
+                  <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2">
                     {[
-                      { label: "Total Market (TAM)", value: idea.market_analysis?.TAM, gradient: "from-blue-500 to-blue-700" },
-                      { label: "Serviceable (SAM)", value: idea.market_analysis?.SAM, gradient: "from-teal-500 to-emerald-600" },
-                      { label: "Your Slice (SOM)", value: idea.market_analysis?.SOM, gradient: "from-violet-500 to-purple-700" },
-                      { label: "Annual Growth", value: idea.market_analysis?.growth, gradient: "from-orange-500 to-red-500" },
+                      { label: "Total Market (TAM)", value: idea.market_analysis?.TAM, grad: "from-blue-600 to-blue-500" },
+                      { label: "Serviceable (SAM)", value: idea.market_analysis?.SAM, grad: "from-teal-600 to-emerald-500" },
+                      { label: "Your Slice (SOM)", value: idea.market_analysis?.SOM, grad: "from-violet-600 to-purple-500" },
+                      { label: "Annual Growth", value: idea.market_analysis?.growth, grad: "from-orange-500 to-red-500" },
                     ].map((m, i) => (
-                      <div key={i} className={`bg-gradient-to-br ${m.gradient} rounded-2xl p-6 text-white shadow-lg`}>
-                        <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-2">{m.label}</p>
-                        <p className="text-xl font-black leading-tight">{m.value || "—"}</p>
+                      <div key={i} className={`bg-gradient-to-br ${m.grad} rounded-xl p-4 text-white`}>
+                        <p className="text-[10px] text-white/70 font-semibold uppercase tracking-wider mb-1.5 leading-tight">{m.label}</p>
+                        <p className="text-base font-black leading-snug">{m.value || "—"}</p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Industry Structure 2-col */}
+                  {/* Industry structure — 2x2 */}
                   {idea.industry_structure && (
-                    <div className="mt-10 grid md:grid-cols-2 gap-6">
+                    <div className="mt-3 grid md:grid-cols-2 gap-3">
                       {[
-                        { title: "Key Competitors", items: idea.industry_structure.competitors, icon: Building2, color: "text-red-600", bg: "bg-red-50" },
-                        { title: "Market Barriers", items: idea.industry_structure.barriers, icon: Shield, color: "text-orange-600", bg: "bg-orange-50" },
-                        { title: "Market Trends", items: idea.industry_structure.trends, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
-                        { title: "Opportunities", items: idea.industry_structure.opportunities, icon: Target, color: "text-blue-600", bg: "bg-blue-50" },
-                      ].map((group, i) => (
-                        <div key={i} className={`${group.bg} rounded-2xl p-6`}>
-                          <h3 className={`font-bold text-sm uppercase tracking-wider mb-4 ${group.color}`}>{group.title}</h3>
-                          <ul className="space-y-2.5">
-                            {group.items?.map((item, j) => (
-                              <li key={j} className="flex items-start gap-2.5">
-                                <group.icon className={`w-4 h-4 ${group.color} mt-0.5 flex-shrink-0`} />
-                                <span className="text-sm text-gray-700">{item}</span>
+                        { title: "Key Competitors", items: idea.industry_structure.competitors, icon: Building2, tc: "text-red-600", bg: "bg-red-50 border-red-100" },
+                        { title: "Market Barriers", items: idea.industry_structure.barriers, icon: Shield, tc: "text-orange-600", bg: "bg-orange-50 border-orange-100" },
+                        { title: "Market Trends", items: idea.industry_structure.trends, icon: TrendingUp, tc: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100" },
+                        { title: "Opportunities", items: idea.industry_structure.opportunities, icon: Target, tc: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
+                      ].map((g, i) => (
+                        <div key={i} className={`${g.bg} border rounded-xl p-4`}>
+                          <p className={`text-[10px] font-black uppercase tracking-wider mb-2 ${g.tc}`}>{g.title}</p>
+                          <ul className="space-y-1">
+                            {g.items?.map((item, j) => (
+                              <li key={j} className="flex items-start gap-2">
+                                <g.icon className={`w-3 h-3 ${g.tc} mt-0.5 flex-shrink-0`} />
+                                <span className="text-xs text-gray-700">{item}</span>
                               </li>
                             ))}
                           </ul>
@@ -483,31 +442,25 @@ export default function IdeaDetail(): JSX.Element {
                     </div>
                   )}
 
-                  {/* Target Users & Pain Points */}
+                  {/* Target users + pain points */}
                   {idea.user_personas && (
-                    <div className="mt-8 grid md:grid-cols-2 gap-6">
-                      <div className="rounded-2xl border border-blue-100 p-6">
-                        <h3 className="font-bold text-blue-800 mb-4 flex items-center gap-2">
-                          <Users className="w-4 h-4" /> Target Users
-                        </h3>
-                        <div className="space-y-2">
+                    <div className="mt-3 grid md:grid-cols-2 gap-3">
+                      <div className="bg-white border border-gray-100 rounded-xl p-4">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-blue-600 mb-2">Target Users</p>
+                        <div className="space-y-1.5">
                           {idea.user_personas.target_users?.map((u, i) => (
-                            <div key={i} className="flex items-center gap-2.5 py-2 px-3 rounded-lg bg-blue-50">
-                              <User className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                              <span className="text-sm text-gray-700">{u}</span>
+                            <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                              <User className="w-3 h-3 text-blue-400 flex-shrink-0" /> {u}
                             </div>
                           ))}
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-red-100 p-6">
-                        <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
-                          <Zap className="w-4 h-4" /> Pain Points
-                        </h3>
-                        <div className="space-y-2">
+                      <div className="bg-white border border-gray-100 rounded-xl p-4">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-red-600 mb-2">Pain Points</p>
+                        <div className="space-y-1.5">
                           {idea.user_personas.pain_points?.map((p, i) => (
-                            <div key={i} className="flex items-center gap-2.5 py-2 px-3 rounded-lg bg-red-50">
-                              <Zap className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
-                              <span className="text-sm text-gray-700">{p}</span>
+                            <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                              <Zap className="w-3 h-3 text-red-400 flex-shrink-0" /> {p}
                             </div>
                           ))}
                         </div>
@@ -516,32 +469,32 @@ export default function IdeaDetail(): JSX.Element {
                   )}
                 </section>
 
-                {/* ── SECTION 3: Investment ── */}
+                {/* ── INVESTMENT ── */}
                 <section id="investment">
-                  <SectionLabel icon={IndianRupee} color="green" text="Investment Breakdown" />
+                  <SectionTitle icon={IndianRupee} label="Investment Breakdown" color="green" />
 
-                  {/* Big investment number */}
-                  <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-8 text-white shadow-xl">
-                      <p className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-1">Total Investment Required</p>
-                      <p className="text-5xl font-black mb-2">{getInvestmentDisplay(idea.investment)}</p>
-                      <p className="text-white/80 text-sm">{getInvestmentDescription(idea.investment)}</p>
+                  {/* Main investment + jobs row — compact */}
+                  <div className="mt-3 grid sm:grid-cols-2 gap-3">
+                    <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white">
+                      <p className="text-[10px] text-white/70 font-bold uppercase tracking-widest mb-1">Total Investment Required</p>
+                      <p className="text-3xl font-black">{getInvestmentDisplay(idea.investment)}</p>
+                      {getInvestmentDescription(idea.investment) && (
+                        <p className="text-white/75 text-xs mt-1">{getInvestmentDescription(idea.investment)}</p>
+                      )}
                     </div>
-
-                    {/* Employment stats */}
                     {idea.employment_generation && (
-                      <div className="sm:w-72 bg-gray-900 rounded-2xl p-6 text-white">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">Jobs Created</h3>
-                        <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gray-900 rounded-xl p-4 text-white">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Jobs Created</p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                           {[
-                            { label: "Total", value: idea.employment_generation.total, color: "text-yellow-400" },
-                            { label: "Skilled", value: idea.employment_generation.skilled, color: "text-blue-400" },
-                            { label: "Semi-Skilled", value: idea.employment_generation.semi_skilled, color: "text-emerald-400" },
-                            { label: "Unskilled", value: idea.employment_generation.unskilled, color: "text-pink-400" },
+                            { l: "Total", v: idea.employment_generation.total, c: "text-yellow-400" },
+                            { l: "Skilled", v: idea.employment_generation.skilled, c: "text-blue-400" },
+                            { l: "Semi-Skilled", v: idea.employment_generation.semi_skilled, c: "text-emerald-400" },
+                            { l: "Unskilled", v: idea.employment_generation.unskilled, c: "text-pink-400" },
                           ].map((e, i) => (
                             <div key={i}>
-                              <p className={`text-3xl font-black ${e.color}`}>{e.value ?? "—"}</p>
-                              <p className="text-gray-500 text-xs mt-0.5">{e.label}</p>
+                              <p className={`text-xl font-black ${e.c}`}>{e.v ?? "—"}</p>
+                              <p className="text-gray-500 text-[10px]">{e.l}</p>
                             </div>
                           ))}
                         </div>
@@ -549,24 +502,25 @@ export default function IdeaDetail(): JSX.Element {
                     )}
                   </div>
 
-                  {/* Fixed + Working capital breakdown */}
+                  {/* Fixed + Working capital */}
                   {idea.investment_breakdown && (
-                    <div className="mt-6 grid md:grid-cols-2 gap-6">
+                    <div className="mt-3 grid md:grid-cols-2 gap-3">
                       {[
-                        { title: `Fixed Capital (₹${idea.investment_breakdown.fixed_capital?.total_fixed_capital ?? ""})`, data: idea.investment_breakdown.fixed_capital, skip: "total_fixed_capital", color: "blue" },
-                        { title: `Working Capital (₹${idea.investment_breakdown.working_capital?.total_working_capital ?? ""})`, data: idea.investment_breakdown.working_capital, skip: "total_working_capital", color: "purple" },
-                      ].map((group, gi) => group.data ? (
-                        <div key={gi} className="rounded-2xl border border-gray-100 p-6">
-                          <h3 className={`font-bold text-${group.color}-700 mb-4`}>{group.title}</h3>
-                          <div className="space-y-2.5">
-                            {Object.entries(group.data)
-                              .filter(([k]) => k !== group.skip)
-                              .map(([k, v], i) => (
-                                <div key={i} className="flex justify-between items-center py-1.5 border-b border-gray-50 last:border-0">
-                                  <span className="text-sm text-gray-600">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
-                                  <span className="text-sm font-bold text-gray-900">₹{v}</span>
-                                </div>
-                              ))}
+                        { title: `Fixed Capital`, total: idea.investment_breakdown.fixed_capital?.total_fixed_capital, data: idea.investment_breakdown.fixed_capital, skip: "total_fixed_capital", tc: "text-blue-700" },
+                        { title: `Working Capital`, total: idea.investment_breakdown.working_capital?.total_working_capital, data: idea.investment_breakdown.working_capital, skip: "total_working_capital", tc: "text-purple-700" },
+                      ].map((g, gi) => g.data ? (
+                        <div key={gi} className="bg-white border border-gray-100 rounded-xl p-4">
+                          <div className="flex justify-between items-center mb-3">
+                            <p className={`text-xs font-bold ${g.tc}`}>{g.title}</p>
+                            {g.total && <p className={`text-xs font-black ${g.tc}`}>₹{g.total}</p>}
+                          </div>
+                          <div className="space-y-1.5">
+                            {Object.entries(g.data).filter(([k]) => k !== g.skip).map(([k, v], i) => (
+                              <div key={i} className="flex justify-between items-center text-xs border-b border-gray-50 pb-1 last:border-0 last:pb-0">
+                                <span className="text-gray-500">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                <span className="font-semibold text-gray-800">₹{v}</span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       ) : null)}
@@ -575,60 +529,51 @@ export default function IdeaDetail(): JSX.Element {
 
                   {/* Financing structure */}
                   {idea.investment_breakdown?.means_of_finance && (
-                    <div className="mt-6 rounded-2xl border border-gray-100 p-6">
-                      <h3 className="font-bold text-gray-900 mb-4">Financing Structure</h3>
-                      <div className="flex flex-wrap gap-3">
-                        {Object.entries(idea.investment_breakdown.means_of_finance)
-                          .filter(([k]) => k !== "total")
-                          .map(([k, v], i) => (
-                            <div key={i} className="flex-1 min-w-32 bg-gray-50 rounded-xl p-4 text-center">
-                              <p className="text-xl font-black text-gray-800">₹{v}</p>
-                              <p className="text-xs text-gray-500 mt-1">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</p>
-                            </div>
-                          ))}
+                    <div className="mt-3 bg-white border border-gray-100 rounded-xl p-4">
+                      <p className="text-xs font-bold text-gray-700 mb-3">Financing Structure</p>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(idea.investment_breakdown.means_of_finance).filter(([k]) => k !== "total").map(([k, v], i) => (
+                          <div key={i} className="flex-1 min-w-28 bg-gray-50 rounded-lg px-3 py-2 text-center">
+                            <p className="text-base font-black text-gray-800">₹{v}</p>
+                            <p className="text-[10px] text-gray-500">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
                 </section>
 
-                {/* ── SECTION 4: Funding ── */}
+                {/* ── FUNDING ── */}
                 <section id="funding">
-                  <SectionLabel icon={DollarSign} color="orange" text="Funding Options" />
-
-                  <div className="mt-6 space-y-4">
+                  <SectionTitle icon={DollarSign} label="Funding Options" color="orange" />
+                  <div className="mt-3 space-y-3">
                     {idea.funding_options?.map((opt, i) => (
-                      <div key={i} className="rounded-2xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <h3 className="font-bold text-gray-900 text-lg">{opt.type}</h3>
-                          <span className="text-xl font-black text-orange-600 bg-orange-50 px-4 py-1 rounded-full">
-                            {opt.display_amount}
-                          </span>
+                      <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 hover:border-orange-200 transition-colors">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="text-sm font-bold text-gray-900">{opt.type}</h3>
+                          <span className="text-sm font-black text-orange-600 bg-orange-50 px-3 py-0.5 rounded-full">{opt.display_amount}</span>
                         </div>
-                        <div className="grid sm:grid-cols-3 gap-4 text-sm">
-                          {opt.timeline && <InfoPill label="Timeline" value={opt.timeline} />}
-                          {opt.repayment_period && <InfoPill label="Repayment" value={opt.repayment_period} />}
-                          {opt.processing_time && <InfoPill label="Processing" value={opt.processing_time} />}
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {opt.timeline && <Chip label="Timeline" value={opt.timeline} />}
+                          {opt.repayment_period && <Chip label="Repayment" value={opt.repayment_period} />}
+                          {opt.processing_time && <Chip label="Processing" value={opt.processing_time} />}
                         </div>
                         {opt.sources && (
-                          <div className="mt-4">
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Sources</p>
-                            <div className="flex flex-wrap gap-2">
+                          <div className="mb-2">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sources</p>
+                            <div className="flex flex-wrap gap-1.5">
                               {opt.sources.map((s, si) => (
-                                <span key={si} className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
-                                  {s.label}: {s.amount}
-                                </span>
+                                <span key={si} className="text-[11px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{s.label}: {s.amount}</span>
                               ))}
                             </div>
                           </div>
                         )}
                         {opt.schemes && (
-                          <div className="mt-4">
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Government Schemes</p>
-                            <div className="flex flex-wrap gap-2">
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Gov. Schemes</p>
+                            <div className="flex flex-wrap gap-1.5">
                               {opt.schemes.map((s, si) => (
-                                <span key={si} className="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-medium">
-                                  {s.name}: {s.amount}
-                                </span>
+                                <span key={si} className="text-[11px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">{s.name}: {s.amount}</span>
                               ))}
                             </div>
                           </div>
@@ -636,50 +581,43 @@ export default function IdeaDetail(): JSX.Element {
                       </div>
                     ))}
 
-                    {/* PMEGP */}
                     {idea.pmegp_summary && (
-                      <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-6">
-                        <h3 className="font-bold text-blue-900 text-lg mb-5 flex items-center gap-2">
-                          <Award className="w-5 h-5 text-blue-600" /> PMEGP Scheme Details
-                        </h3>
-                        <div className="grid md:grid-cols-3 gap-6">
+                      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                        <p className="text-xs font-bold text-blue-800 mb-3 flex items-center gap-1.5">
+                          <Award className="w-3.5 h-3.5" /> PMEGP Scheme Details
+                        </p>
+                        <div className="grid md:grid-cols-3 gap-4">
                           {idea.pmegp_summary.project_viability && (
                             <div>
-                              <h4 className="font-semibold text-blue-700 text-xs uppercase tracking-wider mb-3">Project Viability</h4>
-                              <div className="space-y-2">
-                                {Object.entries(idea.pmegp_summary.project_viability).map(([k, v], i) => (
-                                  <div key={i} className="flex justify-between text-sm">
-                                    <span className="text-gray-600">{k.replace(/_/g, " ")}</span>
-                                    <span className="font-bold">{v as string}</span>
-                                  </div>
-                                ))}
-                              </div>
+                              <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">Project Viability</p>
+                              {Object.entries(idea.pmegp_summary.project_viability).map(([k, v], i) => (
+                                <div key={i} className="flex justify-between text-xs mb-1">
+                                  <span className="text-gray-500">{k.replace(/_/g, " ")}</span>
+                                  <span className="font-semibold">{v as string}</span>
+                                </div>
+                              ))}
                             </div>
                           )}
                           {idea.pmegp_summary.benefits && (
                             <div>
-                              <h4 className="font-semibold text-emerald-700 text-xs uppercase tracking-wider mb-3">Benefits</h4>
-                              <ul className="space-y-1.5">
-                                {idea.pmegp_summary.benefits.map((b, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm">
-                                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-gray-700">{b}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">Benefits</p>
+                              {idea.pmegp_summary.benefits.map((b, i) => (
+                                <div key={i} className="flex items-start gap-1.5 mb-1">
+                                  <CheckCircle className="w-3 h-3 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                  <span className="text-xs text-gray-700">{b}</span>
+                                </div>
+                              ))}
                             </div>
                           )}
                           {idea.pmegp_summary.eligibility && (
                             <div>
-                              <h4 className="font-semibold text-purple-700 text-xs uppercase tracking-wider mb-3">Eligibility</h4>
-                              <ul className="space-y-1.5">
-                                {idea.pmegp_summary.eligibility.map((e, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm">
-                                    <Shield className="w-3.5 h-3.5 text-purple-500 mt-0.5 flex-shrink-0" />
-                                    <span className="text-gray-700">{e}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                              <p className="text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-2">Eligibility</p>
+                              {idea.pmegp_summary.eligibility.map((e, i) => (
+                                <div key={i} className="flex items-start gap-1.5 mb-1">
+                                  <Shield className="w-3 h-3 text-purple-500 mt-0.5 flex-shrink-0" />
+                                  <span className="text-xs text-gray-700">{e}</span>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>
@@ -688,103 +626,92 @@ export default function IdeaDetail(): JSX.Element {
                   </div>
                 </section>
 
-                {/* ── SECTION 5: Business Model ── */}
+                {/* ── BUSINESS MODEL ── */}
                 <section id="business">
-                  <SectionLabel icon={Briefcase} color="purple" text="Business Model" />
+                  <SectionTitle icon={Briefcase} label="Business Model" color="purple" />
 
-                  {/* Value prop hero card */}
+                  {/* Value prop */}
                   {idea.value_proposition?.primary && (
-                    <div className="mt-6 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 text-white p-8">
-                      <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-2">Primary Value Proposition</p>
-                      <p className="text-2xl font-bold leading-relaxed">{idea.value_proposition.primary}</p>
+                    <div className="mt-3 bg-gradient-to-r from-violet-600 to-purple-700 rounded-xl p-4 text-white">
+                      <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest mb-1">Value Proposition</p>
+                      <p className="text-sm font-bold leading-relaxed">{idea.value_proposition.primary}</p>
                       {idea.value_proposition.competitive_advantage && (
-                        <div className="mt-5 p-4 bg-white/10 rounded-xl">
-                          <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-1">Competitive Advantage</p>
-                          <p className="text-sm text-white/90">{idea.value_proposition.competitive_advantage}</p>
-                        </div>
+                        <p className="mt-2 text-xs text-white/75 border-t border-white/20 pt-2">{idea.value_proposition.competitive_advantage}</p>
                       )}
                     </div>
                   )}
 
-                  {/* Secondary benefits as pills */}
                   {idea.value_proposition?.secondary && idea.value_proposition.secondary.length > 0 && (
-                    <div className="mt-5 flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5 mt-2">
                       {idea.value_proposition.secondary.map((b, i) => (
-                        <span key={i} className="flex items-center gap-1.5 bg-purple-50 text-purple-700 text-sm font-medium px-4 py-2 rounded-full">
-                          <CheckCircle className="w-3.5 h-3.5" /> {b}
+                        <span key={i} className="text-xs bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" /> {b}
                         </span>
                       ))}
                     </div>
                   )}
 
-                  <div className="mt-8 grid md:grid-cols-2 gap-6">
-                    {/* Revenue Streams */}
+                  <div className="mt-3 grid md:grid-cols-2 gap-3">
+                    {/* Revenue streams */}
                     {idea.business_model?.revenue_streams && (
-                      <div className="rounded-2xl border border-gray-100 p-6">
-                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <IndianRupee className="w-4 h-4 text-emerald-600" /> Revenue Streams
-                        </h3>
-                        <div className="space-y-2">
+                      <div className="bg-white border border-gray-100 rounded-xl p-4">
+                        <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">Revenue Streams</p>
+                        <div className="space-y-1.5">
                           {idea.business_model.revenue_streams.map((s, i) => (
-                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors">
-                              <ArrowRight className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                              <span className="text-sm text-gray-700">{s}</span>
+                            <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                              <ArrowRight className="w-3 h-3 text-emerald-500 flex-shrink-0" /> {s}
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Pricing + Moats */}
-                    <div className="space-y-5">
+                    {/* Pricing + tech stack */}
+                    <div className="space-y-2">
                       {idea.business_model?.pricing_strategy && (
-                        <div className="rounded-2xl border border-gray-100 p-6">
-                          <h3 className="font-bold text-gray-900 mb-2">Pricing Strategy</h3>
-                          <p className="text-sm text-gray-600 leading-relaxed">{idea.business_model.pricing_strategy}</p>
+                        <div className="bg-white border border-gray-100 rounded-xl p-4">
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pricing Strategy</p>
+                          <p className="text-xs text-gray-700 leading-relaxed">{idea.business_model.pricing_strategy}</p>
                         </div>
                       )}
                       {idea.tech_stack && (
-                        <div className="rounded-2xl bg-gray-900 p-5">
-                          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Tech Stack</p>
-                          <p className="text-sm text-gray-300 leading-relaxed">{idea.tech_stack}</p>
+                        <div className="bg-gray-900 rounded-xl p-4">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Tech Stack</p>
+                          <p className="text-xs text-gray-300 leading-relaxed">{idea.tech_stack}</p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Scale path & milestones */}
+                  {/* Milestones */}
                   {idea.scale_path?.milestones && idea.scale_path.milestones.length > 0 && (
-                    <div className="mt-8">
-                      <h3 className="font-bold text-gray-900 mb-5 flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-blue-600" /> Growth Milestones
-                      </h3>
-                      {idea.scale_path.timeline && (
-                        <p className="text-sm text-gray-500 mb-5">{idea.scale_path.timeline}</p>
-                      )}
-                      <div className="relative pl-6 border-l-2 border-blue-100 space-y-6">
+                    <div className="mt-3 bg-white border border-gray-100 rounded-xl p-4">
+                      <p className="text-xs font-bold text-gray-800 mb-3 flex items-center gap-1.5">
+                        <TrendingUp className="w-3.5 h-3.5 text-blue-500" /> Growth Milestones
+                      </p>
+                      {idea.scale_path.timeline && <p className="text-xs text-gray-400 mb-3">{idea.scale_path.timeline}</p>}
+                      <div className="space-y-2">
                         {idea.scale_path.milestones.map((m, i) => (
-                          <div key={i} className="relative">
-                            <div className="absolute -left-[1.65rem] w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-black flex items-center justify-center shadow-md">
-                              {i + 1}
-                            </div>
-                            <p className="text-sm text-gray-700 leading-relaxed">{m}</p>
+                          <div key={i} className="flex items-start gap-3">
+                            <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                            <p className="text-xs text-gray-700 leading-relaxed">{m}</p>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Business Moats */}
+                  {/* Business moats */}
                   {idea.business_moats && idea.business_moats.length > 0 && (
-                    <div className="mt-8 rounded-2xl border border-orange-100 bg-orange-50 p-6">
-                      <h3 className="font-bold text-orange-900 mb-4 flex items-center gap-2">
-                        <Shield className="w-4 h-4" /> Business Moats (Unfair Advantages)
-                      </h3>
-                      <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="mt-3 bg-orange-50 border border-orange-100 rounded-xl p-4">
+                      <p className="text-[10px] font-bold text-orange-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <Shield className="w-3 h-3" /> Business Moats
+                      </p>
+                      <div className="grid sm:grid-cols-2 gap-2">
                         {idea.business_moats.map((m, i) => (
-                          <div key={i} className="flex items-start gap-2.5 bg-white rounded-xl p-4 shadow-sm">
-                            <Shield className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-gray-700">{m}</span>
+                          <div key={i} className="flex items-start gap-2 bg-white rounded-lg px-3 py-2">
+                            <Shield className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
+                            <span className="text-xs text-gray-700">{m}</span>
                           </div>
                         ))}
                       </div>
@@ -792,23 +719,21 @@ export default function IdeaDetail(): JSX.Element {
                   )}
                 </section>
 
-                {/* ── SECTION 6: Skills ── */}
+                {/* ── SKILLS ── */}
                 <section id="skills">
-                  <SectionLabel icon={GraduationCap} color="indigo" text="Skills Required" />
-
-                  <div className="mt-6 grid md:grid-cols-3 gap-6">
+                  <SectionTitle icon={GraduationCap} label="Skills Required" color="indigo" />
+                  <div className="mt-3 grid md:grid-cols-3 gap-3">
                     {[
-                      { label: "Technical Skills", items: idea.skills_required?.technical_skills, color: "blue", bg: "bg-blue-50", dot: "bg-blue-500" },
-                      { label: "Business Skills", items: idea.skills_required?.business_skills, color: "emerald", bg: "bg-emerald-50", dot: "bg-emerald-500" },
-                      { label: "Soft Skills", items: idea.skills_required?.soft_skills, color: "purple", bg: "bg-purple-50", dot: "bg-purple-500" },
-                    ].map((group, i) => (
-                      <div key={i} className={`${group.bg} rounded-2xl p-6`}>
-                        <h3 className={`font-bold text-${group.color}-700 text-sm uppercase tracking-wider mb-4`}>{group.label}</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {group.items?.map((skill, j) => (
-                            <span key={j} className={`inline-flex items-center gap-1.5 bg-white text-gray-700 text-xs font-medium px-3 py-1.5 rounded-full shadow-sm`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${group.dot}`} />
-                              {skill}
+                      { label: "Technical Skills", items: idea.skills_required?.technical_skills, tc: "text-blue-700", bg: "bg-blue-50 border-blue-100", dot: "bg-blue-500" },
+                      { label: "Business Skills", items: idea.skills_required?.business_skills, tc: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100", dot: "bg-emerald-500" },
+                      { label: "Soft Skills", items: idea.skills_required?.soft_skills, tc: "text-purple-700", bg: "bg-purple-50 border-purple-100", dot: "bg-purple-500" },
+                    ].map((g, i) => (
+                      <div key={i} className={`${g.bg} border rounded-xl p-4`}>
+                        <p className={`text-[10px] font-black uppercase tracking-wider mb-2 ${g.tc}`}>{g.label}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {g.items?.map((skill, j) => (
+                            <span key={j} className="inline-flex items-center gap-1 bg-white text-gray-700 text-[11px] font-medium px-2 py-1 rounded-full border border-gray-100">
+                              <span className={`w-1 h-1 rounded-full ${g.dot}`} /> {skill}
                             </span>
                           ))}
                         </div>
@@ -817,61 +742,62 @@ export default function IdeaDetail(): JSX.Element {
                   </div>
                 </section>
 
-                {/* ── SECTION 7: Reviews ── */}
+                {/* ── REVIEWS ── */}
                 <section id="reviews">
-                  <SectionLabel icon={Star} color="yellow" text="Community Reviews" />
+                  <SectionTitle icon={Star} label="Community Reviews" color="yellow" />
 
-                  {/* Rating summary */}
-                  <div className="mt-6 flex items-center gap-6 p-6 bg-gray-50 rounded-2xl">
-                    <div className="text-center">
-                      <p className="text-6xl font-black text-gray-900">{averageRating.toFixed(1)}</p>
+                  {/* Rating summary — compact */}
+                  <div className="mt-3 bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-6">
+                    <div className="text-center flex-shrink-0">
+                      <p className="text-4xl font-black text-gray-900 leading-none">{averageRating.toFixed(1)}</p>
                       <div className="flex gap-0.5 mt-1 justify-center">
                         {[1,2,3,4,5].map(s => (
-                          <Star key={s} className={`w-4 h-4 ${s <= Math.round(averageRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
+                          <Star key={s} className={`w-3.5 h-3.5 ${s <= Math.round(averageRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{totalReviews} reviews</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{totalReviews} reviews</p>
                     </div>
-                    <div className="flex-1 space-y-2">
+                    <div className="flex-1 space-y-1">
                       {[5,4,3,2,1].map(s => {
                         const count = reviews.filter(r => Math.round(r.rating) === s).length;
                         const pct = totalReviews ? (count / totalReviews) * 100 : 0;
                         return (
-                          <div key={s} className="flex items-center gap-3">
-                            <span className="text-xs text-gray-500 w-3">{s}</span>
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 flex-shrink-0" />
-                            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div className="h-full bg-yellow-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                          <div key={s} className="flex items-center gap-2">
+                            <span className="text-[10px] text-gray-400 w-2 text-right">{s}</span>
+                            <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400 flex-shrink-0" />
+                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
                             </div>
-                            <span className="text-xs text-gray-400 w-6 text-right">{count}</span>
+                            <span className="text-[10px] text-gray-400 w-3">{count}</span>
                           </div>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Write a review */}
-                  <div className="mt-6 rounded-2xl border border-gray-100 p-6">
-                    <h3 className="font-bold text-gray-900 mb-4">{userReview && !isEditingReview ? "Your Review" : "Write a Review"}</h3>
+                  {/* Write review */}
+                  <div className="mt-3 bg-white border border-gray-100 rounded-xl p-4">
+                    <p className="text-xs font-bold text-gray-800 mb-3">
+                      {userReview && !isEditingReview ? "Your Review" : "Write a Review"}
+                    </p>
                     {user ? (
                       userReview && !isEditingReview ? (
                         <div>
-                          <div className="flex gap-0.5 mb-2">
-                            {[1,2,3,4,5].map(s => <Star key={s} className={`w-5 h-5 ${s <= userReview.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />)}
+                          <div className="flex gap-0.5 mb-1">
+                            {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= userReview.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />)}
                           </div>
-                          {userReview.comment && <p className="text-sm text-gray-700 mb-3">{userReview.comment}</p>}
+                          {userReview.comment && <p className="text-xs text-gray-600 mb-2">{userReview.comment}</p>}
                           <div className="flex gap-2">
-                            <button onClick={() => setIsEditingReview(true)} className="text-sm text-blue-600 hover:underline">Edit</button>
-                            <button onClick={handleDeleteReview} className="text-sm text-red-500 hover:underline">Delete</button>
+                            <button onClick={() => setIsEditingReview(true)} className="text-xs text-blue-600 hover:underline">Edit</button>
+                            <button onClick={handleDeleteReview} className="text-xs text-red-500 hover:underline">Delete</button>
                           </div>
                         </div>
                       ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           <div className="flex gap-1">
                             {[1,2,3,4,5].map(s => (
-                              <Star
-                                key={s}
-                                className={`w-7 h-7 cursor-pointer transition-transform hover:scale-110 ${s <= (hoverRating || selectedRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                              <Star key={s}
+                                className={`w-6 h-6 cursor-pointer hover:scale-110 transition-transform ${s <= (hoverRating || selectedRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`}
                                 onClick={() => setSelectedRating(s)}
                                 onMouseEnter={() => setHoverRating(s)}
                                 onMouseLeave={() => setHoverRating(0)}
@@ -881,99 +807,101 @@ export default function IdeaDetail(): JSX.Element {
                           <textarea
                             value={comment}
                             onChange={e => setComment(e.target.value)}
-                            placeholder="Share what you think about this idea..."
-                            className="w-full min-h-24 p-4 border border-gray-200 rounded-xl resize-none text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            placeholder="Share your thoughts..."
+                            className="w-full h-20 p-3 text-xs border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                           />
                           <div className="flex gap-2">
-                            <button onClick={handleSubmitReview} disabled={!selectedRating} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors">
-                              {userReview ? "Update Review" : "Submit Review"}
+                            <button onClick={handleSubmitReview} disabled={!selectedRating}
+                              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors">
+                              {userReview ? "Update" : "Submit"}
                             </button>
                             {userReview && (
-                              <button onClick={() => { setIsEditingReview(false); setSelectedRating(userReview.rating); setComment(userReview.comment || ""); }} className="text-sm text-gray-500 hover:text-gray-700 px-4 py-2.5 rounded-xl border border-gray-200">Cancel</button>
+                              <button onClick={() => { setIsEditingReview(false); setSelectedRating(userReview.rating); setComment(userReview.comment || ""); }}
+                                className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50">Cancel</button>
                             )}
                           </div>
                         </div>
                       )
                     ) : (
-                      <div className="text-center py-6">
-                        <p className="text-gray-500 text-sm mb-3">Log in to share your thoughts</p>
-                        <Link href="/auth"><button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl">Log In</button></Link>
+                      <div className="text-center py-3">
+                        <p className="text-xs text-gray-500 mb-2">Log in to review</p>
+                        <Link href="/auth"><button className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-semibold">Log In</button></Link>
                       </div>
                     )}
                   </div>
 
-                  {/* Recent reviews list */}
+                  {/* Recent reviews */}
                   {reviews.length > 0 && (
-                    <div className="mt-4 space-y-3">
+                    <div className="mt-2 space-y-2">
                       {reviews.slice(0, 5).map((r, i) => (
-                        <div key={i} className="p-4 rounded-xl bg-gray-50">
+                        <div key={i} className="bg-white border border-gray-100 rounded-lg px-4 py-3">
                           <div className="flex gap-0.5 mb-1">
-                            {[1,2,3,4,5].map(s => <Star key={s} className={`w-3.5 h-3.5 ${s <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />)}
+                            {[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />)}
                           </div>
-                          {r.comment && <p className="text-sm text-gray-700">{r.comment}</p>}
+                          {r.comment && <p className="text-xs text-gray-600">{r.comment}</p>}
                         </div>
                       ))}
                     </div>
                   )}
                 </section>
 
-              </main>
+              </div>{/* end main */}
 
-              {/* ── Sticky right sidebar ── */}
-              <aside className="hidden lg:block w-72 flex-shrink-0 sticky top-24 self-start h-fit space-y-4">
+              {/* ── Right Sidebar ── */}
+              <aside className="hidden lg:block w-60 xl:w-64 flex-shrink-0 sticky top-12 self-start space-y-3">
 
-                {/* CTA card */}
-                <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6">
-                  <Sparkles className="w-6 h-6 mb-3 text-blue-200" />
-                  <h3 className="font-bold text-lg mb-1">Ready to Start?</h3>
-                  <p className="text-blue-200 text-xs mb-4">Get the full business plan with financials, market research & roadmap.</p>
+                {/* CTA */}
+                <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-4 text-white">
+                  <Sparkles className="w-4 h-4 mb-2 text-blue-200" />
+                  <h3 className="text-sm font-bold mb-1">Ready to Start?</h3>
+                  <p className="text-blue-200 text-[11px] mb-3 leading-relaxed">Full business plan with financials & roadmap.</p>
                   <Link href="/auth" className="block">
-                    <button className="w-full flex items-center justify-center gap-2 bg-white text-blue-700 font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors text-sm">
-                      <Download className="w-4 h-4" /> Download Full Report
+                    <button className="w-full flex items-center justify-center gap-1.5 bg-white text-blue-700 font-bold py-2 rounded-lg text-xs hover:bg-blue-50 transition-colors">
+                      <Download className="w-3.5 h-3.5" /> Download Full Report
                     </button>
                   </Link>
                 </div>
 
                 {/* Quick actions */}
-                <div className="rounded-2xl border border-gray-100 p-5 space-y-2">
-                  <h3 className="font-bold text-gray-900 text-sm mb-3">Quick Actions</h3>
+                <div className="bg-white border border-gray-100 rounded-xl p-3">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Quick Actions</p>
                   {[
                     { icon: FileText, label: "Business Plan Template" },
                     { icon: Phone, label: "Expert Consultation", href: "/contact" },
                     { icon: Building2, label: "Find Partners" },
                   ].map((a, i) => (
-                    <button key={i} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-left">
-                      <a.icon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 font-medium">{a.label}</span>
+                    <button key={i} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                      <a.icon className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                      <span className="text-xs text-gray-700">{a.label}</span>
                     </button>
                   ))}
                 </div>
 
                 {/* Key metrics */}
                 {idea.key_metrics && (
-                  <div className="rounded-2xl border border-gray-100 p-5">
-                    <h3 className="font-bold text-gray-900 text-sm mb-4">Key Metrics to Track</h3>
+                  <div className="bg-white border border-gray-100 rounded-xl p-3">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Key Metrics</p>
                     {[
-                      { label: "Customer", items: idea.key_metrics.customer_metrics, color: "text-blue-600" },
-                      { label: "Financial", items: idea.key_metrics.financial_metrics, color: "text-emerald-600" },
+                      { label: "Customer", items: idea.key_metrics.customer_metrics, tc: "text-blue-600" },
+                      { label: "Financial", items: idea.key_metrics.financial_metrics, tc: "text-emerald-600" },
                     ].map((g, i) => g.items && g.items.length > 0 ? (
-                      <div key={i} className="mb-4 last:mb-0">
-                        <p className={`text-xs font-bold uppercase tracking-wider ${g.color} mb-2`}>{g.label}</p>
-                        <ul className="space-y-1">
-                          {g.items.slice(0, 3).map((m, j) => <li key={j} className="text-xs text-gray-600">• {m}</li>)}
+                      <div key={i} className="mb-3 last:mb-0">
+                        <p className={`text-[10px] font-bold uppercase tracking-wider ${g.tc} mb-1`}>{g.label}</p>
+                        <ul className="space-y-0.5">
+                          {g.items.slice(0, 3).map((m, j) => <li key={j} className="text-[11px] text-gray-600">• {m}</li>)}
                         </ul>
                       </div>
                     ) : null)}
                   </div>
                 )}
 
-                {/* Expert CTA */}
-                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-                  <p className="font-bold text-blue-900 text-sm mb-1">Need Expert Guidance?</p>
-                  <p className="text-xs text-blue-600 mb-3">Get personalized advice for this business idea</p>
+                {/* Expert help */}
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                  <p className="text-xs font-bold text-blue-900 mb-0.5">Need Expert Guidance?</p>
+                  <p className="text-[11px] text-blue-600 mb-2">Get personalized advice</p>
                   <Link href="/advisory" className="block">
-                    <button className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
-                      <MessageCircle className="w-4 h-4" /> Contact Expert
+                    <button className="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2 rounded-lg transition-colors">
+                      <MessageCircle className="w-3.5 h-3.5" /> Contact Expert
                     </button>
                   </Link>
                 </div>
@@ -990,30 +918,28 @@ export default function IdeaDetail(): JSX.Element {
   );
 }
 
-// ─── Mini components ──────────────────────────────────────────────────────────
-function SectionLabel({ icon: Icon, color, text }: { icon: any; color: string; text: string }) {
-  const colorMap: Record<string, string> = {
-    yellow: "text-yellow-600 bg-yellow-50",
-    blue: "text-blue-600 bg-blue-50",
-    green: "text-emerald-600 bg-emerald-50",
-    orange: "text-orange-600 bg-orange-50",
-    purple: "text-purple-600 bg-purple-50",
-    indigo: "text-indigo-600 bg-indigo-50",
+// ─── Mini components ─────────────────────────────────────────────────────────
+function SectionTitle({ icon: Icon, label, color }: { icon: any; color: string; label: string }) {
+  const map: Record<string, string> = {
+    yellow: "text-yellow-600 bg-yellow-50 border-yellow-100",
+    blue: "text-blue-600 bg-blue-50 border-blue-100",
+    green: "text-emerald-600 bg-emerald-50 border-emerald-100",
+    orange: "text-orange-600 bg-orange-50 border-orange-100",
+    purple: "text-purple-600 bg-purple-50 border-purple-100",
+    indigo: "text-indigo-600 bg-indigo-50 border-indigo-100",
   };
-  const cls = colorMap[color] || "text-gray-600 bg-gray-50";
   return (
-    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${cls} font-bold text-sm`}>
-      <Icon className="w-4 h-4" />
-      {text}
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold ${map[color] || map.blue}`}>
+      <Icon className="w-3.5 h-3.5" /> {label}
     </div>
   );
 }
 
-function InfoPill({ label, value }: { label: string; value: string }) {
+function Chip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-gray-50 rounded-xl px-3 py-2">
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="text-sm text-gray-700 font-semibold">{value}</p>
+    <div className="bg-gray-50 rounded-lg px-2.5 py-1.5">
+      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className="text-xs font-semibold text-gray-700">{value}</p>
     </div>
   );
 }
