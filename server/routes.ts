@@ -646,6 +646,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  // Get single platform idea by ID
+  app.get("/api/ideas/:id", async (req, res) => {
+    try {
+      const idea = await storage.getPlatformIdeaById(req.params.id);
+      if (!idea) {
+        return res.status(404).json({ success: false, message: "Idea not found" });
+      }
+      res.json(idea);
+    } catch (error: any) {
+      console.error("Error fetching platform idea:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Add to routes.ts
 
   // Get reviews for an idea
