@@ -29,18 +29,19 @@ interface Idea {
   investment: any;
   timeframe: string;
   location: string;
-  heroImage: string;
-  images: string[];
-  tags: string[];
+  heroImage: any;
+  images: any;
+  tags: any;
   market_analysis: any;
   industry_structure: any;
+  user_personas: any;
   business_model: any;
   investment_breakdown: any;
   funding_options: any;
   pmegp_summary: any;
   bank_loan_details: any;
   scale_path: any;
-  business_moats: string[];
+  business_moats: any;
   skills_required: any;
   ratings_reviews: any;
   key_metrics: any;
@@ -199,12 +200,7 @@ export default function IdeaDetail() {
   const { id } = useParams<{ id: string }>();
 
   const { data: idea, isLoading, error } = useQuery<Idea>({
-    queryKey: ["/api/ideas", id],
-    queryFn: async () => {
-      const res = await fetch(`/api/ideas/${id}`);
-      if (!res.ok) throw new Error("Failed to load idea");
-      return res.json();
-    },
+    queryKey: [`/api/ideas/${id}`],
   });
 
   if (isLoading) return (
@@ -240,10 +236,15 @@ export default function IdeaDetail() {
   const keyMetrics = safe(idea.key_metrics) || {};
   const valueProposition = safe(idea.value_proposition) || {};
   const investmentObj = safe(idea.investment) || {};
-  const heroImage = safe(idea.heroImage) || (safe(idea.images) || [])[0] || "";
+  // heroImage is stored as a JSON string like `"\"https://...\""` — parse twice
+  let heroImage = safe(idea.heroImage) || "";
+  if (typeof heroImage === "string" && heroImage.startsWith('"')) {
+    try { heroImage = JSON.parse(heroImage); } catch { /* keep as is */ }
+  }
+  if (!heroImage) heroImage = (safe(idea.images) || [])[0] || "";
   const tags: string[] = safe(idea.tags) || [];
 
-  const investDisplay = typeof investmentObj === "object"
+  const userPersonas = safe(idea.user_personas) || {};
     ? (investmentObj.display || `₹${(investmentObj.amount / 100000).toFixed(1)}L`)
     : idea.investment;
 
@@ -422,8 +423,8 @@ export default function IdeaDetail() {
                       { title: "Market Barriers", icon: "🚧", items: industryStructure.barriers, color: "#f59e0b" },
                       { title: "Market Trends", icon: "📊", items: industryStructure.trends, color: "#10b981" },
                       { title: "Opportunities", icon: "🎯", items: industryStructure.opportunities, color: "#3b82f6" },
-                      { title: "Target Users", icon: "👥", items: industryStructure.target_users || safe(idea.user_personas)?.target_users, color: "#8b5cf6" },
-                      { title: "Pain Points", icon: "❗", items: industryStructure.pain_points || safe(idea.user_personas)?.pain_points, color: "#f97316" },
+                      { title: "Target Users", icon: "👥", items: industryStructure.target_users || userPersonas.target_users, color: "#8b5cf6" },
+                      { title: "Pain Points", icon: "❗", items: industryStructure.pain_points || userPersonas.pain_points, color: "#f97316" },
                     ].map((section, i) => section.items?.length ? (
                       <div key={i} style={{
                         background: "#fafafa", borderRadius: 10, padding: "12px 14px",
