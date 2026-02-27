@@ -75,7 +75,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter);
-    overflow-x: hidden;
+    overflow-x: auto;
+    min-width: 1280px;
   }
   .scrollbar-hide {
     -ms-overflow-style: none;
