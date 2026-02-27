@@ -177,8 +177,8 @@
 export default function Footer() {
   return (
     <footer className="bg-[#0b2b4c] text-gray-200">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+      <div className="w-full px-0 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 px-6">
 
           {/* Left Section */}
           <div className="lg:col-span-1 space-y-5">
