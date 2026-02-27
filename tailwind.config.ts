@@ -10,6 +10,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      maxWidth: {
+        "8xl": "1440px",
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

@@ -33,7 +33,7 @@ export default function MainContentLayout({ ideas, isSearchActive, totalDefaultI
     
   return (
     <div className="bg-gray-50 py-2">
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row  gap-4 lg:gap-6">
           {/* Main Content */}
           <div className="basis-full lg:basis-[75%] min-w-0">
