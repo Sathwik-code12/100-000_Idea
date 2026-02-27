@@ -147,22 +147,24 @@ export default function Home() {
     setIsSearchActive(false);
   };
   return (
-    <div className="min-h-screen bg-gray-50 w-full">
+    <div className="min-h-screen w-full">
       <Header />
-      <SubmenuSection />
-      <CategoryNavigation />
-      <SearchHero ideas={ideas}
-        onSearchResults={handleSearchResults}
-        onClearSearch={handleClearSearch} />
-      <MainHero />
-      <MainContentLayout ideas={displayedIdeas}
-        isSearchActive={isSearchActive}
-        totalDefaultIdeas={ideas.length} />
-      
-      <TopicsSection />
-      <DonationBanner />
-      {/* <SubscribeSection /> */}
-      <NewFooter />
+      <div className="page-content-wrapper">
+        <SubmenuSection />
+        <CategoryNavigation />
+        <SearchHero ideas={ideas}
+          onSearchResults={handleSearchResults}
+          onClearSearch={handleClearSearch} />
+        <MainHero />
+        <MainContentLayout ideas={displayedIdeas}
+          isSearchActive={isSearchActive}
+          totalDefaultIdeas={ideas.length} />
+        
+        <TopicsSection />
+        <DonationBanner />
+        {/* <SubscribeSection /> */}
+        <NewFooter />
+      </div>
     </div>
   );
 }
