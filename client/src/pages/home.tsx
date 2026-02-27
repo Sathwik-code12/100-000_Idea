@@ -61,7 +61,7 @@
 //     setIsSearchActive(false);
 //   };
 //   return (
-//     <div className="min-h-screen bg-gray-50 w-full">
+//     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
 //       <Header />
 
 //       {/* <SearchHero ideas={ideas}

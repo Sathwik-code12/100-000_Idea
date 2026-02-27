@@ -24,7 +24,7 @@ export default function MainHero() {
 
   return (
     <section
-      className="border-b border-gray-200 overflow-hidden"
+      className="border-b border-gray-200"
       style={{
         backgroundColor: "#ffffff",
         backgroundImage: `
@@ -73,7 +73,7 @@ export default function MainHero() {
           </div>
 
           {/* Right: Video Panel */}
-          <div className="hidden lg:block flex-shrink-0 w-[44%] self-stretch overflow-hidden rounded-xl shadow-lg">
+          <div className="hidden lg:block flex-shrink-0 w-[44%] self-stretch rounded-xl shadow-lg">
             {heroVideo ? (
               <video
                 src={heroVideo}
