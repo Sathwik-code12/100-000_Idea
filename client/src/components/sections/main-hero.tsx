@@ -24,13 +24,18 @@ export default function MainHero() {
 
   return (
     <section
-      className="border-b border-gray-200"
+      className="border-b border-gray-200 overflow-hidden"
       style={{
         backgroundColor: "#ffffff",
+        backgroundImage: `
+          linear-gradient(rgba(0,0,0,0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0,0,0,0.07) 1px, transparent 1px)
+        `,
+        backgroundSize: "20px 20px",
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="flex flex-col lg:flex-row items-stretch gap-8 py-4 lg:py-6">
+      <div className="max-w-full px-6 sm:px-8 lg:px-10">
+        <div className="flex flex-col lg:flex-row items-stretch gap-8 py-8 lg:py-10">
 
           {/* Left: Text Content */}
           <div className="flex-1 text-left flex flex-col justify-center">

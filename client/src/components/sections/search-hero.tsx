@@ -127,7 +127,7 @@
 
 //   return (
 //     <section className="bg-blue-600 py-1.5">
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//       <div className="max-w-full px-4 sm:px-6 lg:px-8">
 //         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
 //           {/* Search Input */}
 //           <div className="relative flex-1 min-w-0">
@@ -369,7 +369,7 @@ export default function SearchHero({ ideas, onSearchResults, onClearSearch }: Se
 
   return (
     <section className="bg-blue-600 py-1.5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
           {/* Search Input */}
           <div className="relative flex-1 min-w-0">

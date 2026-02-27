@@ -97,7 +97,7 @@ export default function CategoryNavigation() {
     //   </div>
     // </section>
     <section className="bg-gradient-to-r from-gray-50 to-white py-4 border-b border-gray-200 w-full">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6">
+      <div className="max-w-full px-3 sm:px-6">
 
         <div
           className="
