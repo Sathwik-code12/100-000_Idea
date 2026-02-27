@@ -179,9 +179,22 @@ function StarRating({ rating }: { rating: number }) {
 export default function IdeaDetail() {
   const { id } = useParams<{ id: string }>();
 
-  // ✅ Same pattern as horizontal-scroll-cards.tsx and rest of codebase — no custom queryFn
+  // Explicit queryFn with 10s timeout — avoids infinite spinner
   const { data: idea, isLoading, error } = useQuery<Idea>({
     queryKey: [`/api/ideas/${id}`],
+    queryFn: async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      try {
+        const res = await fetch(`/api/ideas/${id}`, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    },
+    retry: 1,
+    staleTime: 60000,
   });
 
   if (isLoading) return (
@@ -197,6 +210,7 @@ export default function IdeaDetail() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-gray-400">
       <Lightbulb size={48} className="mb-3 text-gray-300" />
       <p className="text-base font-medium">Idea not found.</p>
+      {error && <p className="text-xs text-red-400 mt-1">{String(error)}</p>}
       <Link href="/all-ideas">
         <a className="text-blue-500 text-sm mt-2 hover:underline">← Back to ideas</a>
       </Link>
