@@ -75,12 +75,17 @@
   html {
     min-width: 1280px;
     overflow-x: auto;
+    background-color: #e8e8e8;
   }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter);
     min-width: 1280px;
-    overflow-x: auto;
+    max-width: 1536px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: visible;
+    box-shadow: 0 0 20px rgba(0,0,0,0.08);
   }
   .scrollbar-hide {
     -ms-overflow-style: none;
