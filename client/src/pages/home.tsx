@@ -61,7 +61,7 @@
 //     setIsSearchActive(false);
 //   };
 //   return (
-//     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
+//     <div className="min-h-screen bg-gray-50 w-full">
 //       <Header />
 
 //       {/* <SearchHero ideas={ideas}
@@ -147,7 +147,7 @@ export default function Home() {
     setIsSearchActive(false);
   };
   return (
-    <div className="min-h-screen bg-gray-50 w-full ">
+    <div className="min-h-screen bg-gray-50 w-full">
       <Header />
       <SubmenuSection />
       <CategoryNavigation />
