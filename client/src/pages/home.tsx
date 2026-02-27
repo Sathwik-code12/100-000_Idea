@@ -159,12 +159,11 @@ export default function Home() {
         <MainContentLayout ideas={displayedIdeas}
           isSearchActive={isSearchActive}
           totalDefaultIdeas={ideas.length} />
-        
         <TopicsSection />
         <DonationBanner />
         {/* <SubscribeSection /> */}
-        <NewFooter />
       </div>
+      <NewFooter />
     </div>
   );
 }
