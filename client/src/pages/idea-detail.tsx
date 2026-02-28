@@ -109,6 +109,15 @@ function pctFromStr(s: string): number {
   return m ? +m[1] : 0;
 }
 
+// Handle investment as object { display } or plain string like "₹60L"
+function getInvestmentDisplay(inv: any): string {
+  if (!inv) return "₹0";
+  if (typeof inv === "string") return inv;
+  if (typeof inv === "object" && inv.display) return inv.display;
+  if (typeof inv === "object" && inv.amount) return `₹${(inv.amount / 100000).toFixed(1)}L`;
+  return "₹0";
+}
+
 function Stars({ val, sz = 14 }: { val: number; sz?: number }) {
   return (
     <span className="inline-flex gap-0.5">
@@ -324,7 +333,7 @@ export default function IdeaDetail() {
                   {/* 4 stat pills */}
                   <div className="grid grid-cols-2 gap-2.5">
                     {[
-                      { icon: <IndianRupee size={15} className="text-blue-500"   />, val: idea.investment?.display || "₹0",               sub: "Investment Required", bg: "bg-blue-50"   },
+                      { icon: <IndianRupee size={15} className="text-blue-500"   />, val: getInvestmentDisplay(idea.investment),             sub: "Investment Required", bg: "bg-blue-50"   },
                       { icon: <TrendingUp  size={15} className="text-green-500"  />, val: idea.market_analysis?.growth || "—",             sub: "Annual CAGR",        bg: "bg-green-50"  },
                       { icon: <Clock       size={15} className="text-orange-400" />, val: idea.timeframe || "—",                           sub: "Time to Market",     bg: "bg-orange-50" },
                       { icon: <Star        size={15} className="fill-yellow-400 text-yellow-400" />, val: avgRating?.toFixed(1) || "0.0", sub: `${totalRev} Reviews`, bg: "bg-yellow-50" },
@@ -409,9 +418,15 @@ export default function IdeaDetail() {
               <SecHead iconBg="bg-orange-100" icon={<PiggyBank size={15} className="text-orange-500" />} title="Investment" />
               <div className="p-5 space-y-5">
 
-                <p className="text-[11px] font-semibold text-gray-500 flex items-center gap-1.5">
-                  <IndianRupee size={11} /> Financing Structure
-                </p>
+                {finRows.length === 0 && (
+                  <div className="flex items-center gap-3 bg-orange-50 rounded-xl p-4">
+                    <IndianRupee size={22} className="text-orange-500 flex-shrink-0" />
+                    <div>
+                      <p className="text-xl font-black text-gray-900">{getInvestmentDisplay(idea.investment)}</p>
+                      <p className="text-[11px] text-gray-500">Total Investment Required</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Donut + bars */}
                 {finRows.length > 0 && (
@@ -463,35 +478,38 @@ export default function IdeaDetail() {
                   </div>
                 )}
 
-                {/* Fixed + Working capital */}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {[
-                    {
-                      lbl: "Fixed Capital",
-                      total: idea.investment_breakdown?.fixed_capital?.total_fixed_capital,
-                      rows: Object.entries(idea.investment_breakdown?.fixed_capital || {}).filter(([k]) => k !== "total_fixed_capital"),
-                      bg: "bg-blue-50", tc: "text-blue-700", vc: "text-blue-600",
-                    },
-                    {
-                      lbl: "Working Capital",
-                      total: idea.investment_breakdown?.working_capital?.total_working_capital,
-                      rows: Object.entries(idea.investment_breakdown?.working_capital || {}).filter(([k]) => k !== "total_working_capital"),
-                      bg: "bg-purple-50", tc: "text-purple-700", vc: "text-purple-600",
-                    },
-                  ].map((col, ci) => (
-                    <div key={ci}>
-                      <p className={`text-[11px] font-bold ${col.tc} mb-2`}>{col.lbl} ({col.total || "—"})</p>
-                      <div className="space-y-1">
-                        {col.rows.map(([k, v]) => (
-                          <div key={k} className={`flex justify-between items-start ${col.bg} rounded-lg px-2.5 py-1.5`}>
-                            <span className="text-[11px] text-gray-600">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
-                            <span className={`text-[11px] font-bold ${col.vc} ml-2 flex-shrink-0`}>{v}</span>
-                          </div>
-                        ))}
+                {/* Fixed + Working capital - only show if data exists */}
+                {(Object.keys(idea.investment_breakdown?.fixed_capital || {}).filter(k => k !== "total_fixed_capital").length > 0 ||
+                  Object.keys(idea.investment_breakdown?.working_capital || {}).filter(k => k !== "total_working_capital").length > 0) && (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {[
+                      {
+                        lbl: "Fixed Capital",
+                        total: idea.investment_breakdown?.fixed_capital?.total_fixed_capital,
+                        rows: Object.entries(idea.investment_breakdown?.fixed_capital || {}).filter(([k]) => k !== "total_fixed_capital"),
+                        bg: "bg-blue-50", tc: "text-blue-700", vc: "text-blue-600",
+                      },
+                      {
+                        lbl: "Working Capital",
+                        total: idea.investment_breakdown?.working_capital?.total_working_capital,
+                        rows: Object.entries(idea.investment_breakdown?.working_capital || {}).filter(([k]) => k !== "total_working_capital"),
+                        bg: "bg-purple-50", tc: "text-purple-700", vc: "text-purple-600",
+                      },
+                    ].filter(col => col.rows.length > 0).map((col, ci) => (
+                      <div key={ci}>
+                        <p className={`text-[11px] font-bold ${col.tc} mb-2`}>{col.lbl} ({col.total || "—"})</p>
+                        <div className="space-y-1">
+                          {col.rows.map(([k, v]) => (
+                            <div key={k} className={`flex justify-between items-start ${col.bg} rounded-lg px-2.5 py-1.5`}>
+                              <span className="text-[11px] text-gray-600">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
+                              <span className={`text-[11px] font-bold ${col.vc} ml-2 flex-shrink-0`}>{v as string}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -501,6 +519,13 @@ export default function IdeaDetail() {
               <div className="p-5 space-y-5">
 
                 {/* 3 funding cards */}
+                {(idea.funding_options || []).length === 0 && (
+                  <div className="bg-violet-50 border border-violet-100 rounded-xl p-4 text-center">
+                    <Award size={28} className="text-violet-400 mx-auto mb-2" />
+                    <p className="text-xs font-semibold text-violet-700">PMEGP & Government Schemes Available</p>
+                    <p className="text-[11px] text-gray-500 mt-1">Eligible for subsidized funding through government programs</p>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {(idea.funding_options || []).slice(0, 3).map((opt, i) => {
                     const styles = [
@@ -520,20 +545,57 @@ export default function IdeaDetail() {
                   })}
                 </div>
 
-                {/* PMEGP at a glance */}
+                {/* PMEGP at a glance - handles both data structures */}
                 {idea.pmegp_summary && (
                   <>
                     <div className="flex items-center gap-2 text-[11px] font-semibold text-gray-500">
                       <CheckCircle size={11} className="text-green-500" /> PMEGP Scheme at a Glance
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                      {Object.entries(idea.pmegp_summary.project_viability || {}).map(([k, v]) => (
-                        <div key={k} className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-center">
-                          <p className="text-sm font-bold text-gray-900">{v}</p>
-                          <p className="text-[10px] text-gray-500 mt-0.5">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</p>
+                    {/* Structure 1: has project_viability object (ideas 1-7) */}
+                    {idea.pmegp_summary.project_viability && Object.keys(idea.pmegp_summary.project_viability).length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        {Object.entries(idea.pmegp_summary.project_viability).map(([k, v]) => (
+                          <div key={k} className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-center">
+                            <p className="text-sm font-bold text-gray-900">{String(v)}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Structure 2: has eligible/max_loan/subsidy (ideas 8-14) */}
+                    {!idea.pmegp_summary.project_viability && (
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {idea.pmegp_summary.max_loan && (
+                          <div className="bg-green-50 border border-green-100 rounded-xl p-3 text-center">
+                            <p className="text-sm font-bold text-green-700">{String(idea.pmegp_summary.max_loan)}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">Max Loan Available</p>
+                          </div>
+                        )}
+                        {idea.pmegp_summary.subsidy && (
+                          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-center">
+                            <p className="text-sm font-bold text-blue-700">{String(idea.pmegp_summary.subsidy)}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">Subsidy Available</p>
+                          </div>
+                        )}
+                        {idea.pmegp_summary.processing_time && (
+                          <div className="bg-orange-50 border border-orange-100 rounded-xl p-3 text-center col-span-2">
+                            <p className="text-sm font-bold text-orange-700">{String(idea.pmegp_summary.processing_time)}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">Processing Time</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {/* Documents required - shown for both structures */}
+                    {(idea.pmegp_summary.documents_required || []).length > 0 && (
+                      <div className="bg-gray-50 rounded-xl p-3">
+                        <p className="text-[11px] font-bold text-gray-600 mb-2">Documents Required</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(idea.pmegp_summary.documents_required || []).map((doc: string, i: number) => (
+                            <span key={i} className="text-[10px] bg-white border border-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{doc}</span>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -544,20 +606,22 @@ export default function IdeaDetail() {
               <SecHead iconBg="bg-amber-100" icon={<Briefcase size={15} className="text-amber-600" />} title="Business Model" />
               <div className="p-5 space-y-5">
 
-                {/* Value proposition trio */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {[
-                    { lbl: "Primary Value",      text: idea.value_proposition?.primary,                                             bg: "from-rose-50 to-pink-50   border-rose-100",   ib: "bg-rose-100",   ic: <Flame     size={15} className="text-rose-500"   /> },
-                    { lbl: "Secondary Benefits", text: (idea.value_proposition?.secondary || []).join(". "),                        bg: "from-teal-50 to-green-50  border-teal-100",   ib: "bg-teal-100",   ic: <Lightbulb size={15} className="text-teal-500"   /> },
-                    { lbl: "Competitive Edge",   text: idea.value_proposition?.competitive_advantage,                               bg: "from-yellow-50 to-amber-50 border-amber-100", ib: "bg-amber-100",  ic: <Zap       size={15} className="text-amber-500"  /> },
-                  ].map((c, i) => (
-                    <div key={i} className={`rounded-xl border bg-gradient-to-br p-4 ${c.bg}`}>
-                      <div className={`w-8 h-8 rounded-lg ${c.ib} flex items-center justify-center mb-2`}>{c.ic}</div>
-                      <p className="text-[11px] font-bold text-gray-800 mb-1">{c.lbl}</p>
-                      <p className="text-[11px] text-gray-500 leading-relaxed">{c.text || "—"}</p>
-                    </div>
-                  ))}
-                </div>
+                {/* Value proposition trio - only show if data exists */}
+                {(idea.value_proposition?.primary || idea.value_proposition?.competitive_advantage || (idea.value_proposition?.secondary || []).length > 0) && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[
+                      { lbl: "Primary Value",      text: idea.value_proposition?.primary,                              bg: "from-rose-50 to-pink-50   border-rose-100",   ib: "bg-rose-100",   ic: <Flame     size={15} className="text-rose-500"   /> },
+                      { lbl: "Secondary Benefits", text: (idea.value_proposition?.secondary || []).join(". "),         bg: "from-teal-50 to-green-50  border-teal-100",   ib: "bg-teal-100",   ic: <Lightbulb size={15} className="text-teal-500"   /> },
+                      { lbl: "Competitive Edge",   text: idea.value_proposition?.competitive_advantage,               bg: "from-yellow-50 to-amber-50 border-amber-100", ib: "bg-amber-100",  ic: <Zap       size={15} className="text-amber-500"  /> },
+                    ].map((c, i) => (
+                      <div key={i} className={`rounded-xl border bg-gradient-to-br p-4 ${c.bg}`}>
+                        <div className={`w-8 h-8 rounded-lg ${c.ib} flex items-center justify-center mb-2`}>{c.ic}</div>
+                        <p className="text-[11px] font-bold text-gray-800 mb-1">{c.lbl}</p>
+                        <p className="text-[11px] text-gray-500 leading-relaxed">{c.text || "—"}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Revenue + Pricing */}
                 <div className="grid sm:grid-cols-2 gap-6 pt-3 border-t border-gray-50">
@@ -566,20 +630,24 @@ export default function IdeaDetail() {
                     <p className="text-[11px] font-bold text-gray-700 mb-3 flex items-center gap-1.5">
                       <IndianRupee size={11} className="text-green-600" /> Revenue Streams
                     </p>
-                    <div className="space-y-2.5">
-                      {(idea.business_model?.revenue_streams || []).map((r, i) => {
-                        const ws = [78, 62, 52, 44];
-                        return (
-                          <div key={i}>
-                            <p className="text-[11px] text-gray-700 mb-0.5">{r}</p>
-                            <div className="h-1.5 bg-gray-100 rounded-full">
-                              <div className="h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-500"
-                                style={{ width: `${ws[i % 4]}%` }} />
+                    {(idea.business_model?.revenue_streams || []).length > 0 ? (
+                      <div className="space-y-2.5">
+                        {(idea.business_model!.revenue_streams).map((r, i) => {
+                          const ws = [78, 62, 52, 44];
+                          return (
+                            <div key={i}>
+                              <p className="text-[11px] text-gray-700 mb-0.5">{r}</p>
+                              <div className="h-1.5 bg-gray-100 rounded-full">
+                                <div className="h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-500"
+                                  style={{ width: `${ws[i % 4]}%` }} />
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-gray-400 italic">See business plan for revenue details</p>
+                    )}
                   </div>
 
                   {/* Pricing Strategy */}
