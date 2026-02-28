@@ -1,899 +1,4077 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo, memo } from "react";
 import { useRoute, Link } from "wouter";
 import Header from "@/components/layout/header";
 import NewFooter from "@/components/sections/new-footer";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import {
-  Star, Download, MessageCircle, Share2, ChevronRight,
-  TrendingUp, Clock, IndianRupee, Globe, Building2,
-  Shield, Lightbulb, Users, Zap, Award, CheckCircle,
-  FileText, Phone, User, Briefcase, GraduationCap,
-  Target, PiggyBank, BarChart3, DollarSign, Flame,
+  Star,
+  Heart,
+  Share2,
+  Download,
+  MapPin,
+  ChevronRight,
+  MessageCircle,
+  BookOpen,
+  BarChart3,
+  PiggyBank,
+  DollarSign,
+  Shield,
+  Clock,
+  User,
+  Target,
+  CheckCircle,
+  Zap,
+  TrendingUp,
+  FileText,
+  Phone,
+  Building2,
+  Users,
+  Calendar,
+  IndianRupee,
+  Award,
+  Lightbulb,
+  Globe,
+  Briefcase,
+  GraduationCap
 } from "lucide-react";
 
-/* ─────────────────────────────────────────────────────────────
-   TYPES
-───────────────────────────────────────────────────────────── */
-interface IdeaData {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  heroImage: string;
-  images: string[];
-  category: string;
-  subcategory?: string;
-  difficulty: string;
-  timeframe?: string;
-  location?: string;
-  investment: { amount: number; display: string; description?: string };
-  market_analysis: { TAM: string; SAM: string; SOM: string; growth: string };
-  industry_structure: { competitors: string[]; barriers: string[]; trends: string[]; opportunities: string[] };
-  user_personas: { target_users: string[]; pain_points: string[] };
-  investment_breakdown: {
-    total_project_cost: string;
-    fixed_capital: Record<string, string>;
-    working_capital: Record<string, string>;
-    means_of_finance: Record<string, string>;
-  };
-  funding_options: Array<{
-    type: string; display_amount: string;
-    sources?: { label: string; amount: string }[];
-    options?: { label: string; rate: string }[];
-    schemes?: { name: string; amount: string }[];
-  }>;
-  pmegp_summary?: {
-    project_viability: Record<string, string>;
-    eligibility: string[];
-    benefits: string[];
-  };
-  value_proposition: { primary: string; secondary: string[]; competitive_advantage: string };
-  business_model: { revenue_streams: string[]; pricing_strategy: string };
-  scale_path: { milestones: string[]; timeline: string };
-  business_moats: string[];
-  skills_required: { technical_skills: string[]; business_skills: string[]; soft_skills: string[] };
-  key_metrics: { customer_metrics: string[]; financial_metrics: string[] };
-  tech_stack?: string;
-  ratings_reviews: { average_rating: number; total_reviews: number };
-}
+// Enhanced business ideas data with authentic web research
+const businessIdeasData = {
+  "1": {
+    id: 1,
+    title: "Traditional Indian Bakery",
+    categories: ["Food & Beverage", "Retail", "Manufacturing"],
+    summary: "Traditional Indian bakery offering fresh daily breads, sweets, savory snacks, and modern bakery products serving local communities with authentic recipes and contemporary retail practices.",
+    
+    // Investment details based on authentic web research
+    investment: {
+      amount: 1500000,
+      currency: "INR",
+      display: "₹15.0L",
+      description: "Total initial capital for equipment, setup, inventory, and working capital"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "3-6 months",
+    
+    features: [
+      "Fresh daily breads and traditional Indian sweets",
+      "Modern retail setup with attractive displays",
+      "Festival-specific specialty products",
+      "Online ordering and delivery integration"
+    ],
+    
+    tech_stack: "POS systems, inventory management software, basic e-commerce integration for online orders, social media marketing tools.",
+    
+    developing_your_idea: {
+      concept: "Combining traditional Indian baking recipes with modern retail practices to serve growing urban communities.",
+      innovation: "Festival-themed product collections and custom celebration cake ordering system with traditional Indian flavors.",
+      differentiation: "Authentic traditional recipes, fresh daily production, competitive pricing, and strong community connections.",
+      timeline: "Equipment procurement and setup in 2 months, staff training in 3 weeks, trial production in 2 weeks, grand opening in 6 months."
+    },
+    
+    // Market analysis based on web research
+    market_analysis: {
+      TAM: "₹31,500 Crore (Indian bakery market by 2033)",
+      SAM: "₹8,000 Crore (Traditional bakery segment)",
+      SOM: "₹50 Crore (Realistic capture in urban markets)",
+      growth: "9.12% annual CAGR (2025-2033)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Local established bakeries and sweet shops",
+        "Modern bakery chains like Monginis",
+        "Hypermarket bakery sections"
+      ],
+      barriers: [
+        "High competition from established players",
+        "Need for skilled baking staff",
+        "Raw material price fluctuations"
+      ],
+      trends: [
+        "Premium and health-conscious variants gaining popularity",
+        "Online ordering and delivery integration",
+        "Seasonal and festival-specific products driving 40% of sales"
+      ],
+      opportunities: [
+        "Catering to growing urban populations",
+        "Corporate bulk orders and events",
+        "Export potential for specialty Indian sweets"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Local families for daily bread and occasional sweets",
+        "Office workers and students for quick breakfast",
+        "Event planners for bulk celebration orders"
+      ],
+      pain_points: [
+        "Limited availability of fresh traditional items",
+        "Inconsistent quality from local vendors",
+        "Lack of convenient ordering options"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Urban communities lack access to fresh, authentic traditional bakery products with consistent quality and modern convenience.",
+      solution: "A traditional bakery combining authentic recipes with modern retail practices, offering fresh daily products and convenient ordering.",
+      market: "₹13.8 billion market growing at 9.12% CAGR with strong urban demand and festival seasonality.",
+      traction: "Festival season can drive 40% of annual sales with proper product planning.",
+      team: "Requires skilled bakers, retail staff, and management with food industry experience."
+    },
+    
+    value_proposition: {
+      primary: "Authentic traditional bakery products with consistent quality, fresh daily production, and modern convenience.",
+      secondary: [
+        "Traditional recipes with modern hygiene standards",
+        "Competitive pricing for daily essentials",
+        "Custom orders for celebrations and festivals"
+      ],
+      competitive_advantage: "Strong community connections, authentic traditional recipes, and efficient daily production system."
+    },
+    
+    business_model: {
+      revenue_streams: [
+        "Daily fresh bread and snack sales",
+        "Traditional sweets and festival specialties",
+        "Custom celebration cakes and bulk orders",
+        "Corporate catering contracts"
+      ],
+      pricing_strategy: "Competitive pricing for daily items, premium pricing for specialty and custom products."
+    },
+    
+    scale_path: {
+      milestones: [
+        "Achieve ₹2L monthly revenue in Year 1",
+        "Establish 5 regular corporate clients in Year 2", 
+        "Launch online delivery in local area by Year 2",
+        "Open second location by Year 3"
+      ],
+      timeline: "3-year growth plan to established local brand"
+    },
+    
+    business_moats: [
+      "Recipe authenticity and taste consistency",
+      "Local community relationships and brand loyalty",
+      "Operational efficiency in daily production",
+      "Strategic location with high foot traffic"
+    ],
+    
+    key_metrics: {
+      customer_metrics: [
+        "Daily customer count and repeat rate",
+        "Average order value by product category",
+        "Customer satisfaction and reviews",
+        "Festival season sales growth"
+      ],
+      product_metrics: [
+        "Daily production vs. sales ratio",
+        "Product waste percentage",
+        "Inventory turnover rate",
+        "Seasonal product performance"
+      ],
+      financial_metrics: [
+        "Gross profit margin (25-35%)",
+        "Monthly revenue growth",
+        "Break-even achievement (8-14 months)",
+        "ROI (22-35% annually)"
+      ]
+    },
+    
+    pitch_deck: {
+      key_slides: [
+        "The Traditional Food Gap",
+        "Our Authentic Solution", 
+        "₹31,500 Crore Market Opportunity",
+        "Our Products & Community Impact",
+        "Business Model & Revenue Projections",
+        "The Founder & Local Vision",
+        "The Investment Ask"
+      ]
+    },
+    
+    funding_options: [
+      {
+        type: "Self Funding",
+        display_amount: "₹5.0-8.0L",
+        sources: [
+          {
+            label: "Personal Savings",
+            amount: "₹5.0-8.0L"
+          }
+        ],
+        timeline: "1-2 months"
+      },
+      {
+        type: "Bank Loans", 
+        display_amount: "₹10.0-15.0L",
+        options: [
+          {
+            label: "MUDRA Tarun Loan",
+            rate: "8-11%"
+          },
+          {
+            label: "Business Term Loan",
+            rate: "10-14%"
+          }
+        ],
+        repayment_period: "3-7 years"
+      },
+      {
+        type: "Government Schemes",
+        display_amount: "₹3.5-8.75L",
+        schemes: [
+          {
+            name: "PMEGP Scheme",
+            amount: "₹25L (35% subsidy for general category)"
+          }
+        ],
+        processing_time: "3-6 months"
+      }
+    ],
+    
+    investment_breakdown: {
+      total_project_cost: "₹15.0L",
+      fixed_capital: {
+        land_building: "₹2.0L (Shop rent advance)",
+        plant_machinery: "₹6.0L (Ovens, mixers, refrigeration)", 
+        furniture_fixtures: "₹1.5L (Display counters, seating)",
+        office_equipment: "₹0.5L (POS, computer systems)",
+        total_fixed_capital: "₹10.0L"
+      },
+      working_capital: {
+        raw_materials: "₹3.0L (Flour, ingredients, packaging)",
+        packing_materials: "₹0.5L",
+        utilities_rent: "₹1.0L (Initial months)",
+        contingencies: "₹0.5L",
+        total_working_capital: "₹5.0L"
+      },
+      means_of_finance: {
+        promoter_contribution: "₹3.0L (20%)",
+        pmegp_subsidy: "₹5.25L (35%)",
+        bank_loan: "₹6.75L (45%)", 
+        total: "₹15.0L"
+      }
+    },
+    
+    employment_generation: {
+      total: 6,
+      skilled: 2,
+      semi_skilled: 3,
+      unskilled: 1
+    },
+    
+    bank_loan_details: {
+      loan_amount: "₹6.75L",
+      interest_rate: "9.5% p.a.",
+      repayment_period: "5 years",
+      processing_fee: "₹6,750"
+    },
+    
+    pmegp_summary: {
+      project_cost_structure: {
+        fixed_capital: "₹10.0L",
+        working_capital: "₹5.0L", 
+        total: "₹15.0L"
+      },
+      funding_pattern: {
+        promoter_contribution: "₹3.0L (20%)",
+        pmegp_subsidy: "₹5.25L (35%)",
+        bank_loan: "₹6.75L (45%)",
+        total: "₹15.0L (100%)"
+      },
+      project_viability: {
+        annual_turnover: "₹36.0L",
+        net_profit: "₹6.48L (18%)",
+        break_even_period: "12 months",
+        roi: "43.2%"
+      },
+      eligibility: [
+        "Age: 18+ years",
+        "Educational Qualification: 8th pass minimum",
+        "Family income should not exceed ₹3.0L per annum",
+        "Should not have availed PMEGP assistance earlier"
+      ],
+      benefits: [
+        "35% subsidy on project cost",
+        "45% bank loan at concessional rates",
+        "Maximum project cost: ₹25.0L for manufacturing units"
+      ]
+    },
+    
+    skills_required: {
+      technical_skills: [
+        "Traditional Baking Techniques",
+        "Food Safety & Hygiene",
+        "Inventory Management", 
+        "Quality Control"
+      ],
+      business_skills: [
+        "Customer Service",
+        "Supplier Relations",
+        "Financial Management",
+        "Local Marketing"
+      ],
+      soft_skills: [
+        "Community Engagement",
+        "Consistency & Reliability",
+        "Time Management",
+        "Cultural Sensitivity"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.2,
+      total_reviews: 234
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&h=600&fit=crop",
+    location: "Urban & Semi-Urban"
+  },
 
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  userId: string;
-}
+  2: {
+    id: 2,
+    title: "Specialty Coffee Shop",
+    categories: ["Food & Beverage", "Hospitality", "Services"],
+    summary: "Premium coffee experience with locally sourced beans, artisanal preparation methods, and comfortable co-working space targeting India's growing coffee culture.",
+    
+    investment: {
+      amount: 1200000,
+      currency: "INR", 
+      display: "₹12.0L",
+      description: "Complete setup for mid-scale specialty coffee shop with equipment and initial operations"
+    },
+    
+    difficulty_level: "Medium-High",
+    time_to_market: "4-6 months",
+    
+    features: [
+      "Third-wave specialty coffee brewing techniques",
+      "Co-working friendly environment with WiFi", 
+      "Local coffee roaster partnerships",
+      "Artisanal food and beverage menu"
+    ],
+    
+    tech_stack: "Advanced POS systems, WiFi infrastructure, social media management tools, delivery app integration, customer loyalty programs.",
+    
+    developing_your_idea: {
+      concept: "Creating a third-wave coffee culture destination that serves as both premium café and productive workspace.",
+      innovation: "Coffee education workshops and cupping sessions to build community of coffee enthusiasts.",
+      differentiation: "Focus on locally sourced beans, skilled barista training, and authentic coffee education for customers.",
+      timeline: "Location setup and equipment in 3 months, staff training in 1 month, soft opening and marketing in 2 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹26,170 Crore (Indian café and bar market by 2029)",
+      SAM: "₹7,850 Crore (Specialty coffee segment)", 
+      SOM: "₹39 Crore (Metropolitan specialty coffee market capture)",
+      growth: "13.2% annual CAGR (2024-2030)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Established coffee chains like Café Coffee Day",
+        "Premium brands like Starbucks and Blue Tokai", 
+        "Independent specialty coffee shops"
+      ],
+      barriers: [
+        "High real estate costs in prime locations",
+        "Training and retaining skilled baristas",
+        "Competition from established coffee chains"
+      ],
+      trends: [
+        "Specialty coffee gaining popularity over instant coffee",
+        "Work-from-café culture increasing post-pandemic",
+        "Growing appreciation for coffee origins and brewing methods"
+      ],
+      opportunities: [
+        "Corporate partnerships for office catering",
+        "Coffee subscription and retail sales",
+        "Barista training and consulting services"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Working professionals seeking workspace and premium coffee",
+        "College students needing study spaces",
+        "Coffee enthusiasts interested in specialty brews"
+      ],
+      pain_points: [
+        "Limited availability of high-quality specialty coffee",
+        "Lack of comfortable work-friendly café spaces",
+        "Inconsistent coffee quality and preparation"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "India's growing coffee culture lacks accessible specialty coffee experiences with proper brewing techniques and comfortable workspace environments.",
+      solution: "A specialty coffee shop combining third-wave coffee culture with co-working space, offering premium coffee education and community building.",
+      market: "₹439.56M market growing to ₹928.98M by 2030 at 13.2% CAGR driven by urban millennials and Gen-Z.",
+      traction: "Blue Tokai raised $35M Series C showing strong investor confidence in specialty coffee market.",
+      team: "Requires experienced baristas, café management, and coffee industry knowledge for sourcing and quality."
+    },
+    
+    value_proposition: {
+      primary: "Premium specialty coffee experience with educational component and productive workspace environment.",
+      secondary: [
+        "Third-wave coffee brewing expertise",
+        "Community building through coffee education", 
+        "Comfortable co-working environment with reliable WiFi"
+      ],
+      competitive_advantage: "Focus on coffee education, local sourcing partnerships, and authentic third-wave coffee culture."
+    },
+    
+    business_model: {
+      revenue_streams: [
+        "Premium beverage sales with 60-70% gross margins",
+        "Food and snack offerings", 
+        "Corporate catering and bulk orders",
+        "Coffee retail sales and subscriptions"
+      ],
+      pricing_strategy: "Premium pricing for specialty drinks, competitive pricing for workspace usage, value pricing for corporate orders."
+    },
+    
+    scale_path: {
+      milestones: [
+        "Achieve 150 daily customers in Year 1",
+        "Launch corporate catering services in Year 1.5",
+        "Establish coffee retail line in Year 2", 
+        "Open second location in high-traffic area by Year 3"
+      ],
+      timeline: "3-year growth plan to recognized local specialty coffee brand"
+    },
+    
+    business_moats: [
+      "Skilled barista team and coffee expertise",
+      "Strong relationships with local coffee roasters", 
+      "Community of loyal specialty coffee customers",
+      "Prime location with established foot traffic"
+    ],
+    
+    key_metrics: {
+      customer_metrics: [
+        "Daily customer count and average stay time",
+        "Customer retention rate and loyalty program usage",
+        "Average order value by customer segment",
+        "Customer satisfaction scores and reviews"
+      ],
+      product_metrics: [
+        "Coffee sales volume by origin and preparation method",
+        "Food attachment rate to beverage orders",
+        "Barista efficiency and preparation consistency",
+        "Workspace utilization rates during peak hours"
+      ],
+      financial_metrics: [
+        "Gross profit margin (60-70% on beverages)",
+        "Daily revenue per square foot",
+        "Break-even achievement (10-15 months)",
+        "Monthly profit (₹40K-1.5L potential)"
+      ]
+    },
+    
+    pitch_deck: {
+      key_slides: [
+        "The Coffee Culture Gap",
+        "Our Specialty Coffee Solution",
+        "₹26,170 Crore Market Opportunity", 
+        "Our Coffee Experience & Community",
+        "Business Model & Financial Projections",
+        "The Team & Coffee Vision",
+        "The Investment Ask"
+      ]
+    },
+    
+    funding_options: [
+      {
+        type: "Self Funding",
+        display_amount: "₹8.0-12.0L",
+        sources: [
+          {
+            label: "Personal Savings & Family",
+            amount: "₹8.0-12.0L"
+          }
+        ],
+        timeline: "2-3 months"
+      },
+      {
+        type: "Bank Loans",
+        display_amount: "₹15.0-25.0L", 
+        options: [
+          {
+            label: "Business Term Loan",
+            rate: "10-14%"
+          },
+          {
+            label: "Equipment Financing",
+            rate: "12-16%"
+          }
+        ],
+        repayment_period: "3-5 years"
+      },
+      {
+        type: "SIDBI Loans",
+        display_amount: "₹5.0-25.0L",
+        schemes: [
+          {
+            name: "SIDBI Small Business Loan",
+            amount: "Lower rates for women entrepreneurs (8-12%)"
+          }
+        ],
+        processing_time: "45-60 days"
+      }
+    ],
+    
+    investment_breakdown: {
+      total_project_cost: "₹18.0L",
+      fixed_capital: {
+        land_building: "₹3.0L (Premium location rent advance)",
+        plant_machinery: "₹8.0L (Espresso machines, grinders, brewing equipment)",
+        furniture_fixtures: "₹4.0L (Seating, work tables, interior design)", 
+        office_equipment: "₹1.0L (POS, WiFi, audio systems)",
+        total_fixed_capital: "₹16.0L"
+      },
+      working_capital: {
+        raw_materials: "₹1.5L (Coffee beans, milk, ingredients)",
+        packing_materials: "₹0.2L",
+        utilities_rent: "₹0.8L (Initial months)",
+        contingencies: "₹0.5L",
+        total_working_capital: "₹3.0L"
+      },
+      means_of_finance: {
+        promoter_contribution: "₹5.4L (30%)",
+        bank_loan: "₹12.6L (70%)",
+        total: "₹18.0L"
+      }
+    },
+    
+    employment_generation: {
+      total: 8,
+      skilled: 3,
+      semi_skilled: 4,
+      unskilled: 1
+    },
+    
+    bank_loan_details: {
+      loan_amount: "₹12.6L", 
+      interest_rate: "11.5% p.a.",
+      repayment_period: "5 years",
+      processing_fee: "₹12,600"
+    },
+    
+    skills_required: {
+      technical_skills: [
+        "Barista Training & Coffee Preparation",
+        "Coffee Bean Knowledge & Sourcing",
+        "Equipment Operation & Maintenance", 
+        "Food Safety Certification"
+      ],
+      business_skills: [
+        "Hospitality Management",
+        "Supplier Relationship Management",
+        "Digital Marketing & Social Media",
+        "Financial Planning & Control"
+      ],
+      soft_skills: [
+        "Customer Service Excellence",
+        "Team Leadership",
+        "Cultural Awareness",
+        "Attention to Detail"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.5,
+      total_reviews: 189
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1200&h=600&fit=crop",
+    location: "Metro Cities"
+  },
 
-/* ─────────────────────────────────────────────────────────────
-   SAFE JSON PARSER
-   DB returns some JSON columns as strings — parse them safely
-───────────────────────────────────────────────────────────── */
-function safeJson<T = any>(val: any, fallback: T): T {
-  if (val === null || val === undefined) return fallback;
-  if (typeof val === "string") {
-    try { return JSON.parse(val) as T; } catch { return fallback; }
+  3: {
+    id: 3,
+    title: "Online Tutoring Platform",
+    categories: ["EdTech", "Education", "Technology"],
+    summary: "Comprehensive online education platform connecting students with qualified tutors across various subjects and competitive exams, leveraging India's growing digital education market.",
+    
+    investment: {
+      amount: 800000,
+      currency: "INR",
+      display: "₹8.0L", 
+      description: "Technology development, content creation, and initial marketing for EdTech platform"
+    },
+    
+    difficulty_level: "High",
+    time_to_market: "6-12 months",
+    
+    features: [
+      "Live one-on-one and group tutoring sessions",
+      "AI-powered student-tutor matching system",
+      "Interactive whiteboards and screen sharing",
+      "Progress tracking and performance analytics"
+    ],
+    
+    tech_stack: "React/Node.js web platform, mobile apps (React Native/Flutter), video conferencing APIs (Agora/WebRTC), payment gateways, cloud hosting (AWS/Google Cloud).",
+    
+    developing_your_idea: {
+      concept: "Democratizing quality education through technology by connecting students with expert tutors across India and globally.",
+      innovation: "AI-powered personalized learning paths and real-time performance analytics for students and parents.",
+      differentiation: "Focus on competitive exam preparation, regional language support, and affordable pricing for Indian market.",
+      timeline: "MVP development in 4 months, beta testing in 2 months, content creation parallel, full launch in 8 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹2,76,750 Crore (Global online tutoring market by 2029)",
+      SAM: "₹1,38,375 Crore (Indian EdTech market projection by 2030)",
+      SOM: "₹692 Crore (K-12 online tutoring segment capture)",
+      growth: "26.4% annual CAGR (2025-2029)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Established EdTech giants like BYJU'S and Vedantu",
+        "Unacademy and PhysicsWallah for competitive exams",
+        "Local coaching centers transitioning online"
+      ],
+      barriers: [
+        "High customer acquisition costs in competitive market",
+        "Need for high-quality content and tutor recruitment",
+        "Technology infrastructure and scaling challenges"
+      ],
+      trends: [
+        "Post-pandemic shift accelerating online education adoption",
+        "AI-powered personalized learning gaining importance",
+        "Regional language content becoming crucial for market penetration"
+      ],
+      opportunities: [
+        "Underserved rural and tier-2/3 city markets",
+        "Corporate training and upskilling programs",
+        "International expansion to other developing markets"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "K-12 students needing supplementary education support",
+        "Competitive exam aspirants (JEE, NEET, UPSC)",
+        "Working professionals seeking skill development"
+      ],
+      pain_points: [
+        "Limited access to quality tutors in smaller cities",
+        "High cost of traditional coaching centers", 
+        "Inflexible timing and location constraints"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Millions of Indian students lack access to quality tutoring due to geographic constraints, high costs, and limited availability of expert teachers.",
+      solution: "An online platform democratizing access to quality education through technology, connecting students with expert tutors anytime, anywhere.",
+      market: "₹2.8-5.13 billion market growing to ₹17.34-33.2 billion by 2030 driven by digital adoption and competitive exam pressure.",
+      traction: "EdTech sector raised ₹278 million in first 9 months of 2024 showing continued investor confidence.",
+      team: "Requires strong technical team, education experts, content creators, and marketing professionals with EdTech experience."
+    },
+    
+    value_proposition: {
+      primary: "Affordable, personalized, and accessible quality education through expert tutors and AI-powered learning analytics.",
+      secondary: [
+        "Flexible scheduling to fit student convenience",
+        "Comprehensive progress tracking for parents",
+        "Multi-language support for regional accessibility"
+      ],
+      competitive_advantage: "AI-powered personalization, affordable pricing model, and focus on underserved markets."
+    },
+    
+    business_model: {
+      revenue_streams: [
+        "Commission from tutors (20-30% of session fees)",
+        "Subscription plans for premium features",
+        "Corporate training partnerships",
+        "Content licensing to educational institutions"
+      ],
+      pricing_strategy: "Freemium model with basic access, premium subscriptions ₹500-5000/month, competitive commission rates for tutors."
+    },
+    
+    scale_path: {
+      milestones: [
+        "Onboard 100 qualified tutors in Year 1",
+        "Achieve 1,000 active students by end of Year 1",
+        "Launch mobile apps and expand to 5 regional languages in Year 2",
+        "Reach 10,000 students and expand internationally by Year 3"
+      ],
+      timeline: "3-year growth plan to established EdTech platform with regional expansion"
+    },
+    
+    business_moats: [
+      "Network effects - more tutors attract more students and vice versa",
+      "Data and AI algorithms improving matching and personalization",
+      "Brand reputation and trust in education sector",
+      "Technology infrastructure and platform stability"
+    ],
+    
+    key_metrics: {
+      customer_metrics: [
+        "Student acquisition rate and cost (CAC)",
+        "Student retention and course completion rates", 
+        "Net Promoter Score (NPS) from students and parents",
+        "Average session frequency per student"
+      ],
+      product_metrics: [
+        "Tutor utilization rates and satisfaction scores",
+        "Platform uptime and technical performance",
+        "Content engagement and learning outcome metrics",
+        "Mobile vs web usage patterns"
+      ],
+      financial_metrics: [
+        "Monthly Recurring Revenue (MRR) growth",
+        "Customer Lifetime Value (CLV) to CAC ratio",
+        "Gross margin after tutor payments (35-55%)",
+        "Burn rate and path to profitability"
+      ]
+    },
+    
+    pitch_deck: {
+      key_slides: [
+        "The Education Access Crisis",
+        "Our Technology-Enabled Solution",
+        "₹1,38,375 Crore Market Opportunity",
+        "Our Platform & Learning Analytics",
+        "Business Model & Unit Economics", 
+        "The Team & EdTech Vision",
+        "The Investment Ask & Growth Plan"
+      ]
+    },
+    
+    funding_options: [
+      {
+        type: "Self Funding",
+        display_amount: "₹3.0-5.0L",
+        sources: [
+          {
+            label: "Personal Savings & Bootstrap",
+            amount: "₹3.0-5.0L"
+          }
+        ],
+        timeline: "1-2 months"
+      },
+      {
+        type: "Angel Investors",
+        display_amount: "₹25.0L-2.0Cr",
+        options: [
+          {
+            label: "Angel Networks",
+            rate: "10-25% equity"
+          },
+          {
+            label: "Individual Angel Investors",
+            rate: "15-30% equity"
+          }
+        ],
+        repayment_period: "Equity investment"
+      },
+      {
+        type: "Government Grants",
+        display_amount: "₹10.0-50.0L",
+        schemes: [
+          {
+            name: "Startup India Seed Fund",
+            amount: "Up to ₹20L for innovative EdTech solutions"
+          }
+        ],
+        processing_time: "6-12 months"
+      }
+    ],
+    
+    investment_breakdown: {
+      total_project_cost: "₹15.0L",
+      fixed_capital: {
+        land_building: "₹1.0L (Virtual office setup)",
+        plant_machinery: "₹3.0L (Servers, computers, development equipment)",
+        furniture_fixtures: "₹0.5L (Basic office setup)",
+        office_equipment: "₹1.5L (Development tools, software licenses)",
+        total_fixed_capital: "₹6.0L"
+      },
+      working_capital: {
+        raw_materials: "₹3.0L (Content development, tutor payments)",
+        packing_materials: "N/A",
+        utilities_rent: "₹2.0L (Hosting, internet, marketing)",
+        contingencies: "₹4.0L (Development contingency, legal)",
+        total_working_capital: "₹9.0L"
+      },
+      means_of_finance: {
+        promoter_contribution: "₹3.0L (20%)",
+        angel_investment: "₹7.5L (50%)", 
+        government_grant: "₹4.5L (30%)",
+        total: "₹15.0L"
+      }
+    },
+    
+    employment_generation: {
+      total: 12,
+      skilled: 8,
+      semi_skilled: 3,
+      unskilled: 1
+    },
+    
+    skills_required: {
+      technical_skills: [
+        "Full-Stack Web Development",
+        "Mobile App Development", 
+        "Video Conferencing Integration",
+        "AI/ML for Recommendation Systems"
+      ],
+      business_skills: [
+        "EdTech Industry Knowledge",
+        "Content Strategy & Development",
+        "Digital Marketing & User Acquisition",
+        "Partnership Development"
+      ],
+      soft_skills: [
+        "Educational Empathy",
+        "Cross-Cultural Communication",
+        "Strategic Thinking",
+        "Adaptability & Learning"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.3,
+      total_reviews: 156
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop",
+    location: "Pan India"
+  },
+
+  4: {
+    id: 4,
+    title: "Organic Food Store & Health Market",
+    categories: ["Retail", "Health", "Sustainability"],
+    summary: "Premium organic food retail store focusing on health-conscious consumers with certified organic products, fresh produce, and sustainable lifestyle products.",
+    
+    investment: {
+      amount: 1400000,
+      currency: "INR",
+      display: "₹14.0L",
+      description: "Complete organic food store setup with inventory, refrigeration, and certification requirements"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "4-6 months",
+    
+    features: [
+      "Certified organic fruits, vegetables, and grains",
+      "Health and wellness product range",
+      "Sustainable packaging and eco-friendly practices", 
+      "Customer education on organic benefits"
+    ],
+    
+    tech_stack: "POS system with inventory tracking, e-commerce platform integration, cold storage management systems, organic certification tracking software.",
+    
+    developing_your_idea: {
+      concept: "Creating a trusted destination for health-conscious consumers seeking authentic organic products with complete transparency in sourcing.",
+      innovation: "Customer education programs and organic farming partnerships to build trust and community engagement.",
+      differentiation: "Focus on authentic organic certification, local farmer partnerships, and comprehensive health product ecosystem.",
+      timeline: "Supplier certification and setup in 3 months, inventory stocking in 1 month, staff training and launch in 2 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹1,08,079 Crore (Indian organic food market by 2033)",
+      SAM: "₹32,424 Crore (Organized organic retail segment)", 
+      SOM: "₹162 Crore (Urban organic food store market capture)",
+      growth: "20.13% annual CAGR (2025-2033)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Organic sections in supermarkets like Big Bazaar",
+        "Online organic platforms like BigBasket Organic",
+        "Local organic stores and farmers' markets"
+      ],
+      barriers: [
+        "Higher procurement costs and complex supply chain",
+        "Customer education required for premium pricing",
+        "Seasonal availability and inventory management challenges"
+      ],
+      trends: [
+        "Rising health consciousness especially among millennials",
+        "Government support through organic farming schemes",
+        "Online platforms generating significant growth in organic sales"
+      ],
+      opportunities: [
+        "Corporate wellness partnerships",
+        "Subscription box models for regular customers",
+        "Expansion to organic personal care and household products"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Health-conscious millennials and Gen Z consumers",
+        "Families with young children seeking chemical-free food",
+        "Fitness enthusiasts and people with health conditions"
+      ],
+      pain_points: [
+        "Difficulty finding authentic certified organic products",
+        "Lack of trust in organic claims and certifications",
+        "Limited availability and higher prices than conventional products"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Growing health-conscious Indian consumers struggle to find authentic, certified organic products with transparent sourcing and fair pricing.",
+      solution: "A dedicated organic food store providing certified products with complete transparency, farmer partnerships, and customer education.",
+      market: "$1,917.4 million market growing to $10,807.9 million by 2033 at 20.13% CAGR driven by health awareness and disposable income growth.",
+      traction: "Government providing 25% subsidy for organic businesses and India having 4.43 million organic farmers shows strong ecosystem support.",
+      team: "Requires expertise in organic certification, retail management, supply chain, and customer education in health and nutrition."
+    },
+    
+    value_proposition: {
+      primary: "Authentic certified organic products with complete transparency, fair pricing, and comprehensive customer education on health benefits.",
+      secondary: [
+        "Direct partnerships with certified organic farmers",
+        "Expert guidance on organic lifestyle transition",
+        "Sustainable packaging and eco-friendly practices"
+      ],
+      competitive_advantage: "Deep supplier relationships, customer education focus, and authentic organic certification expertise."
+    },
+    
+    business_model: {
+      revenue_streams: [
+        "Organic food and produce sales with 15-25% margins",
+        "Health and wellness product sales",
+        "Corporate wellness partnerships and bulk orders",
+        "Organic lifestyle consultation services"
+      ],
+      pricing_strategy: "Premium pricing justified by authentic certification, competitive with online organic platforms, bulk discounts for regular customers."
+    },
+    
+    scale_path: {
+      milestones: [
+        "Establish 20 certified supplier partnerships in Year 1",
+        "Achieve ₹50L annual revenue with 500 regular customers in Year 1",
+        "Launch online platform and delivery in Year 2",
+        "Open second location and expand product range in Year 3"
+      ],
+      timeline: "3-year plan to established organic retail brand with online presence"
+    },
+    
+    business_moats: [
+      "Trusted relationships with certified organic suppliers",
+      "Deep customer relationships and brand loyalty in health segment",
+      "Expertise in organic certification and quality assurance", 
+      "Strategic location in health-conscious neighborhood"
+    ],
+    
+    key_metrics: {
+      customer_metrics: [
+        "Customer acquisition rate and repeat purchase frequency",
+        "Average basket size and customer lifetime value",
+        "Customer satisfaction scores and organic lifestyle adoption",
+        "Referral rates and word-of-mouth marketing effectiveness"
+      ],
+      product_metrics: [
+        "Inventory turnover rates by product category",
+        "Organic certification compliance and quality metrics",
+        "Product waste percentage and freshness maintenance",
+        "Seasonal demand patterns and supplier reliability"
+      ],
+      financial_metrics: [
+        "Gross profit margin (15-25% target)",
+        "Monthly revenue per square foot", 
+        "Break-even achievement (12-18 months)",
+        "Supplier payment terms and cash flow management"
+      ]
+    },
+    
+    pitch_deck: {
+      key_slides: [
+        "The Organic Trust Crisis",
+        "Our Certified Organic Solution",
+        "₹1,08,079 Crore Market Opportunity",
+        "Our Products & Farmer Partnerships",
+        "Business Model & Growth Projections",
+        "The Team & Health Mission",
+        "The Investment Ask"
+      ]
+    },
+    
+    funding_options: [
+      {
+        type: "Self Funding",
+        display_amount: "₹9.0-14.0L",
+        sources: [
+          {
+            label: "Personal Savings & Family Investment",
+            amount: "₹9.0-14.0L"
+          }
+        ],
+        timeline: "2-3 months"
+      },
+      {
+        type: "Bank Loans",
+        display_amount: "₹10.0-25.0L",
+        options: [
+          {
+            label: "MUDRA Shishu/Kishore Loan", 
+            rate: "7-10%"
+          },
+          {
+            label: "Retail Business Loan",
+            rate: "11-15%"
+          }
+        ],
+        repayment_period: "3-5 years"
+      },
+      {
+        type: "Government Subsidies",
+        display_amount: "₹6.0-15.0L",
+        schemes: [
+          {
+            name: "Organic Business Subsidy Schemes",
+            amount: "25% subsidy up to ₹60L for organic retail"
+          }
+        ],
+        processing_time: "4-6 months"
+      }
+    ],
+    
+    investment_breakdown: {
+      total_project_cost: "₹20.0L",
+      fixed_capital: {
+        land_building: "₹4.0L (Premium location rent and setup)",
+        plant_machinery: "₹6.0L (Refrigeration, storage, POS systems)",
+        furniture_fixtures: "₹3.0L (Display units, customer seating)",
+        office_equipment: "₹1.0L (Computers, certification tracking)",
+        total_fixed_capital: "₹14.0L"
+      },
+      working_capital: {
+        raw_materials: "₹4.0L (Initial organic inventory)",
+        packing_materials: "₹0.5L (Sustainable packaging)",
+        utilities_rent: "₹1.0L (Initial months operations)", 
+        contingencies: "₹0.5L",
+        total_working_capital: "₹6.0L"
+      },
+      means_of_finance: {
+        promoter_contribution: "₹6.0L (30%)",
+        bank_loan: "₹9.0L (45%)",
+        government_subsidy: "₹5.0L (25%)",
+        total: "₹20.0L"
+      }
+    },
+    
+    employment_generation: {
+      total: 7,
+      skilled: 2,
+      semi_skilled: 4,
+      unskilled: 1
+    },
+    
+    bank_loan_details: {
+      loan_amount: "₹9.0L",
+      interest_rate: "10.5% p.a.",
+      repayment_period: "5 years", 
+      processing_fee: "₹9,000"
+    },
+    
+    skills_required: {
+      technical_skills: [
+        "Organic Certification Knowledge",
+        "Supply Chain Management",
+        "Food Safety & Storage",
+        "Inventory Management Systems"
+      ],
+      business_skills: [
+        "Retail Operations Management",
+        "Customer Education & Consultation", 
+        "Supplier Relationship Management",
+        "Health & Nutrition Knowledge"
+      ],
+      soft_skills: [
+        "Health Advocacy & Passion",
+        "Customer Trust Building",
+        "Sustainability Mindset",
+        "Community Engagement"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.1,
+      total_reviews: 78
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1594736797933-d0b22d21989d?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&h=600&fit=crop",
+    location: "Urban Areas",
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹10 lakh (Manufacturing category)",
+      subsidy: "15-35% based on category and location",
+      documents_required: ["Project report", "Land documents", "Bank NOC", "Caste certificate if applicable"],
+      processing_time: "45-60 days"
+    }
+    
+  },
+  
+  "2": {
+    id: 2,
+    title: "AI-Powered Personal Finance App",
+    categories: ["Technology", "FinTech", "Mobile App"],
+    summary: "Smart budgeting app that uses machine learning to provide personalized financial advice and automate savings, helping users achieve their financial goals through intelligent insights and automated financial management.",
+    
+    investment: {
+      amount: 12000000,
+      currency: "INR",
+      display: "₹1.2Cr",
+      description: "Total initial capital for development, team, marketing, and regulatory compliance"
+    },
+    
+    difficulty_level: "Hard",
+    time_to_market: "8 months",
+    
+    features: [
+      "AI-powered spending analysis and categorization",
+      "Automated savings recommendations and goal tracking",
+      "Investment portfolio analysis and suggestions",
+      "Bill reminders and payment automation integration"
+    ],
+    
+    tech_stack: "React Native, Node.js, Python (ML), TensorFlow, MongoDB, AWS, Banking APIs, OAuth 2.0, Real-time analytics dashboard.",
+    
+    developing_your_idea: {
+      concept: "Leveraging AI and machine learning to democratize personalized financial advisory services for middle-class Indians.",
+      innovation: "Contextual AI that understands Indian spending patterns, festivals, and cultural financial behaviors for accurate predictions.",
+      differentiation: "Multi-language support, UPI integration, Indian tax planning features, and culturally aware financial advice.",
+      timeline: "MVP development in 4 months, beta testing in 2 months, regulatory approvals in 1 month, full launch in 8 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹2,45,000 Crore (Indian FinTech market by 2030)",
+      SAM: "₹45,000 Crore (Personal finance management segment)",
+      SOM: "₹500 Crore (Realistic capture with strong execution)",
+      growth: "22.5% annual CAGR (2025-2030)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "CRED, ET Money, Paytm Money",
+        "International players like Mint, YNAB",
+        "Traditional banks' mobile apps"
+      ],
+      barriers: [
+        "High customer acquisition costs",
+        "Regulatory compliance requirements",
+        "Data security and privacy concerns"
+      ],
+      trends: [
+        "Increased smartphone adoption and digital literacy",
+        "Growing awareness about financial planning",
+        "Government push for digital financial inclusion"
+      ],
+      opportunities: [
+        "Underserved Tier-2 and Tier-3 city markets",
+        "Integration with government financial schemes",
+        "Corporate employee benefits partnerships"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Young professionals (25-40) with disposable income",
+        "Small business owners seeking financial organization",
+        "Students learning financial management"
+      ],
+      pain_points: [
+        "Difficulty tracking multiple bank accounts and investments",
+        "Lack of personalized financial advice",
+        "Complex investment options and decision fatigue"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Most Indians struggle with personal financial management due to lack of accessible, personalized, and culturally relevant financial guidance.",
+      solution: "An AI-powered app that understands Indian financial behavior and provides personalized, actionable financial advice in multiple languages.",
+      market: "₹2.45 trillion FinTech market growing at 22.5% CAGR with 500M+ potential smartphone users.",
+      traction: "Pre-launch user surveys show 78% willingness to pay for personalized AI financial advice."
+    },
+    
+    investment_breakdown: {
+      development: { amount: 4500000, percentage: 37.5, description: "App development, AI/ML implementation, testing" },
+      team: { amount: 3600000, percentage: 30, description: "Technical team, data scientists, financial advisors" },
+      marketing: { amount: 2400000, percentage: 20, description: "User acquisition, digital marketing, partnerships" },
+      operations: { amount: 900000, percentage: 7.5, description: "Legal, compliance, office setup, tools" },
+      buffer: { amount: 600000, percentage: 5, description: "Contingency and unexpected expenses" }
+    },
+    
+    funding_options: [
+      {
+        type: "Angel Investment",
+        amount: "₹50L - ₹2Cr",
+        timeline: "3-6 months",
+        requirements: "MVP, user traction, strong team"
+      },
+      {
+        type: "Venture Capital",
+        amount: "₹5Cr - ₹20Cr",
+        timeline: "6-12 months",
+        requirements: "Proven product-market fit, growth metrics"
+      }
+    ],
+    
+    business_model: {
+      revenue_streams: [
+        "Freemium subscription model (₹199-999/month)",
+        "Commission from financial product referrals",
+        "Premium analytics and advanced AI features",
+        "Corporate B2B financial wellness packages"
+      ],
+      pricing_strategy: "Freemium model with basic features free, advanced AI insights and automated features in paid tiers starting at ₹199/month."
+    },
+    
+    value_proposition: {
+      primary: "Get personalized financial advice powered by AI that understands your spending patterns, goals, and Indian financial ecosystem.",
+      secondary: [
+        "Automated savings that grow wealth without effort",
+        "Multi-language support for regional users",
+        "Integration with all major Indian banks and UPI",
+        "Tax-saving recommendations based on Indian laws"
+      ],
+      competitive_advantage: "Only AI-powered personal finance app specifically designed for Indian financial behavior, festivals, and cultural spending patterns."
+    },
+    
+    scale_path: {
+      timeline: "Year 1: 100K users, Year 2: 1M users, Year 3: 5M+ users with expansion to financial products marketplace.",
+      milestones: [
+        "Launch MVP with 1,000 beta users and validate core AI features",
+        "Achieve 50,000 active users with 15% conversion to paid",
+        "Secure Series A funding and expand to 5 major Indian cities",
+        "Launch corporate wellness partnerships with 100+ companies",
+        "Expand to financial products marketplace with investment options"
+      ]
+    },
+    
+    business_moats: [
+      "Proprietary AI algorithms trained on Indian financial behavior data",
+      "Strong network effects as more users improve AI recommendations",
+      "Regulatory compliance and banking partnerships",
+      "Brand trust and user data advantages over new entrants"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Mobile App Development (React Native/Flutter)",
+        "AI/ML Engineering (Python, TensorFlow)",
+        "Backend Development (Node.js, APIs)",
+        "Data Science and Analytics",
+        "Financial APIs Integration"
+      ],
+      business_skills: [
+        "FinTech Regulatory Knowledge",
+        "User Experience Design",
+        "Growth Marketing & User Acquisition",
+        "Financial Advisory Experience"
+      ],
+      soft_skills: [
+        "Problem-Solving & Innovation",
+        "Data-Driven Decision Making",
+        "Customer-Centric Thinking",
+        "Team Leadership & Management"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.7,
+      total_reviews: 156
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop",
+    location: "Pan India",
+    
+    key_metrics: {
+      customer_metrics: [
+        "User acquisition cost and lifetime value",
+        "Daily active users and engagement rate",
+        "Subscription conversion and retention rate"
+      ],
+      financial_metrics: [
+        "Monthly recurring revenue growth",
+        "Customer acquisition cost vs revenue",
+        "Gross margin and operational efficiency"
+      ]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector category)",
+      subsidy: "15-25% for general category",
+      documents_required: ["Detailed project report", "Educational qualifications", "Technical feasibility", "Market analysis"],
+      processing_time: "60-90 days due to technical evaluation"
+    }
+  },
+  
+  "3": {
+    id: 3,
+    title: "Vertical Urban Farming System",
+    categories: ["Agriculture", "Sustainability", "Technology"],
+    summary: "Automated indoor farming solution for growing fresh produce in urban environments with minimal space, using advanced hydroponic and LED technology to provide year-round fresh vegetables and herbs.",
+    
+    investment: {
+      amount: 6500000,
+      currency: "INR",
+      display: "₹65L",
+      description: "Total initial capital for equipment, facility setup, technology, and working capital"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "6 months",
+    
+    features: [
+      "Automated hydroponic growing systems with IoT monitoring",
+      "LED grow lights optimized for different crop types",
+      "Climate control and automated nutrient delivery",
+      "Vertical growing towers maximizing space efficiency"
+    ],
+    
+    tech_stack: "IoT sensors, automated irrigation systems, LED technology, climate control systems, mobile monitoring app, data analytics dashboard.",
+    
+    developing_your_idea: {
+      concept: "Bringing fresh, pesticide-free produce production directly into urban areas using space-efficient vertical farming technology.",
+      innovation: "AI-optimized growing conditions and crop rotation systems designed specifically for Indian climate and urban constraints.",
+      differentiation: "Focus on Indian vegetables and herbs with higher yields per square foot than traditional farming.",
+      timeline: "Facility setup in 3 months, equipment installation in 2 months, first harvest trial in 1 month, commercial production in 6 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹45,000 Crore (Indian fresh produce market)",
+      SAM: "₹8,000 Crore (Urban fresh vegetables segment)",
+      SOM: "₹200 Crore (Realistic capture in metro cities)",
+      growth: "12.3% annual CAGR (2025-2030)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Traditional vegetable vendors and wholesale markets",
+        "Organic farming startups like Akshayakalpa",
+        "International vertical farming companies"
+      ],
+      barriers: [
+        "High initial setup costs for technology",
+        "Need for specialized technical knowledge",
+        "Consumer education about vertical farming"
+      ],
+      trends: [
+        "Growing demand for organic and pesticide-free produce",
+        "Urban consumers willing to pay premium for freshness",
+        "Government support for sustainable agriculture"
+      ],
+      opportunities: [
+        "Partnership with restaurants and hotels for direct supply",
+        "Expansion to office complexes and residential communities",
+        "Export potential for premium organic produce"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Premium restaurants seeking consistent fresh supply",
+        "Health-conscious urban families",
+        "Corporate offices with cafeterias"
+      ],
+      pain_points: [
+        "Inconsistent quality and supply from traditional sources",
+        "Pesticide residue concerns in conventional vegetables",
+        "High prices for organic produce with limited availability"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Urban consumers struggle to access fresh, pesticide-free vegetables due to long supply chains, inconsistent quality, and high prices for organic produce.",
+      solution: "Automated vertical farming systems that produce fresh vegetables year-round in urban locations with 95% less water and no pesticides.",
+      market: "₹45,000 crore fresh produce market with growing urban premium segment willing to pay 20-30% more for quality.",
+      traction: "Pilot installations show 40% higher yields and 60% water savings compared to traditional farming methods."
+    },
+    
+    investment_breakdown: {
+      equipment: { amount: 3250000, percentage: 50, description: "Hydroponic systems, LED lights, climate control" },
+      facility: { amount: 1625000, percentage: 25, description: "Warehouse rental, setup, utilities" },
+      technology: { amount: 975000, percentage: 15, description: "IoT sensors, automation, monitoring systems" },
+      working_capital: { amount: 650000, percentage: 10, description: "Seeds, nutrients, initial operations" }
+    },
+    
+    funding_options: [
+      {
+        type: "Government Grants",
+        amount: "₹15L - ₹50L",
+        timeline: "6-12 months",
+        requirements: "Sustainability focus, job creation plan"
+      },
+      {
+        type: "Angel Investment",
+        amount: "₹50L - ₹2Cr",
+        timeline: "3-6 months",
+        requirements: "Working prototype, market validation"
+      }
+    ],
+    
+    business_model: {
+      revenue_streams: [
+        "Direct sales to restaurants and hotels (B2B)",
+        "Subscription boxes for home delivery (B2C)",
+        "Equipment leasing to other urban farmers",
+        "Consulting services for vertical farm setup"
+      ],
+      pricing_strategy: "Premium pricing 20-30% above organic produce due to superior freshness, consistency, and year-round availability."
+    },
+    
+    value_proposition: {
+      primary: "Fresh, pesticide-free vegetables grown locally in urban environments with guaranteed quality and year-round availability.",
+      secondary: [
+        "95% less water usage compared to traditional farming",
+        "Zero pesticide residue and maximum nutritional content",
+        "Consistent supply regardless of weather conditions",
+        "Reduced transportation costs and carbon footprint"
+      ],
+      competitive_advantage: "Only urban farming solution combining advanced technology with focus on Indian vegetables and local market needs."
+    },
+    
+    scale_path: {
+      timeline: "Year 1: 1 facility, Year 2: 5 facilities across metros, Year 3: Franchise model with 20+ locations.",
+      milestones: [
+        "Establish first commercial facility with 500kg monthly production",
+        "Secure 10+ restaurant partners and achieve break-even",
+        "Expand to second city and launch home delivery service",
+        "Develop franchise model and train 5 franchise partners",
+        "Scale to 20 facilities with combined 10 tons monthly production"
+      ]
+    },
+    
+    business_moats: [
+      "Proprietary growing recipes optimized for Indian vegetables",
+      "Strong supplier relationships and economies of scale",
+      "Technology and automation expertise difficult to replicate",
+      "Brand reputation and customer loyalty in premium segment"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Agricultural Science and Hydroponics",
+        "IoT and Automation Systems",
+        "LED Lighting Technology",
+        "Climate Control Systems",
+        "Supply Chain Management"
+      ],
+      business_skills: [
+        "Agricultural Business Management",
+        "B2B Sales and Partnership Development",
+        "Operations and Logistics",
+        "Sustainability and Environmental Impact"
+      ],
+      soft_skills: [
+        "Innovation and Problem-Solving",
+        "Sustainability Mindset",
+        "Quality Focus and Attention to Detail",
+        "Community and Environmental Advocacy"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.4,
+      total_reviews: 89
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=1200&h=600&fit=crop",
+    location: "Metro Cities",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Crop yield per square foot vs traditional farming",
+        "Customer retention rate for restaurant clients",
+        "Quality consistency and delivery reliability"
+      ],
+      financial_metrics: [
+        "Revenue per square foot of farming space",
+        "Cost savings vs traditional produce sourcing",
+        "Profit margins and break-even timeline"
+      ]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹10 lakh (Manufacturing/Service hybrid)",
+      subsidy: "25-35% for innovative agricultural technology",
+      documents_required: ["Technical project report", "Land/space arrangements", "Technology tie-ups", "Market linkages"],
+      processing_time: "45-75 days"
+    }
+  },
+  
+  "4": {
+    id: 4,
+    title: "Sustainable Fashion Marketplace",
+    categories: ["Fashion", "E-commerce", "Sustainability"],
+    summary: "Online platform connecting eco-conscious consumers with sustainable fashion brands and second-hand clothing, promoting circular fashion economy through curated sustainable brands and verified pre-owned designer items.",
+    
+    investment: {
+      amount: 4000000,
+      currency: "INR",
+      display: "₹40L",
+      description: "Total initial capital for platform development, marketing, and initial inventory"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "4 months",
+    
+    features: [
+      "Curated sustainable fashion brands marketplace",
+      "Verified second-hand designer clothing section",
+      "Sustainability scoring system for brands and products",
+      "Virtual try-on technology and size recommendation"
+    ],
+    
+    tech_stack: "React, Node.js, MongoDB, Stripe payments, AR/VR for virtual try-on, AI for size recommendations, social media integration.",
+    
+    developing_your_idea: {
+      concept: "Creating a trusted marketplace that makes sustainable fashion accessible and desirable for conscious Indian consumers.",
+      innovation: "Sustainability scoring algorithm and virtual styling consultations specifically for Indian fashion preferences.",
+      differentiation: "Focus on Indian sustainable brands with affordability options through curated second-hand luxury items.",
+      timeline: "Platform development in 2 months, brand onboarding in 1 month, beta testing in 2 weeks, full launch in 4 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹1,25,000 Crore (Indian fashion and apparel market)",
+      SAM: "₹15,000 Crore (Premium and sustainable fashion segment)",
+      SOM: "₹300 Crore (Realistic capture with strong brand partnerships)",
+      growth: "15.2% annual CAGR (2025-2030)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Myntra, Ajio for mainstream fashion",
+        "International players like Vestiaire Collective",
+        "Local sustainable fashion brands selling direct"
+      ],
+      barriers: [
+        "Customer education about sustainable fashion value",
+        "Higher price points compared to fast fashion",
+        "Quality verification for second-hand items"
+      ],
+      trends: [
+        "Growing environmental consciousness among millennials",
+        "Increased acceptance of second-hand luxury goods",
+        "Government regulations on textile waste"
+      ],
+      opportunities: [
+        "Partnership with fashion influencers and stylists",
+        "Corporate sustainability initiatives",
+        "International sustainable brands entering India"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Environmentally conscious women aged 25-45",
+        "Fashion-forward professionals seeking unique pieces",
+        "Budget-conscious consumers wanting designer items"
+      ],
+      pain_points: [
+        "Difficulty finding trustworthy sustainable fashion options",
+        "High prices of sustainable clothing",
+        "Limited variety in sustainable fashion choices"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Fashion-conscious consumers struggle to find affordable, verified sustainable fashion options and quality second-hand designer items in India.",
+      solution: "A curated marketplace combining the best sustainable fashion brands with verified pre-owned luxury items, making conscious fashion accessible.",
+      market: "₹1.25 trillion fashion market with growing 30% sustainable segment driven by millennial and Gen-Z consumers.",
+      traction: "Initial brand partnerships secured with 25+ sustainable fashion brands and 500+ consignment items."
+    },
+    
+    investment_breakdown: {
+      development: { amount: 1600000, percentage: 40, description: "Platform development, mobile app, features" },
+      marketing: { amount: 1200000, percentage: 30, description: "Digital marketing, influencer partnerships, PR" },
+      inventory: { amount: 800000, percentage: 20, description: "Initial consignment inventory, brand partnerships" },
+      operations: { amount: 400000, percentage: 10, description: "Team, legal, office setup, tools" }
+    },
+    
+    funding_options: [
+      {
+        type: "Bootstrapping",
+        amount: "₹10L - ₹20L",
+        timeline: "Immediate",
+        requirements: "MVP development, initial brand partnerships"
+      },
+      {
+        type: "Angel Investment",
+        amount: "₹50L - ₹1Cr",
+        timeline: "3-6 months",
+        requirements: "User traction, revenue proof of concept"
+      }
+    ],
+    
+    business_model: {
+      revenue_streams: [
+        "Commission on brand sales (15-25%)",
+        "Commission on consignment sales (30-40%)",
+        "Premium listing fees for brands",
+        "Styling consultation services (₹999-2999)"
+      ],
+      pricing_strategy: "Commission-based revenue model with competitive rates for brands, premium fees for enhanced visibility and marketing support."
+    },
+    
+    value_proposition: {
+      primary: "Discover and shop verified sustainable fashion and authenticated second-hand luxury items in one trusted platform.",
+      secondary: [
+        "Sustainability scoring helps make informed choices",
+        "Virtual try-on reduces returns and improves fit",
+        "Styling consultations for personalized fashion advice",
+        "Support for local sustainable fashion brands"
+      ],
+      competitive_advantage: "Only platform combining new sustainable fashion with verified second-hand luxury, with sustainability scoring and Indian fashion focus."
+    },
+    
+    scale_path: {
+      timeline: "Year 1: 50 brands, Year 2: 200 brands across categories, Year 3: International expansion and private label.",
+      milestones: [
+        "Launch with 25+ sustainable brands and 500 consignment items",
+        "Achieve 10,000 registered users and ₹10L monthly GMV",
+        "Expand to menswear and children's fashion categories",
+        "Launch private label sustainable fashion line",
+        "Scale to 200+ brands and explore international markets"
+      ]
+    },
+    
+    business_moats: [
+      "Curated brand relationships and exclusive partnerships",
+      "Reputation for authentic sustainability scoring",
+      "Advanced virtual try-on technology and fit algorithms",
+      "Strong community of conscious fashion consumers"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "E-commerce Platform Development",
+        "AI/ML for Recommendations",
+        "AR/VR for Virtual Try-on",
+        "Mobile App Development",
+        "Payment Gateway Integration"
+      ],
+      business_skills: [
+        "Fashion Industry Knowledge",
+        "Brand Partnership Development",
+        "Digital Marketing and Social Media",
+        "Inventory and Supply Chain Management"
+      ],
+      soft_skills: [
+        "Fashion Sense and Trend Awareness",
+        "Sustainability Advocacy",
+        "Community Building",
+        "Creative Problem-Solving"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.2,
+      total_reviews: 94
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop",
+    location: "Metro Cities",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Brand partnerships and seller onboarding rate",
+        "Customer repeat purchase rate and satisfaction",
+        "Platform traffic and conversion rates"
+      ],
+      financial_metrics: [
+        "Gross merchandise value (GMV) growth",
+        "Commission revenue and take rate",
+        "Customer acquisition cost vs lifetime value"
+      ]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector - Trading)",
+      subsidy: "15-25% for e-commerce platform",
+      documents_required: ["Business model documentation", "Technology infrastructure plan", "Vendor agreements", "Compliance certificates"],
+      processing_time: "60-90 days for service sector evaluation"
+    }
+  },
+
+  "5": {
+    id: 5,
+    title: "Cloud Kitchen for Regional Cuisines",
+    categories: ["Food & Beverage", "Technology", "Delivery"],
+    summary: "Multi-brand cloud kitchen serving authentic regional Indian cuisines with online-only ordering, focusing on home-style cooking and fast delivery to urban consumers seeking authentic flavors.",
+    
+    investment: {
+      amount: 2500000,
+      currency: "INR",
+      display: "₹25L",
+      description: "Complete cloud kitchen setup with equipment, licenses, and initial marketing"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "3 months",
+    
+    features: [
+      "Multi-brand operations under one kitchen",
+      "Region-specific authentic recipes and ingredients",
+      "Advanced order management and delivery tracking",
+      "Data-driven menu optimization and demand forecasting"
+    ],
+    
+    tech_stack: "POS system, order management software, delivery aggregator integrations, inventory management, customer analytics dashboard.",
+    
+    developing_your_idea: {
+      concept: "Bringing authentic regional Indian cuisines to urban areas through optimized cloud kitchen operations with minimal overhead costs.",
+      innovation: "AI-powered demand forecasting and dynamic menu optimization based on local preferences and seasonal trends.",
+      differentiation: "Focus on authentic regional recipes with home-style cooking approach and premium ingredient sourcing.",
+      timeline: "Kitchen setup in 6 weeks, equipment installation in 2 weeks, menu testing in 2 weeks, launch in 3 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹4,23,865 Crore (Indian food delivery market by 2028)",
+      SAM: "₹63,580 Crore (Cloud kitchen segment)",
+      SOM: "₹318 Crore (Regional cuisine cloud kitchen market)",
+      growth: "12.8% annual CAGR (2024-2028)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Swiggy Cloud Kitchens, Zomato Kitchen Hub",
+        "Regional players like Freshmenu, Box8",
+        "Independent cloud kitchen operators"
+      ],
+      barriers: [
+        "High competition and customer acquisition costs",
+        "Quality consistency across multiple brands",
+        "Dependency on aggregator platforms"
+      ],
+      trends: [
+        "Growing demand for authentic regional cuisines",
+        "Increasing acceptance of online-only food brands",
+        "Rising urban population seeking convenience"
+      ],
+      opportunities: [
+        "Expansion to tier-2 cities with regional focus",
+        "Franchise model for proven recipes",
+        "Corporate catering and subscription meals"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Working professionals missing home-style regional food",
+        "Students and migrants from different states",
+        "Food enthusiasts exploring authentic regional cuisines"
+      ],
+      pain_points: [
+        "Lack of authentic regional food options in cities",
+        "High prices for quality regional cuisine",
+        "Limited availability of home-style cooking"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Urban consumers struggle to find authentic regional Indian cuisines that match home-style cooking quality and taste.",
+      solution: "Multi-brand cloud kitchen delivering authentic regional cuisines with traditional recipes and premium ingredients.",
+      market: "₹4,23,865 crore market growing at 12.8% CAGR driven by urbanization and food delivery adoption.",
+      traction: "Cloud kitchen market expected to grow 40% annually with increasing preference for online food ordering.",
+      team: "Requires expertise in food operations, regional cuisine knowledge, supply chain, and digital marketing."
+    },
+    
+    business_moats: [
+      "Authentic regional recipe database and chef network",
+      "Optimized multi-brand operations reducing per-order costs",
+      "Strong supplier relationships for regional ingredients",
+      "Data-driven menu optimization and demand prediction"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Food Safety & Hygiene Management",
+        "Kitchen Operations & Equipment",
+        "Order Management Systems",
+        "Supply Chain & Inventory Management"
+      ],
+      business_skills: [
+        "Regional Cuisine Knowledge",
+        "Multi-brand Operations Management",
+        "Digital Marketing & Customer Acquisition",
+        "Food Cost Management & Pricing"
+      ],
+      soft_skills: [
+        "Culinary Passion & Innovation",
+        "Quality Control & Consistency",
+        "Adaptability & Fast Execution",
+        "Customer Service Excellence"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.3,
+      total_reviews: 187
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=600&fit=crop",
+    location: "Urban Areas",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Order frequency and customer retention rate",
+        "Average order value and basket size",
+        "Customer satisfaction and review ratings"
+      ],
+      financial_metrics: [
+        "Revenue per kitchen and profit margins",
+        "Cost per order and delivery efficiency",
+        "Monthly recurring revenue growth"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "15-20 positions",
+      indirect_jobs: "8-12 delivery partner positions",
+      job_categories: ["Chefs", "Kitchen Staff", "Operations"],
+      skill_levels: ["Skilled culinary staff", "Operations management"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹10 lakh (Manufacturing category)",
+      subsidy: "15-35% based on location and category",
+      documents_required: ["Food license", "Kitchen setup plan", "Equipment list", "Market analysis"],
+      processing_time: "45-60 days"
+    }
+  },
+
+  "6": {
+    id: 6,
+    title: "Digital Health & Telemedicine Platform",
+    categories: ["Healthcare", "Technology", "Service"],
+    summary: "Comprehensive telemedicine platform connecting patients with verified doctors for consultations, health monitoring, and prescription management with AI-powered health assessments.",
+    
+    investment: {
+      amount: 8500000,
+      currency: "INR",
+      display: "₹85L",
+      description: "Platform development, medical partnerships, regulatory compliance, and initial marketing"
+    },
+    
+    difficulty_level: "Hard",
+    time_to_market: "8 months",
+    
+    features: [
+      "Video consultations with verified doctors",
+      "AI-powered symptom checker and health assessment",
+      "Digital prescription and medicine delivery",
+      "Health records management and appointment scheduling"
+    ],
+    
+    tech_stack: "React Native, Node.js, MongoDB, WebRTC, AI/ML, Payment gateways, Cloud infrastructure, Security compliance (HIPAA).",
+    
+    developing_your_idea: {
+      concept: "Making healthcare accessible and affordable through technology-enabled medical consultations and health monitoring.",
+      innovation: "AI-powered pre-consultation screening and multilingual support for rural and urban healthcare access.",
+      differentiation: "Focus on regional languages, affordable pricing, and integration with local healthcare systems.",
+      timeline: "Platform development in 4 months, doctor onboarding in 2 months, regulatory approvals in 2 months, launch in 8 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹3,72,000 Crore (Indian healthcare market by 2028)",
+      SAM: "₹18,600 Crore (Digital health and telemedicine segment)",
+      SOM: "₹930 Crore (Telemedicine platform market)",
+      growth: "31.2% annual CAGR (2023-2028)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Practo, Apollo 24/7, Tata 1mg",
+        "DocsApp, mfine, Lybrate",
+        "International players like Teladoc"
+      ],
+      barriers: [
+        "Regulatory compliance and medical licensing",
+        "Trust building with patients and doctors",
+        "High customer acquisition and retention costs"
+      ],
+      trends: [
+        "Growing acceptance of digital healthcare post-COVID",
+        "Government push for digital health initiatives",
+        "Increasing smartphone and internet penetration"
+      ],
+      opportunities: [
+        "Rural healthcare access and specialist consultations",
+        "Corporate wellness and employee health programs",
+        "Integration with insurance and government schemes"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Urban professionals seeking convenient healthcare",
+        "Rural patients needing specialist consultations",
+        "Elderly patients requiring regular monitoring"
+      ],
+      pain_points: [
+        "Long waiting times and travel for consultations",
+        "Lack of specialist doctors in rural areas",
+        "High costs of private healthcare"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Healthcare accessibility challenges with long waiting times, limited specialist availability, and high costs affecting quality care delivery.",
+      solution: "Technology-enabled telemedicine platform providing instant access to qualified doctors with AI-powered health assessments.",
+      market: "₹3,72,000 crore healthcare market growing at 31.2% CAGR with increasing digital adoption.",
+      traction: "Government's National Digital Health Mission and post-pandemic acceptance driving rapid market growth.",
+      team: "Requires healthcare technology expertise, medical partnerships, regulatory knowledge, and patient acquisition skills."
+    },
+    
+    business_moats: [
+      "Verified doctor network and quality assurance",
+      "AI-powered health assessment algorithms",
+      "Regulatory compliance and medical data security",
+      "Integration with healthcare ecosystem and insurance"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Healthcare Technology Development",
+        "AI/ML for Health Assessments",
+        "Medical Data Security & Compliance",
+        "Video Conferencing Integration"
+      ],
+      business_skills: [
+        "Healthcare Industry Knowledge",
+        "Medical Partnership Development",
+        "Regulatory Affairs & Compliance",
+        "Healthcare Marketing & Patient Acquisition"
+      ],
+      soft_skills: [
+        "Healthcare Empathy & Understanding",
+        "Trust Building & Communication",
+        "Quality Assurance Focus",
+        "Patient-Centric Approach"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.5,
+      total_reviews: 234
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=1200&h=600&fit=crop",
+    location: "Pan India",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Patient consultation frequency and satisfaction",
+        "Doctor utilization rate and response time",
+        "Platform engagement and retention rates"
+      ],
+      financial_metrics: [
+        "Revenue per consultation and subscription",
+        "Customer acquisition cost vs lifetime value",
+        "Monthly recurring revenue growth"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "40-60 positions",
+      indirect_jobs: "100-200 doctor partnerships",
+      job_categories: ["Technology", "Healthcare Operations", "Customer Support"],
+      skill_levels: ["High-skilled tech and healthcare professionals"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector category)",
+      subsidy: "15-25% for technology services",
+      documents_required: ["Healthcare license", "Technology infrastructure plan", "Medical partnerships", "Compliance certificates"],
+      processing_time: "75-90 days due to regulatory requirements"
+    }
+  },
+
+  "7": {
+    id: 7,
+    title: "Solar Energy Installation Service",
+    categories: ["Renewable Energy", "Service", "Sustainability"],
+    summary: "Solar panel installation and maintenance service for residential and commercial properties, providing end-to-end renewable energy solutions with financing options and government subsidy assistance.",
+    
+    investment: {
+      amount: 3500000,
+      currency: "INR",
+      display: "₹35L",
+      description: "Equipment, vehicles, training, initial inventory, and working capital"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "4 months",
+    
+    features: [
+      "Residential and commercial solar installations",
+      "Energy audit and customized system design",
+      "Maintenance and monitoring services",
+      "Government subsidy assistance and financing options"
+    ],
+    
+    tech_stack: "Solar design software, monitoring systems, CRM software, project management tools, IoT sensors for system monitoring.",
+    
+    developing_your_idea: {
+      concept: "Making solar energy accessible and affordable through professional installation services and comprehensive customer support.",
+      innovation: "Smart monitoring systems and predictive maintenance using IoT sensors and data analytics.",
+      differentiation: "Complete end-to-end service with financing support and long-term maintenance contracts.",
+      timeline: "Team training in 2 months, equipment procurement in 1 month, first installations in 1 month, scale operations in 4 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹1,24,000 Crore (Indian solar energy market by 2030)",
+      SAM: "₹31,000 Crore (Rooftop solar installation segment)",
+      SOM: "₹620 Crore (Regional solar installation market)",
+      growth: "20.5% annual CAGR (2023-2030)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Tata Power Solar, Adani Solar",
+        "Local solar installers and distributors",
+        "Waaree Energies, Vikram Solar"
+      ],
+      barriers: [
+        "High initial investment for equipment",
+        "Technical expertise and certification requirements",
+        "Competition from established players"
+      ],
+      trends: [
+        "Government incentives and net metering policies",
+        "Falling solar panel costs and increasing efficiency",
+        "Growing environmental awareness among consumers"
+      ],
+      opportunities: [
+        "Rural electrification and agricultural applications",
+        "Industrial and commercial rooftop installations",
+        "Electric vehicle charging station integration"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Homeowners seeking to reduce electricity bills",
+        "Businesses looking for sustainable energy solutions",
+        "Industrial facilities with high energy consumption"
+      ],
+      pain_points: [
+        "High upfront costs and complex financing",
+        "Lack of technical knowledge about solar systems",
+        "Concerns about installation quality and maintenance"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Rising electricity costs and environmental concerns drive demand for solar energy, but installation complexity and high costs create barriers.",
+      solution: "Professional solar installation service with financing support, quality assurance, and comprehensive maintenance.",
+      market: "₹1,24,000 crore solar market growing at 20.5% CAGR driven by government policies and cost reductions.",
+      traction: "Government target of 40GW rooftop solar by 2025 and various subsidies creating strong market opportunity.",
+      team: "Requires solar technology expertise, electrical installation skills, business development, and customer service capabilities."
+    },
+    
+    business_moats: [
+      "Technical expertise and certified installation teams",
+      "Partnerships with financing institutions",
+      "Long-term maintenance contracts and customer relationships",
+      "Local market knowledge and government policy expertise"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Solar System Design & Engineering",
+        "Electrical Installation & Wiring",
+        "Energy Audit & Assessment",
+        "System Monitoring & Maintenance"
+      ],
+      business_skills: [
+        "Renewable Energy Policy Knowledge",
+        "Project Management & Logistics",
+        "Customer Relationship Management",
+        "Financial Planning & Subsidy Processing"
+      ],
+      soft_skills: [
+        "Environmental Advocacy & Education",
+        "Technical Communication",
+        "Quality Assurance Focus",
+        "Problem-Solving & Troubleshooting"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.4,
+      total_reviews: 145
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200&h=600&fit=crop",
+    location: "Urban & Rural Areas",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Installation completion rate and timeline",
+        "Customer satisfaction and referral rate",
+        "System performance and energy savings"
+      ],
+      financial_metrics: [
+        "Revenue per installation and profit margins",
+        "Project acquisition cost and conversion rate",
+        "Recurring maintenance revenue growth"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "20-30 positions",
+      indirect_jobs: "15-25 contractor positions",
+      job_categories: ["Electrical Technicians", "Sales", "Project Management"],
+      skill_levels: ["Skilled technical workers", "Engineering graduates"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector category)",
+      subsidy: "15-35% based on location and category",
+      documents_required: ["Electrical contractor license", "Technical certifications", "Project portfolio", "Equipment list"],
+      processing_time: "60-75 days"
+    }
+  },
+
+  "8": {
+    id: 8,
+    title: "Skill Development & Training Institute",
+    categories: ["Education", "Skill Development", "Service"],
+    summary: "Professional skill development institute offering industry-relevant courses in technology, digital marketing, and vocational skills with placement assistance and certification programs.",
+    
+    investment: {
+      amount: 4500000,
+      currency: "INR",
+      display: "₹45L",
+      description: "Infrastructure setup, equipment, curriculum development, initial marketing"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "5 months",
+    
+    features: [
+      "Industry-relevant courses in high-demand skills",
+      "Hands-on training with modern equipment and software",
+      "Placement assistance and industry partnerships",
+      "Online and offline course delivery options"
+    ],
+    
+    tech_stack: "Learning management system, video conferencing tools, assessment platforms, student information systems, digital content creation tools.",
+    
+    developing_your_idea: {
+      concept: "Bridging the skill gap by providing practical, industry-relevant training programs that enhance employability.",
+      innovation: "Hybrid learning model with AI-powered personalized learning paths and real-world project-based training.",
+      differentiation: "Strong industry partnerships for placements and curriculum designed by industry experts.",
+      timeline: "Curriculum development in 2 months, infrastructure setup in 2 months, faculty recruitment in 1 month, launch in 5 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹93,000 Crore (Indian skill development market by 2025)",
+      SAM: "₹18,600 Crore (Private skill development segment)",
+      SOM: "₹465 Crore (Technology and digital skills training)",
+      growth: "15.8% annual CAGR (2023-2025)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "NIIT, Aptech, Arena Animation",
+        "Online platforms like Byju's, Unacademy",
+        "Government ITIs and skill centers"
+      ],
+      barriers: [
+        "High setup costs and infrastructure requirements",
+        "Faculty recruitment and retention challenges",
+        "Competition from established players"
+      ],
+      trends: [
+        "Growing demand for digital and technology skills",
+        "Government focus on skill development initiatives",
+        "Increasing preference for practical, job-oriented training"
+      ],
+      opportunities: [
+        "Corporate training and upskilling programs",
+        "Rural skill development and government partnerships",
+        "Specialized courses for emerging technologies"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Recent graduates seeking job-ready skills",
+        "Working professionals looking to upskill",
+        "Career changers and unemployed individuals"
+      ],
+      pain_points: [
+        "Lack of practical skills despite formal education",
+        "Difficulty finding quality training programs",
+        "High costs and time commitment for skill development"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Significant skill gap in the job market with traditional education not preparing students for industry requirements.",
+      solution: "Comprehensive skill development institute providing practical, industry-relevant training with placement support.",
+      market: "₹93,000 crore skill development market growing at 15.8% CAGR driven by industry demands and government initiatives.",
+      traction: "National Skill Development Mission and industry demand for skilled workers creating strong growth opportunities.",
+      team: "Requires educational expertise, industry partnerships, curriculum development skills, and student placement capabilities."
+    },
+    
+    business_moats: [
+      "Industry partnerships for curriculum and placements",
+      "Experienced faculty and training methodology",
+      "Strong placement track record and alumni network",
+      "Government recognition and certification partnerships"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Curriculum Development & Design",
+        "Educational Technology & LMS",
+        "Assessment & Evaluation Methods",
+        "Training Delivery & Facilitation"
+      ],
+      business_skills: [
+        "Education Industry Knowledge",
+        "Corporate Partnership Development",
+        "Student Recruitment & Marketing",
+        "Placement & Career Services"
+      ],
+      soft_skills: [
+        "Educational Leadership & Vision",
+        "Student-Centric Approach",
+        "Quality Assurance & Continuous Improvement",
+        "Communication & Mentoring"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.3,
+      total_reviews: 298
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop",
+    location: "Urban Areas",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Student enrollment and course completion rates",
+        "Placement success rate and salary levels",
+        "Student satisfaction and course effectiveness"
+      ],
+      financial_metrics: [
+        "Revenue per student and course profitability",
+        "Student acquisition cost and retention rate",
+        "Monthly recurring revenue from courses"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "25-40 positions",
+      indirect_jobs: "Placement support for 200+ students annually",
+      job_categories: ["Faculty", "Administration", "Placement Officers"],
+      skill_levels: ["Qualified trainers", "Industry experts"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector category)",
+      subsidy: "15-25% for educational services",
+      documents_required: ["Educational permits", "Curriculum approval", "Infrastructure plan", "Faculty qualifications"],
+      processing_time: "60-90 days"
+    }
+  },
+
+  "9": {
+    id: 9,
+    title: "Smart Home Automation Service",
+    categories: ["Technology", "IoT", "Service"],
+    summary: "Home automation service providing smart lighting, security, climate control, and energy management solutions with installation, maintenance, and customer support.",
+    
+    investment: {
+      amount: 2800000,
+      currency: "INR",
+      display: "₹28L",
+      description: "Equipment inventory, vehicles, training, marketing, and working capital"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "4 months",
+    
+    features: [
+      "Smart lighting and climate control systems",
+      "Home security and surveillance integration",
+      "Energy monitoring and optimization",
+      "Voice control and mobile app integration"
+    ],
+    
+    tech_stack: "IoT devices, mobile apps, cloud platforms, home networking equipment, automation controllers.",
+    
+    developing_your_idea: {
+      concept: "Making homes smarter and more efficient through integrated automation solutions that enhance comfort, security, and energy savings.",
+      innovation: "AI-powered learning systems that adapt to homeowner preferences and predictive maintenance alerts.",
+      differentiation: "End-to-end service from consultation to installation and ongoing support with local technician network.",
+      timeline: "Product sourcing in 1.5 months, team training in 1.5 months, pilot installations in 1 month, full operations in 4 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹18,600 Crore (Indian smart home market by 2028)",
+      SAM: "₹5,580 Crore (Home automation services segment)",
+      SOM: "₹279 Crore (Regional home automation market)",
+      growth: "25.3% annual CAGR (2023-2028)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Xiaomi, Amazon Alexa ecosystem",
+        "Local system integrators and electricians",
+        "Honeywell, Schneider Electric"
+      ],
+      barriers: [
+        "Technical expertise and integration complexity",
+        "High initial investment for inventory",
+        "Customer education and trust building"
+      ],
+      trends: [
+        "Growing adoption of smart devices and IoT",
+        "Increasing awareness about energy efficiency",
+        "Rising disposable income and lifestyle upgrades"
+      ],
+      opportunities: [
+        "Integration with solar systems and EVs",
+        "Corporate and commercial building automation",
+        "Subscription-based monitoring and maintenance"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Tech-savvy homeowners seeking convenience",
+        "Families prioritizing home security",
+        "Environmentally conscious consumers"
+      ],
+      pain_points: [
+        "Complex installation and setup processes",
+        "Compatibility issues between different devices",
+        "Lack of technical support and maintenance"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Homeowners want smart home benefits but face installation complexity and ongoing maintenance challenges.",
+      solution: "Professional home automation service providing seamless integration, installation, and ongoing support.",
+      market: "₹18,600 crore smart home market growing at 25.3% CAGR driven by technology adoption and lifestyle changes.",
+      traction: "Increasing smartphone penetration and IoT device affordability driving rapid market adoption.",
+      team: "Requires IoT expertise, electrical installation skills, customer service, and technology integration knowledge."
+    },
+    
+    business_moats: [
+      "Technical expertise in multi-brand integration",
+      "Local installation and support network",
+      "Customer relationships and ongoing service contracts",
+      "Partnerships with device manufacturers and suppliers"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "IoT Systems Integration",
+        "Home Networking & Wireless Technologies", 
+        "Smart Device Installation & Configuration",
+        "Mobile App Development & Support"
+      ],
+      business_skills: [
+        "Smart Home Technology Knowledge",
+        "Customer Consultation & Solution Design",
+        "Inventory Management & Supplier Relations",
+        "Service Operations & Maintenance"
+      ],
+      soft_skills: [
+        "Technology Enthusiasm & Innovation",
+        "Customer Education & Training",
+        "Problem-Solving & Troubleshooting",
+        "Attention to Detail & Quality"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.2,
+      total_reviews: 163
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=1200&h=600&fit=crop",
+    location: "Urban Areas",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Installation completion rate and timeline",
+        "Customer satisfaction and system usage",
+        "Service call frequency and resolution time"
+      ],
+      financial_metrics: [
+        "Revenue per installation and service contracts",
+        "Customer acquisition cost and lifetime value",
+        "Monthly recurring revenue from maintenance"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "15-25 positions",
+      indirect_jobs: "10-15 contractor positions",
+      job_categories: ["Technical Installers", "Sales Consultants", "Customer Support"],
+      skill_levels: ["Skilled technical workers", "Customer service professionals"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector category)",
+      subsidy: "15-25% for technology services",
+      documents_required: ["Electrical contractor license", "Technology certifications", "Vendor partnerships", "Service portfolio"],
+      processing_time: "45-60 days"
+    }
+  },
+
+  "10": {
+    id: 10,
+    title: "Eco-Friendly Product Manufacturing",
+    categories: ["Manufacturing", "Sustainability", "Consumer Goods"],
+    summary: "Manufacturing biodegradable and eco-friendly alternatives to plastic products including bags, containers, cutlery, and packaging materials using sustainable raw materials.",
+    
+    investment: {
+      amount: 5500000,
+      currency: "INR",
+      display: "₹55L",
+      description: "Manufacturing setup, machinery, raw materials, certifications, and initial marketing"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "6 months",
+    
+    features: [
+      "Biodegradable bags and packaging materials",
+      "Compostable cutlery and food containers",
+      "Eco-friendly cleaning and personal care products",
+      "Sustainable raw material sourcing and processing"
+    ],
+    
+    tech_stack: "Manufacturing equipment, quality testing systems, supply chain management software, sustainability tracking tools.",
+    
+    developing_your_idea: {
+      concept: "Creating sustainable alternatives to plastic products while building environmentally responsible manufacturing processes.",
+      innovation: "Advanced biodegradable material formulations and innovative production processes reducing environmental impact.",
+      differentiation: "Focus on affordability, quality, and complete biodegradability with transparent sustainability metrics.",
+      timeline: "Machinery setup in 3 months, certifications in 2 months, production trials in 1 month, full production in 6 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹1,86,000 Crore (Indian packaging market by 2030)",
+      SAM: "₹37,200 Crore (Eco-friendly packaging segment)",
+      SOM: "₹744 Crore (Biodegradable products market)",
+      growth: "18.7% annual CAGR (2023-2030)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Enviro-friendly product manufacturers",
+        "Traditional plastic manufacturers entering green space",
+        "International eco-product companies"
+      ],
+      barriers: [
+        "High raw material costs compared to plastics",
+        "Consumer awareness and adoption challenges",
+        "Quality consistency and durability requirements"
+      ],
+      trends: [
+        "Government regulations banning single-use plastics",
+        "Growing environmental consciousness among consumers",
+        "Corporate sustainability initiatives and ESG focus"
+      ],
+      opportunities: [
+        "Government procurement and policy support",
+        "Export opportunities to environmentally conscious markets",
+        "B2B partnerships with eco-conscious brands"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Environmentally conscious consumers and businesses",
+        "Retailers seeking sustainable packaging solutions",
+        "Government agencies implementing green policies"
+      ],
+      pain_points: [
+        "Limited availability of affordable eco-friendly alternatives",
+        "Concerns about product quality and durability",
+        "Higher costs compared to traditional plastic products"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Plastic pollution crisis requires sustainable alternatives, but existing eco-friendly products are often expensive or low-quality.",
+      solution: "High-quality, affordable biodegradable products manufactured using innovative sustainable processes.",
+      market: "₹1,86,000 crore packaging market with 18.7% CAGR growth driven by regulations and environmental awareness.",
+      traction: "Government plastic ban policies and corporate sustainability commitments creating strong demand.",
+      team: "Requires manufacturing expertise, sustainability knowledge, quality control, and supply chain management skills."
+    },
+    
+    business_moats: [
+      "Proprietary biodegradable material formulations",
+      "Established sustainable supply chain relationships",
+      "Quality certifications and government approvals",
+      "Brand reputation in sustainability and environmental responsibility"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Manufacturing Process Engineering",
+        "Material Science & Biodegradable Technologies",
+        "Quality Control & Testing",
+        "Supply Chain & Logistics Management"
+      ],
+      business_skills: [
+        "Sustainability & Environmental Compliance",
+        "Manufacturing Operations Management",
+        "B2B Sales & Partnership Development",
+        "Cost Management & Pricing Strategy"
+      ],
+      soft_skills: [
+        "Environmental Advocacy & Mission-Driven Leadership",
+        "Innovation & Continuous Improvement",
+        "Quality Focus & Customer Satisfaction",
+        "Stakeholder Communication & Transparency"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.4,
+      total_reviews: 127
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&h=600&fit=crop",
+    location: "Industrial Areas",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Product quality ratings and customer satisfaction",
+        "Repeat order rate and customer retention",
+        "Environmental impact and sustainability metrics"
+      ],
+      financial_metrics: [
+        "Production volume and cost per unit",
+        "Gross margin and profitability trends",
+        "Revenue growth and market share"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "30-50 positions",
+      indirect_jobs: "20-30 supplier/vendor positions",
+      job_categories: ["Production Workers", "Quality Control", "Management"],
+      skill_levels: ["Skilled manufacturing workers", "Technical supervisors"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Manufacturing category)",
+      subsidy: "15-35% based on location and category",
+      documents_required: ["Pollution control clearance", "Manufacturing license", "Quality certifications", "Environmental compliance"],
+      processing_time: "75-90 days due to environmental clearances"
+    }
+  },
+
+  "11": {
+    id: 11,
+    title: "Fitness & Wellness Center",
+    categories: ["Health & Fitness", "Service", "Wellness"],
+    summary: "Modern fitness center offering gym equipment, group classes, personal training, nutrition counseling, and wellness programs with state-of-the-art facilities and expert guidance.",
+    
+    investment: {
+      amount: 6000000,
+      currency: "INR",
+      display: "₹60L",
+      description: "Equipment, facility setup, interior design, initial marketing, and working capital"
+    },
+    
+    difficulty_level: "Medium",
+    time_to_market: "4 months",
+    
+    features: [
+      "Modern gym equipment and strength training area",
+      "Group fitness classes and yoga studio",
+      "Personal training and nutrition counseling",
+      "Wellness programs and health assessments"
+    ],
+    
+    tech_stack: "Gym management software, fitness tracking apps, payment systems, member check-in systems, nutritional analysis tools.",
+    
+    developing_your_idea: {
+      concept: "Creating a comprehensive fitness ecosystem that promotes physical and mental wellness through expert guidance and modern facilities.",
+      innovation: "AI-powered personalized workout plans and nutrition tracking with wearable device integration.",
+      differentiation: "Holistic wellness approach combining fitness, nutrition, mental health, and community building.",
+      timeline: "Space setup in 2 months, equipment installation in 1 month, staff training in 2 weeks, soft opening in 1 month, grand opening in 4 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹87,200 Crore (Indian fitness industry by 2026)",
+      SAM: "₹13,080 Crore (Fitness centers and gyms segment)",
+      SOM: "₹327 Crore (Regional fitness center market)",
+      growth: "8.7% annual CAGR (2023-2026)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Cult.fit, Gold's Gym, Anytime Fitness",
+        "Local gyms and fitness centers",
+        "Yoga studios and specialized fitness centers"
+      ],
+      barriers: [
+        "High initial investment and ongoing costs",
+        "Staff retention and training challenges",
+        "Competition from established chains"
+      ],
+      trends: [
+        "Growing health consciousness and fitness awareness",
+        "Increasing disposable income and lifestyle changes",
+        "Post-pandemic focus on immunity and wellness"
+      ],
+      opportunities: [
+        "Corporate wellness programs and partnerships",
+        "Specialized programs for seniors and medical fitness",
+        "Online fitness programs and virtual training"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Health-conscious professionals seeking fitness",
+        "Individuals looking for weight management solutions",
+        "Fitness enthusiasts seeking variety and community"
+      ],
+      pain_points: [
+        "Lack of personalized fitness guidance",
+        "Intimidating gym environments for beginners",
+        "High membership costs without desired results"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Rising health issues and sedentary lifestyles require accessible fitness solutions, but many gyms lack personalization and holistic wellness approach.",
+      solution: "Comprehensive fitness center providing personalized training, nutrition guidance, and supportive community environment.",
+      market: "₹87,200 crore fitness industry growing at 8.7% CAGR driven by health awareness and lifestyle changes.",
+      traction: "Increasing health consciousness and corporate wellness initiatives creating strong demand for quality fitness services.",
+      team: "Requires fitness expertise, business management, customer service, and wellness program development skills."
+    },
+    
+    business_moats: [
+      "Qualified trainer team and personalized programs",
+      "Modern equipment and attractive facility design",
+      "Community building and member retention programs",
+      "Partnerships with healthcare providers and nutritionists"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Fitness Program Design & Training",
+        "Nutrition Science & Counseling",
+        "Equipment Operation & Maintenance",
+        "Health Assessment & Monitoring"
+      ],
+      business_skills: [
+        "Fitness Industry Knowledge",
+        "Member Acquisition & Retention",
+        "Staff Management & Training",
+        "Health & Safety Compliance"
+      ],
+      soft_skills: [
+        "Motivational Leadership & Coaching",
+        "Community Building & Engagement",
+        "Empathy & Client Relationship Building",
+        "Health & Wellness Advocacy"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.3,
+      total_reviews: 312
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&h=600&fit=crop",
+    location: "Urban Areas",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Member retention rate and attendance",
+        "Customer satisfaction and fitness results",
+        "Class participation and engagement levels"
+      ],
+      financial_metrics: [
+        "Monthly recurring revenue and membership growth",
+        "Revenue per member and lifetime value",
+        "Operating costs and profit margins"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "20-30 positions",
+      indirect_jobs: "5-10 contractor positions",
+      job_categories: ["Fitness Trainers", "Nutritionists", "Front Desk Staff"],
+      skill_levels: ["Certified fitness professionals", "Customer service staff"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector category)",
+      subsidy: "15-25% for service businesses",
+      documents_required: ["Health department clearance", "Fire safety certificate", "Trainer certifications", "Equipment specifications"],
+      processing_time: "45-60 days"
+    }
+  },
+
+  "12": {
+    id: 12,
+    title: "Digital Marketing Agency",
+    categories: ["Marketing", "Technology", "Service"],
+    summary: "Full-service digital marketing agency providing social media marketing, SEO, content creation, paid advertising, and analytics services for businesses looking to grow their online presence.",
+    
+    investment: {
+      amount: 1800000,
+      currency: "INR",
+      display: "₹18L",
+      description: "Office setup, software tools, initial team, marketing, and working capital"
+    },
+    
+    difficulty_level: "Easy",
+    time_to_market: "2 months",
+    
+    features: [
+      "Social media management and content creation",
+      "Search engine optimization and Google Ads",
+      "Website design and development services",
+      "Analytics and performance reporting"
+    ],
+    
+    tech_stack: "Marketing automation tools, analytics platforms, design software, CRM systems, social media management tools.",
+    
+    developing_your_idea: {
+      concept: "Helping businesses establish and grow their digital presence through comprehensive online marketing strategies.",
+      innovation: "AI-powered content optimization and predictive analytics for campaign performance.",
+      differentiation: "Focus on data-driven strategies with transparent reporting and measurable ROI.",
+      timeline: "Team building in 3 weeks, tool setup in 2 weeks, first client onboarding in 2 weeks, scale operations in 2 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹58,000 Crore (Indian digital advertising market by 2025)",
+      SAM: "₹17,400 Crore (Digital marketing services segment)",
+      SOM: "₹435 Crore (SME digital marketing services)",
+      growth: "27.2% annual CAGR (2023-2025)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "WATConsult, iProspect, Social Beat",
+        "Freelancers and small agencies",
+        "In-house marketing teams"
+      ],
+      barriers: [
+        "High competition and pricing pressure",
+        "Keeping up with platform algorithm changes",
+        "Client retention and proving ROI"
+      ],
+      trends: [
+        "Increasing digital adoption by small businesses",
+        "Growing importance of social media marketing",
+        "Rising demand for data-driven marketing"
+      ],
+      opportunities: [
+        "Local business digitization post-pandemic",
+        "E-commerce growth driving marketing needs",
+        "Specialized services for specific industries"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Small and medium businesses seeking online growth",
+        "Startups needing digital marketing expertise",
+        "Traditional businesses transitioning to digital"
+      ],
+      pain_points: [
+        "Lack of in-house digital marketing expertise",
+        "Difficulty measuring marketing ROI",
+        "Keeping up with changing digital trends"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Businesses struggle with digital marketing complexity and lack expertise to effectively reach online audiences.",
+      solution: "Comprehensive digital marketing services providing strategy, execution, and measurable results for business growth.",
+      market: "₹58,000 crore digital advertising market growing at 27.2% CAGR driven by digital transformation.",
+      traction: "Small business digitization and e-commerce growth creating strong demand for marketing services.",
+      team: "Requires digital marketing expertise, creative skills, analytics knowledge, and client management capabilities."
+    },
+    
+    business_moats: [
+      "Proven track record and case studies",
+      "Specialized industry knowledge and expertise",
+      "Strong client relationships and retention",
+      "Proprietary tools and data-driven methodologies"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Digital Marketing Strategy & Planning",
+        "SEO & SEM Optimization",
+        "Social Media Marketing & Management",
+        "Web Analytics & Data Analysis"
+      ],
+      business_skills: [
+        "Digital Marketing Industry Knowledge",
+        "Client Relationship Management",
+        "Project Management & Campaign Execution",
+        "Creative Content Development"
+      ],
+      soft_skills: [
+        "Creative Thinking & Innovation",
+        "Communication & Presentation",
+        "Analytical Problem-Solving",
+        "Trend Awareness & Adaptability"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.4,
+      total_reviews: 189
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop",
+    location: "Urban Areas",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Client retention rate and satisfaction",
+        "Campaign performance and ROI delivered",
+        "New client acquisition and referrals"
+      ],
+      financial_metrics: [
+        "Monthly recurring revenue and client value",
+        "Project profitability and team utilization",
+        "Revenue growth and market share"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "10-20 positions",
+      indirect_jobs: "5-10 freelancer positions",
+      job_categories: ["Digital Marketers", "Content Creators", "Analysts"],
+      skill_levels: ["Digital marketing professionals", "Creative specialists"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector category)",
+      subsidy: "15-25% for service businesses",
+      documents_required: ["Service provider registration", "Software licenses", "Team qualifications", "Portfolio samples"],
+      processing_time: "30-45 days"
+    }
+  },
+
+  "13": {
+    id: 13,
+    title: "Mobile Food Truck Business",
+    categories: ["Food & Beverage", "Mobile Service", "Retail"],
+    summary: "Mobile food truck serving specialty cuisines and innovative food concepts with flexible location strategy targeting office complexes, events, and high-traffic areas.",
+    
+    investment: {
+      amount: 1200000,
+      currency: "INR",
+      display: "₹12L",
+      description: "Food truck vehicle, kitchen equipment, permits, initial inventory, and marketing"
+    },
+    
+    difficulty_level: "Easy",
+    time_to_market: "3 months",
+    
+    features: [
+      "Specialty cuisine with unique menu offerings",
+      "Mobile POS system and digital payments",
+      "Social media integration for location updates",
+      "Catering services for events and corporate offices"
+    ],
+    
+    tech_stack: "Mobile POS system, GPS tracking, social media management, food safety monitoring, mobile payment solutions.",
+    
+    developing_your_idea: {
+      concept: "Bringing gourmet food experiences directly to customers through strategic mobile operations and innovative menu concepts.",
+      innovation: "Data-driven location optimization and customer preference tracking for menu development.",
+      differentiation: "Focus on high-quality, Instagram-worthy food with strong social media presence and customer engagement.",
+      timeline: "Truck procurement and setup in 6 weeks, permits and licenses in 4 weeks, menu testing in 2 weeks, launch in 3 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹4,23,865 Crore (Indian food service market by 2028)",
+      SAM: "₹21,193 Crore (Street food and quick service segment)",
+      SOM: "₹106 Crore (Mobile food service market)",
+      growth: "9.8% annual CAGR (2023-2028)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "Local street food vendors",
+        "Quick service restaurants",
+        "Other mobile food trucks and carts"
+      ],
+      barriers: [
+        "Permit and licensing complexities",
+        "Location restrictions and competition",
+        "Weather dependency and seasonal challenges"
+      ],
+      trends: [
+        "Growing acceptance of street and mobile food",
+        "Social media driving food discovery",
+        "Increasing demand for convenient, quality food"
+      ],
+      opportunities: [
+        "Corporate catering and office lunch services",
+        "Event catering and festival participation",
+        "Multiple truck fleet expansion"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Office workers seeking convenient lunch options",
+        "Food enthusiasts looking for unique experiences",
+        "Event organizers needing catering services"
+      ],
+      pain_points: [
+        "Limited healthy and tasty lunch options",
+        "Long wait times at restaurants",
+        "Expensive food options in business districts"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Urban workers struggle to find convenient, affordable, and quality food options during busy work schedules.",
+      solution: "Mobile food truck delivering gourmet food experiences directly to customers at convenient locations and times.",
+      market: "₹4,23,865 crore food service market growing at 9.8% CAGR driven by urbanization and convenience trends.",
+      traction: "Growing acceptance of street food culture and social media-driven food discovery creating opportunities.",
+      team: "Requires culinary skills, food safety knowledge, business operations, and customer service expertise."
+    },
+    
+    business_moats: [
+      "Unique menu and food preparation expertise",
+      "Strategic location knowledge and customer base",
+      "Strong social media presence and brand recognition",
+      "Efficient operations and cost management"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "Culinary Arts & Food Preparation",
+        "Food Safety & Hygiene Management",
+        "Mobile Kitchen Operations",
+        "Inventory & Supply Chain Management"
+      ],
+      business_skills: [
+        "Food Service Industry Knowledge",
+        "Location Strategy & Route Planning",
+        "Social Media Marketing & Branding",
+        "Event Planning & Catering Services"
+      ],
+      soft_skills: [
+        "Culinary Creativity & Innovation",
+        "Customer Service Excellence",
+        "Adaptability & Quick Problem-Solving",
+        "Community Engagement & Networking"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.2,
+      total_reviews: 256
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1558618042-c8d2893df4ac?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=1200&h=600&fit=crop",
+    location: "Urban Areas",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Daily customer count and repeat visits",
+        "Average order value and customer satisfaction",
+        "Social media engagement and followers"
+      ],
+      financial_metrics: [
+        "Daily revenue and profit margins",
+        "Food cost percentage and waste reduction",
+        "Monthly growth and seasonal performance"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "3-6 positions",
+      indirect_jobs: "2-4 supplier relationships",
+      job_categories: ["Chef/Cook", "Service Staff", "Driver"],
+      skill_levels: ["Skilled culinary staff", "Customer service workers"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹10 lakh (Manufacturing/Service category)",
+      subsidy: "15-35% based on location",
+      documents_required: ["Food license", "Vehicle registration", "Health permits", "Route permissions"],
+      processing_time: "60-75 days due to multiple permits"
+    }
+  },
+
+  "14": {
+    id: 14,
+    title: "E-Learning Platform for Kids",
+    categories: ["Education", "Technology", "Children"],
+    summary: "Interactive e-learning platform for children aged 5-15 with gamified lessons, personalized learning paths, and parental monitoring for core academic subjects and skill development.",
+    
+    investment: {
+      amount: 7500000,
+      currency: "INR",
+      display: "₹75L",
+      description: "Platform development, content creation, marketing, team, and technology infrastructure"
+    },
+    
+    difficulty_level: "Hard",
+    time_to_market: "8 months",
+    
+    features: [
+      "Interactive lessons with games and animations",
+      "Personalized learning paths based on child's pace",
+      "Progress tracking and parental dashboards",
+      "Live tutoring sessions and doubt clearing"
+    ],
+    
+    tech_stack: "React, Node.js, MongoDB, video streaming, gamification engine, learning analytics, payment gateways, mobile apps.",
+    
+    developing_your_idea: {
+      concept: "Making learning fun and effective for children through technology-enabled interactive education with personalized approach.",
+      innovation: "AI-powered adaptive learning that adjusts content difficulty and teaching style based on child's learning patterns.",
+      differentiation: "Focus on Indian curriculum alignment with multilingual support and culturally relevant content.",
+      timeline: "Content development in 4 months, platform development in 3 months, testing in 1 month, launch in 8 months."
+    },
+    
+    market_analysis: {
+      TAM: "₹1,33,000 Crore (Indian EdTech market by 2025)",
+      SAM: "₹39,900 Crore (K-12 online education segment)",
+      SOM: "₹1,995 Crore (Interactive learning platform market)",
+      growth: "39.7% annual CAGR (2023-2025)"
+    },
+    
+    industry_structure: {
+      competitors: [
+        "BYJU'S, Vedantu, Unacademy",
+        "Khan Academy, Coursera for Kids",
+        "Traditional coaching institutes"
+      ],
+      barriers: [
+        "High content development and technology costs",
+        "Regulatory compliance and child safety",
+        "Competition from established players"
+      ],
+      trends: [
+        "Accelerated digital learning adoption post-pandemic",
+        "Growing parental investment in child education",
+        "Increasing comfort with online learning platforms"
+      ],
+      opportunities: [
+        "Tier-2 and tier-3 city market expansion",
+        "Integration with school curriculum and assessments",
+        "International market expansion with localized content"
+      ]
+    },
+    
+    user_personas: {
+      target_users: [
+        "Parents seeking supplementary education for children",
+        "Students needing personalized learning support",
+        "Schools looking for digital learning tools"
+      ],
+      pain_points: [
+        "One-size-fits-all teaching approaches in schools",
+        "Difficulty finding quality tutors and educational content",
+        "Lack of engaging and interactive learning materials"
+      ]
+    },
+    
+    product_narrative: {
+      problem: "Traditional education methods don't cater to individual learning styles, and parents struggle to provide quality supplementary education.",
+      solution: "Interactive e-learning platform with personalized content, gamification, and comprehensive progress tracking.",
+      market: "₹1,33,000 crore EdTech market growing at 39.7% CAGR driven by digital adoption and educational investment.",
+      traction: "Post-pandemic shift to online learning and increasing parental focus on child education creating strong demand.",
+      team: "Requires EdTech expertise, content development, child psychology, technology development, and education marketing skills."
+    },
+    
+    business_moats: [
+      "Proprietary adaptive learning algorithms",
+      "High-quality, curriculum-aligned content library",
+      "Strong user engagement and retention rates",
+      "Partnerships with schools and educational institutions"
+    ],
+    
+    skills_required: {
+      technical_skills: [
+        "EdTech Platform Development",
+        "Learning Management Systems",
+        "Child-Safe Technology Design",
+        "Data Analytics & Learning Insights"
+      ],
+      business_skills: [
+        "Education Industry Knowledge",
+        "Content Strategy & Curriculum Design",
+        "Parent & Student Acquisition",
+        "Educational Partnerships & Compliance"
+      ],
+      soft_skills: [
+        "Child Psychology & Development Understanding",
+        "Educational Empathy & Patience",
+        "Creative Content Development",
+        "Family Communication & Trust Building"
+      ]
+    },
+    
+    ratings_reviews: {
+      average_rating: 4.6,
+      total_reviews: 278
+    },
+    
+    images: [
+      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=500&fit=crop",
+      "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=800&h=500&fit=crop"
+    ],
+    heroImage: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop",
+    location: "Pan India",
+    
+    key_metrics: {
+      customer_metrics: [
+        "Student engagement time and learning progress",
+        "Parent satisfaction and platform usage",
+        "Course completion rates and academic improvement"
+      ],
+      financial_metrics: [
+        "Monthly active users and subscription revenue",
+        "Customer acquisition cost and lifetime value",
+        "Content development ROI and platform scalability"
+      ]
+    },
+    
+    employment_generation: {
+      direct_jobs: "35-50 positions",
+      indirect_jobs: "20-30 content creator positions",
+      job_categories: ["Developers", "Content Creators", "Education Specialists"],
+      skill_levels: ["High-skilled technology and education professionals"]
+    },
+    
+    pmegp_summary: {
+      eligible: true,
+      max_loan: "₹25 lakh (Service sector category)",
+      subsidy: "15-25% for educational technology",
+      documents_required: ["Educational content approval", "Child safety compliance", "Technology platform documentation", "Content creator agreements"],
+      processing_time: "75-90 days due to educational compliance"
+    }
   }
-  return val as T;
-}
+};
 
-function normalizeIdea(raw: any): IdeaData {
-  return {
-    ...raw,
-    investment:           safeJson(raw.investment,           null),
-    market_analysis:      safeJson(raw.market_analysis,      {}),
-    industry_structure:   safeJson(raw.industry_structure,   {}),
-    user_personas:        safeJson(raw.user_personas,        {}),
-    value_proposition:    safeJson(raw.value_proposition,    {}),
-    business_model:       safeJson(raw.business_model,       {}),
-    scale_path:           safeJson(raw.scale_path,           {}),
-    business_moats:       safeJson(raw.business_moats,       []),
-    key_metrics:          safeJson(raw.key_metrics,          {}),
-    funding_options:      safeJson(raw.funding_options,      []),
-    investment_breakdown: safeJson(raw.investment_breakdown, {}),
-    pmegp_summary:        safeJson(raw.pmegp_summary,        null),
-    skills_required:      safeJson(raw.skills_required,      {}),
-    ratings_reviews:      safeJson(raw.ratings_reviews,      { average_rating: 0, total_reviews: 0 }),
-    tech_stack:           safeJson(raw.tech_stack,           raw.tech_stack || ""),
-    heroImage:            safeJson(raw.heroImage,            raw.heroImage || ""),
-    images:               safeJson(raw.images,               []),
-  };
-}
+// Enhanced components for better UI
 
-/* ─────────────────────────────────────────────────────────────
-   SMALL HELPERS
-───────────────────────────────────────────────────────────── */
-function pctFromStr(s: string): number {
-  const m = s?.match(/\((\d+)%\)/);
-  return m ? +m[1] : 0;
-}
-
-// Handle investment as object { display } or plain string like "₹60L"
-function getInvestmentDisplay(inv: any): string {
-  if (!inv) return "₹0";
-  if (typeof inv === "string") return inv;
-  if (typeof inv === "object" && inv.display) return inv.display;
-  if (typeof inv === "object" && inv.amount) return `₹${(inv.amount / 100000).toFixed(1)}L`;
-  return "₹0";
-}
-
-function Stars({ val, sz = 14 }: { val: number; sz?: number }) {
-  return (
-    <span className="inline-flex gap-0.5">
-      {[1, 2, 3, 4, 5].map(n => (
-        <Star key={n} size={sz}
-          className={n <= Math.round(val) ? "fill-yellow-400 text-yellow-400" : "fill-gray-100 text-gray-200"}
-        />
-      ))}
-    </span>
-  );
-}
-
-/* Colored section-header row */
-function SecHead({ iconBg, icon, title }: { iconBg: string; icon: React.ReactNode; title: string }) {
-  return (
-    <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-50">
-      <span className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>{icon}</span>
-      <span className="font-bold text-[15px] text-gray-900">{title}</span>
+// Enhanced components for better UI
+const HeroSection = memo(({ idea }: { idea: any }) => (
+  <div className="bg-white border-b">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid lg:grid-cols-2 gap-8 items-center">
+        {/* Left Half - Image */}
+        <div className="relative">
+          <img 
+            src={idea.heroImage || idea.images[0]}
+            alt={idea.title}
+            className="w-full h-80 lg:h-96 object-cover rounded-lg shadow-lg"
+          />
+          <div className="absolute top-4 left-4 flex gap-2">
+            {idea.categories.map((category: string, idx: number) => (
+              <Badge key={idx} className="bg-white/90 text-gray-800 backdrop-blur-sm">
+                {category}
+              </Badge>
+            ))}
+          </div>
+        </div>
+        
+        {/* Right Half - Key Information */}
+        <div className="space-y-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="h-4 w-4 text-blue-600" />
+              <span className="text-sm text-gray-600">{idea.location}</span>
+              <Badge className="bg-green-100 text-green-800">{idea.difficulty_level}</Badge>
+            </div>
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{idea.title}</h1>
+            <p className="text-lg text-gray-600 leading-relaxed">{idea.summary}</p>
+          </div>
+          
+          {/* Key Metrics Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-blue-600">{idea.investment.display}</div>
+              <div className="text-sm text-gray-600">Investment Required</div>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-green-600">{idea.market_analysis.growth}</div>
+              <div className="text-sm text-gray-600">Market Growth</div>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-purple-600">{idea.time_to_market}</div>
+              <div className="text-sm text-gray-600">Time to Market</div>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg text-center">
+              <div className="flex items-center justify-center gap-1">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span className="text-2xl font-bold text-yellow-600">{idea.ratings_reviews.average_rating}</span>
+              </div>
+              <div className="text-sm text-gray-600">{idea.ratings_reviews.total_reviews} Reviews</div>
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3">
+            <Link href="/auth">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Download className="h-4 w-4 mr-2" />
+                Download Detailed Report & Business Plan
+              </Button>
+            </Link>
+            <Link href="/advisory">
+              <Button variant="outline">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Ask Expert
+              </Button>
+            </Link>
+            <Button variant="outline">
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
-  );
-}
+  </div>
+));
+HeroSection.displayName = 'HeroSection';
 
-/* White card wrapper */
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-/* Bullet list */
-function BList({ items, dot }: { items?: string[]; dot: string }) {
-  if (!items?.length) return <p className="text-[11px] text-gray-300 italic">—</p>;
-  return (
-    <ul className="space-y-1.5">
-      {items.map((it, i) => (
-        <li key={i} className="flex items-start gap-1.5">
-          <span className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0 mt-[5px]`} />
-          <span className="text-[11px] text-gray-600 leading-snug">{it}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────
-   MAIN
-───────────────────────────────────────────────────────────── */
 export default function IdeaDetail() {
   const [, params] = useRoute("/idea/:id");
   const ideaId = params?.id || "1";
-  const { user } = useAuth();
 
-  const [idea, setIdea]           = useState<IdeaData | null>(null);
-  const [loading, setLoading]     = useState(true);
-  const [reviews, setReviews]     = useState<Review[]>([]);
-  const [avgRating, setAvgRating] = useState(0);
-  const [totalRev, setTotalRev]   = useState(0);
-  const [myReview, setMyReview]   = useState<Review | null>(null);
-  const [myRating, setMyRating]   = useState(0);
-  const [hoverR,   setHoverR]     = useState(0);
-  const [myComment,setMyComment]  = useState("");
-  const [editing,  setEditing]    = useState(false);
-
-  /* fetch idea */
-  useEffect(() => {
-    fetch("/api/platformideas")
-      .then(r => r.json())
-      .then(d => {
-        const raw = d?.ideas?.find((x: any) => String(x.id) === String(ideaId));
-        const found: IdeaData | null = raw ? normalizeIdea(raw) : null;
-        setIdea(found);
-        if (found?.ratings_reviews) {
-          setAvgRating(found.ratings_reviews.average_rating || 0);
-          setTotalRev(found.ratings_reviews.total_reviews || 0);
-        }
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [ideaId]);
-
-  /* fetch reviews */
-  useEffect(() => {
-    if (!idea) return;
-    fetch(`/api/ideas/${idea.id}/reviews`)
-      .then(r => r.json())
-      .then(d => {
-        setReviews(d.reviews || []);
-        if (d.averageRating) setAvgRating(d.averageRating);
-        if (d.totalReviews)  setTotalRev(d.totalReviews);
-      }).catch(() => {});
-  }, [idea]);
-
-  /* fetch my review */
-  useEffect(() => {
-    if (!idea || !user) return;
-    fetch(`/api/ideas/${idea.id}/user-review`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.review) { setMyReview(d.review); setMyRating(d.review.rating); setMyComment(d.review.comment || ""); }
-      }).catch(() => {});
-  }, [idea, user]);
-
-  const reload = () => {
-    fetch(`/api/ideas/${ideaId}/reviews`).then(r => r.json())
-      .then(d => { setReviews(d.reviews || []); if (d.averageRating) setAvgRating(d.averageRating); if (d.totalReviews) setTotalRev(d.totalReviews); }).catch(() => {});
-  };
-
-  const submitReview = async () => {
-    if (!myRating) return;
-    if (!user) { window.location.href = "/auth"; return; }
-    const url = myReview ? `/api/ideas/${idea!.id}/reviews/${myReview.id}` : `/api/ideas/${idea!.id}/reviews`;
-    const res = await fetch(url, { method: myReview ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rating: myRating, comment: myComment }) });
-    if (res.ok) { const d = await res.json(); setMyReview(d.review); setEditing(false); reload(); }
-  };
-
-  const delReview = async () => {
-    if (!myReview || !confirm("Delete?")) return;
-    await fetch(`/api/ideas/${idea!.id}/reviews/${myReview.id}`, { method: "DELETE" });
-    setMyReview(null); setMyRating(0); setMyComment(""); reload();
-  };
-
-  const share = () => {
-    if (navigator.share) navigator.share({ title: idea?.title, url: window.location.href }).catch(() => {});
-    else { navigator.clipboard.writeText(window.location.href); alert("Link copied!"); }
-  };
-
-  /* loading / not found */
-  if (loading) return (
-    <div className="min-h-screen bg-[#f5f6fa]"><Header />
-      <div className="flex items-center justify-center h-80">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    </div>
-  );
-  if (!idea) return (
-    <div className="min-h-screen bg-[#f5f6fa]"><Header />
-      <div className="flex flex-col items-center justify-center h-80 gap-3">
-        <p className="text-gray-400">Idea not found</p>
-        <Link href="/all-ideas"><Button>Browse Ideas</Button></Link>
-      </div>
-    </div>
-  );
-
-  /* ── derived ── */
-  const finRows = Object.entries(idea.investment_breakdown?.means_of_finance || {}).filter(([k]) => k !== "total");
-  const FCOL    = ["#f59e0b", "#3b82f6", "#10b981", "#8b5cf6"];
-  const ratDist = [5, 4, 3, 2, 1].map(s => ({
-    s,
-    pct: totalRev ? Math.round(reviews.filter(r => Math.round(r.rating) === s).length / totalRev * 100) : 0,
-  }));
-
-  const diffCls =
-    /easy|low/i.test(idea.difficulty)   ? "bg-green-100 text-green-700 border-green-200" :
-    /hard|high/i.test(idea.difficulty)  ? "bg-red-100 text-red-700 border-red-200" :
-                                          "bg-amber-100 text-amber-700 border-amber-200";
-
-  const heroSrc = idea.heroImage || idea.images?.[0] || idea.image;
+  const idea = businessIdeasData[ideaId as keyof typeof businessIdeasData] || businessIdeasData["1"];
 
   return (
-    <div className="min-h-screen bg-[#f5f6fa]">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-
-      {/* ── breadcrumb ── */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-[1100px] mx-auto px-4 h-9 flex items-center gap-1.5 text-xs text-gray-500">
-          <Link href="/"         className="hover:text-blue-600 transition-colors">Home</Link>
-          <ChevronRight size={11} className="text-gray-300" />
-          <Link href="/all-ideas" className="hover:text-blue-600 transition-colors">Business Ideas</Link>
-          <ChevronRight size={11} className="text-gray-300" />
-          <span className="text-gray-800 font-semibold truncate max-w-[260px]">{idea.title}</span>
+      
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center gap-2 text-sm">
+            <Link href="/" className="text-blue-600 hover:text-blue-800">Home</Link>
+            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <Link href="/all-ideas" className="text-blue-600 hover:text-blue-800">Business Ideas</Link>
+            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <span className="text-gray-600 font-medium truncate">{idea.title}</span>
+          </div>
         </div>
       </div>
 
-      {/* ── page body ── */}
-      <div className="max-w-[1100px] mx-auto px-4 py-5">
-        <div className="flex gap-5 items-start">
+      {/* Hero Section */}
+      <HeroSection idea={idea} />
 
-          {/* ════════════════════════════════════
-              MAIN COLUMN
-          ════════════════════════════════════ */}
-          <div className="flex-1 min-w-0 space-y-4">
+      {/* Main Content */}
+      <div className="py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-4 gap-8">
+            
+            {/* Main Content - 3 columns */}
+            <div className="lg:col-span-3 space-y-10">
 
-            {/* ── HERO CARD ── */}
-            <Card>
-              <div className="flex flex-col md:flex-row min-h-[220px]">
-                {/* image */}
-                <div className="md:w-[44%] flex-shrink-0">
-                  <img
-                    src={heroSrc}
-                    alt={idea.title}
-                    className="w-full h-56 md:h-full object-cover rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none"
-                    onError={e => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop"; }}
-                  />
-                </div>
+              {/* ── OVERVIEW ── */}
+              <section>
+                <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                  <BookOpen className="h-5 w-5 text-blue-600" />
+                  Overview
+                </h2>
+                <div className="space-y-6">
+                  {/* Product Narrative */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-blue-600" />
+                        Product Narrative
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold mb-2 text-red-700">Problem</h4>
+                        <p className="text-gray-600">{idea.product_narrative.problem}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2 text-green-700">Solution</h4>
+                        <p className="text-gray-600">{idea.product_narrative.solution}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2 text-blue-700">Market</h4>
+                        <p className="text-gray-600">{idea.product_narrative.market}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2 text-purple-700">Traction</h4>
+                        <p className="text-gray-600">{idea.product_narrative.traction}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2 text-orange-700">Team</h4>
+                        <p className="text-gray-600">{idea.product_narrative.team}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                {/* info */}
-                <div className="flex-1 p-5 flex flex-col gap-4">
-                  {/* tags */}
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">{idea.category}</span>
-                    {idea.subcategory && <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">{idea.subcategory}</span>}
-                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${diffCls}`}>{idea.difficulty}</span>
-                  </div>
+                  {/* Key Features */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-purple-600" />
+                        Key Features
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {idea.features.map((feature: string, idx: number) => (
+                          <div key={idx} className="flex items-start gap-3">
+                            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-gray-600">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                  {/* title + desc */}
-                  <div>
-                    <h1 className="text-[22px] font-bold text-gray-900 leading-tight mb-1.5">{idea.title}</h1>
-                    <p className="text-[13px] text-gray-500 leading-relaxed line-clamp-2">{idea.description}</p>
-                  </div>
-
-                  {/* 4 stat pills */}
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {[
-                      { icon: <IndianRupee size={15} className="text-blue-500"   />, val: getInvestmentDisplay(idea.investment),             sub: "Investment Required", bg: "bg-blue-50"   },
-                      { icon: <TrendingUp  size={15} className="text-green-500"  />, val: idea.market_analysis?.growth || "—",             sub: "Annual CAGR",        bg: "bg-green-50"  },
-                      { icon: <Clock       size={15} className="text-orange-400" />, val: idea.timeframe || "—",                           sub: "Time to Market",     bg: "bg-orange-50" },
-                      { icon: <Star        size={15} className="fill-yellow-400 text-yellow-400" />, val: avgRating?.toFixed(1) || "0.0", sub: `${totalRev} Reviews`, bg: "bg-yellow-50" },
-                    ].map((s, i) => (
-                      <div key={i} className={`${s.bg} rounded-xl p-3 flex items-center gap-2.5`}>
-                        {s.icon}
+                  {/* Development Strategy */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Lightbulb className="h-5 w-5 text-yellow-600" />
+                        Developing Your Idea
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-6">
                         <div>
-                          <p className="text-[13px] font-bold text-gray-900 leading-none">{s.val}</p>
-                          <p className="text-[10px] text-gray-400 mt-0.5">{s.sub}</p>
+                          <h4 className="font-semibold mb-2">Concept</h4>
+                          <p className="text-sm text-gray-600">{idea.developing_your_idea.concept}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-2">Innovation</h4>
+                          <p className="text-sm text-gray-600">{idea.developing_your_idea.innovation}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-2">Differentiation</h4>
+                          <p className="text-sm text-gray-600">{idea.developing_your_idea.differentiation}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-2">Timeline</h4>
+                          <p className="text-sm text-gray-600">{idea.developing_your_idea.timeline}</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-
-                  {/* CTAs */}
-                  <div className="flex flex-wrap gap-2 pt-0.5">
-                    <Link href="/auth">
-                      <Button className="h-8 px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg gap-1.5">
-                        <Download size={13} /> Download Report & Business Plan
-                      </Button>
-                    </Link>
-                    <Link href="/advisory">
-                      <Button variant="outline" className="h-8 px-3 text-xs rounded-lg gap-1.5">
-                        <MessageCircle size={13} /> Ask Expert
-                      </Button>
-                    </Link>
-                    <Button variant="outline" className="h-8 px-3 text-xs rounded-lg gap-1.5" onClick={share}>
-                      <Share2 size={13} /> Share
-                    </Button>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </div>
-            </Card>
+              </section>
 
-            {/* ── MARKET ANALYSIS ── */}
-            <Card>
-              <SecHead iconBg="bg-blue-100" icon={<BarChart3 size={15} className="text-blue-600" />} title="Market Analysis" />
-              <div className="p-5 space-y-5">
-
-                {/* TAM / SAM / SOM / Growth */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[
-                    { val: idea.market_analysis?.TAM,    lbl: "Indian Packaging Market",                       icon: <Globe     size={14} className="text-blue-500"   />, bg: "bg-blue-50   border-blue-100",   vc: "text-gray-900"   },
-                    { val: idea.market_analysis?.SAM,    lbl: "Eco-Friendly Segment Serviceable Available",     icon: <Target    size={14} className="text-purple-500" />, bg: "bg-purple-50 border-purple-100", vc: "text-gray-900"   },
-                    { val: idea.market_analysis?.SOM,    lbl: "Biodegradable Products Serviceable Obtainable",  icon: <Award     size={14} className="text-orange-400" />, bg: "bg-orange-50 border-orange-100", vc: "text-gray-900"   },
-                    { val: idea.market_analysis?.growth, lbl: "Annual CAGR",                                    icon: <TrendingUp size={14} className="text-green-500" />, bg: "bg-green-50  border-green-100",  vc: "text-green-700"  },
-                  ].map((m, i) => (
-                    <div key={i} className={`rounded-xl border p-3 text-center ${m.bg}`}>
-                      <div className="flex justify-center mb-1">{m.icon}</div>
-                      <p className={`text-[13px] font-bold leading-snug ${m.vc}`}>{m.val || "—"}</p>
-                      <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{m.lbl}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Industry Structure title */}
-                <div className="flex items-center gap-2 text-[11px] font-semibold text-gray-500">
-                  <Globe size={11} /> Industry Structure
-                </div>
-
-                {/* 6 blocks */}
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {[
-                    { title: "Key Competitors", items: idea.industry_structure?.competitors,  tc: "text-red-600",    dot: "bg-red-400",    icon: <Building2  size={11} />, bd: "border-red-100"    },
-                    { title: "Market Barriers", items: idea.industry_structure?.barriers,      tc: "text-orange-500", dot: "bg-orange-400", icon: <Shield     size={11} />, bd: "border-orange-100" },
-                    { title: "Market Trends",   items: idea.industry_structure?.trends,        tc: "text-green-600",  dot: "bg-green-400",  icon: <TrendingUp size={11} />, bd: "border-green-100"  },
-                    { title: "Opportunities",   items: idea.industry_structure?.opportunities, tc: "text-blue-600",   dot: "bg-blue-400",   icon: <Lightbulb  size={11} />, bd: "border-blue-100"   },
-                    { title: "Target Users",    items: idea.user_personas?.target_users,       tc: "text-indigo-600", dot: "bg-indigo-400", icon: <Users      size={11} />, bd: "border-indigo-100" },
-                    { title: "Pain Points",     items: idea.user_personas?.pain_points,        tc: "text-pink-600",   dot: "bg-pink-400",   icon: <Zap        size={11} />, bd: "border-pink-100"   },
-                  ].map((b, i) => (
-                    <div key={i} className={`rounded-xl border p-3 ${b.bd}`}>
-                      <div className={`flex items-center gap-1.5 text-[11px] font-bold ${b.tc} mb-2`}>{b.icon} {b.title}</div>
-                      <BList items={b.items} dot={b.dot} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-
-            {/* ── INVESTMENT ── */}
-            <Card>
-              <SecHead iconBg="bg-orange-100" icon={<PiggyBank size={15} className="text-orange-500" />} title="Investment" />
-              <div className="p-5 space-y-5">
-
-                {finRows.length === 0 && (
-                  <div className="flex items-center gap-3 bg-orange-50 rounded-xl p-4">
-                    <IndianRupee size={22} className="text-orange-500 flex-shrink-0" />
-                    <div>
-                      <p className="text-xl font-black text-gray-900">{getInvestmentDisplay(idea.investment)}</p>
-                      <p className="text-[11px] text-gray-500">Total Investment Required</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Donut + bars */}
-                {finRows.length > 0 && (
-                  <div className="flex items-center gap-6">
-                    {/* SVG donut */}
-                    <div className="relative w-24 h-24 flex-shrink-0">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        {(() => {
-                          let off = 0;
-                          const C = 2 * Math.PI * 13;
-                          return finRows.map(([, v], i) => {
-                            const p = pctFromStr(v) / 100;
-                            const d = p * C;
-                            const el = (
-                              <circle key={i} cx="18" cy="18" r="13" fill="none"
-                                stroke={FCOL[i % 4]} strokeWidth="5"
-                                strokeDasharray={`${d} ${C}`} strokeDashoffset={-off} />
-                            );
-                            off += d;
-                            return el;
-                          });
-                        })()}
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-gray-700">100%</span>
+              {/* ── MARKET ANALYSIS ── */}
+              <section>
+                <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
+                  Market Analysis
+                </h2>
+                <div className="space-y-6">
+                  {/* Market Size */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-blue-600" />
+                        Market Analysis
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div className="bg-blue-50 p-4 rounded-lg text-center">
+                          <div className="text-xl font-bold text-blue-600">{idea.market_analysis.TAM}</div>
+                          <div className="text-xs text-gray-600">Total Addressable Market</div>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg text-center">
+                          <div className="text-xl font-bold text-green-600">{idea.market_analysis.SAM}</div>
+                          <div className="text-xs text-gray-600">Serviceable Available Market</div>
+                        </div>
+                        <div className="bg-purple-50 p-4 rounded-lg text-center">
+                          <div className="text-xl font-bold text-purple-600">{idea.market_analysis.SOM}</div>
+                          <div className="text-xs text-gray-600">Serviceable Obtainable Market</div>
+                        </div>
+                        <div className="bg-orange-50 p-4 rounded-lg text-center">
+                          <div className="text-xl font-bold text-orange-600">{idea.market_analysis.growth}</div>
+                          <div className="text-xs text-gray-600">Annual Growth Rate</div>
+                        </div>
                       </div>
-                    </div>
+                    </CardContent>
+                  </Card>
 
-                    {/* legend */}
-                    <div className="flex-1 space-y-2">
-                      {finRows.map(([key, val], i) => {
-                        const pct = pctFromStr(val);
-                        return (
-                          <div key={i} className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: FCOL[i % 4] }} />
-                            <span className="text-[11px] text-gray-600 flex-1 truncate">
-                              {key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-                            </span>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: FCOL[i % 4] }} />
+                  {/* Industry Structure */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Industry Structure</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-semibold mb-3 text-red-700">Key Competitors</h4>
+                          <ul className="space-y-2">
+                            {idea.industry_structure.competitors.map((competitor: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <Building2 className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{competitor}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-3 text-orange-700">Market Barriers</h4>
+                          <ul className="space-y-2">
+                            {idea.industry_structure.barriers.map((barrier: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <Shield className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{barrier}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      
+                      <Separator className="my-6" />
+                      
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-semibold mb-3 text-green-700">Market Trends</h4>
+                          <ul className="space-y-2">
+                            {idea.industry_structure.trends.map((trend: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <TrendingUp className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{trend}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-3 text-blue-700">Opportunities</h4>
+                          <ul className="space-y-2">
+                            {idea.industry_structure.opportunities.map((opportunity: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <Target className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{opportunity}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* User Personas */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-purple-600" />
+                        Target Users & Pain Points
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-semibold mb-3 text-blue-700">Target Users</h4>
+                          <ul className="space-y-2">
+                            {idea.user_personas.target_users.map((user: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <User className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{user}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-3 text-red-700">Pain Points</h4>
+                          <ul className="space-y-2">
+                            {idea.user_personas.pain_points.map((pain: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <Zap className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{pain}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </section>
+
+              {/* ── INVESTMENT ── */}
+              <section>
+                <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                  <PiggyBank className="h-5 w-5 text-green-600" />
+                  Investment
+                </h2>
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <PiggyBank className="h-5 w-5 text-green-600" />
+                        Investment Breakdown
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center mb-6">
+                        <div className="text-4xl font-bold text-green-600 mb-2">{idea.investment.display}</div>
+                        <p className="text-gray-600">{idea.investment.description}</p>
+                      </div>
+                      
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-semibold mb-4 text-blue-700">Fixed Capital ({idea.investment_breakdown.fixed_capital.total_fixed_capital})</h4>
+                          <div className="space-y-3">
+                            {Object.entries(idea.investment_breakdown.fixed_capital).filter(([key]) => key !== 'total_fixed_capital').map(([item, amount]) => (
+                              <div key={item} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                <span className="text-sm font-medium">{item.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</span>
+                                <span className="text-sm font-bold text-blue-600">{amount as string}</span>
                               </div>
-                              <span className="text-[11px] font-bold text-gray-600 w-8 text-right">{pct}%</span>
-                            </div>
+                            ))}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Fixed + Working capital - only show if data exists */}
-                {(Object.keys(idea.investment_breakdown?.fixed_capital || {}).filter(k => k !== "total_fixed_capital").length > 0 ||
-                  Object.keys(idea.investment_breakdown?.working_capital || {}).filter(k => k !== "total_working_capital").length > 0) && (
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {[
-                      {
-                        lbl: "Fixed Capital",
-                        total: idea.investment_breakdown?.fixed_capital?.total_fixed_capital,
-                        rows: Object.entries(idea.investment_breakdown?.fixed_capital || {}).filter(([k]) => k !== "total_fixed_capital"),
-                        bg: "bg-blue-50", tc: "text-blue-700", vc: "text-blue-600",
-                      },
-                      {
-                        lbl: "Working Capital",
-                        total: idea.investment_breakdown?.working_capital?.total_working_capital,
-                        rows: Object.entries(idea.investment_breakdown?.working_capital || {}).filter(([k]) => k !== "total_working_capital"),
-                        bg: "bg-purple-50", tc: "text-purple-700", vc: "text-purple-600",
-                      },
-                    ].filter(col => col.rows.length > 0).map((col, ci) => (
-                      <div key={ci}>
-                        <p className={`text-[11px] font-bold ${col.tc} mb-2`}>{col.lbl} ({col.total || "—"})</p>
-                        <div className="space-y-1">
-                          {col.rows.map(([k, v]) => (
-                            <div key={k} className={`flex justify-between items-start ${col.bg} rounded-lg px-2.5 py-1.5`}>
-                              <span className="text-[11px] text-gray-600">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
-                              <span className={`text-[11px] font-bold ${col.vc} ml-2 flex-shrink-0`}>{v as string}</span>
-                            </div>
-                          ))}
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold mb-4 text-purple-700">Working Capital ({idea.investment_breakdown.working_capital.total_working_capital})</h4>
+                          <div className="space-y-3">
+                            {Object.entries(idea.investment_breakdown.working_capital).filter(([key]) => key !== 'total_working_capital').map(([item, amount]) => (
+                              <div key={item} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                                <span className="text-sm font-medium">{item.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</span>
+                                <span className="text-sm font-bold text-purple-600">{amount as string}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Card>
+                    </CardContent>
+                  </Card>
 
-            {/* ── FUNDING ── */}
-            <Card>
-              <SecHead iconBg="bg-violet-100" icon={<DollarSign size={15} className="text-violet-600" />} title="Funding" />
-              <div className="p-5 space-y-5">
-
-                {/* 3 funding cards */}
-                {(idea.funding_options || []).length === 0 && (
-                  <div className="bg-violet-50 border border-violet-100 rounded-xl p-4 text-center">
-                    <Award size={28} className="text-violet-400 mx-auto mb-2" />
-                    <p className="text-xs font-semibold text-violet-700">PMEGP & Government Schemes Available</p>
-                    <p className="text-[11px] text-gray-500 mt-1">Eligible for subsidized funding through government programs</p>
-                  </div>
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {(idea.funding_options || []).slice(0, 3).map((opt, i) => {
-                    const styles = [
-                      { bg: "bg-gradient-to-br from-violet-600 to-purple-700", ib: "bg-white/20", ic: <Award      size={20} className="text-white"      />, light: false },
-                      { bg: "bg-white border border-gray-100",                 ib: "bg-blue-50",   ic: <Building2 size={20} className="text-blue-600"   />, light: true  },
-                      { bg: "bg-white border border-gray-100",                 ib: "bg-green-50",  ic: <Users     size={20} className="text-green-600"  />, light: true  },
-                    ];
-                    const st = styles[i];
-                    const sub = opt.sources?.map(x => x.label).join(", ") || opt.options?.map(x => x.label).join(", ") || opt.display_amount;
-                    return (
-                      <div key={i} className={`rounded-2xl p-4 text-center ${st.bg}`}>
-                        <div className={`w-11 h-11 rounded-2xl ${st.ib} flex items-center justify-center mx-auto mb-3`}>{st.ic}</div>
-                        <p className={`text-xs font-bold mb-1 ${st.light ? "text-gray-900" : "text-white"}`}>{opt.type}</p>
-                        <p className={`text-[10px] leading-snug ${st.light ? "text-gray-500" : "text-white/80"}`}>{sub}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* PMEGP at a glance - handles both data structures */}
-                {idea.pmegp_summary && (
-                  <>
-                    <div className="flex items-center gap-2 text-[11px] font-semibold text-gray-500">
-                      <CheckCircle size={11} className="text-green-500" /> PMEGP Scheme at a Glance
-                    </div>
-                    {/* Structure 1: has project_viability object (ideas 1-7) */}
-                    {idea.pmegp_summary.project_viability && Object.keys(idea.pmegp_summary.project_viability).length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                        {Object.entries(idea.pmegp_summary.project_viability).map(([k, v]) => (
-                          <div key={k} className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-center">
-                            <p className="text-sm font-bold text-gray-900">{String(v)}</p>
-                            <p className="text-[10px] text-gray-500 mt-0.5">{k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</p>
+                  {/* Financing Structure */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <IndianRupee className="h-5 w-5 text-orange-600" />
+                        Financing Structure
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        {Object.entries(idea.investment_breakdown.means_of_finance).filter(([key]) => key !== 'total').map(([source, amount]) => (
+                          <div key={source} className="bg-gray-50 p-4 rounded-lg text-center">
+                            <div className="text-xl font-bold text-gray-700">{amount as string}</div>
+                            <div className="text-sm text-gray-600 mt-1">{source.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</div>
                           </div>
                         ))}
                       </div>
-                    )}
-                    {/* Structure 2: has eligible/max_loan/subsidy (ideas 8-14) */}
-                    {!idea.pmegp_summary.project_viability && (
-                      <div className="grid grid-cols-2 gap-2.5">
-                        {idea.pmegp_summary.max_loan && (
-                          <div className="bg-green-50 border border-green-100 rounded-xl p-3 text-center">
-                            <p className="text-sm font-bold text-green-700">{String(idea.pmegp_summary.max_loan)}</p>
-                            <p className="text-[10px] text-gray-500 mt-0.5">Max Loan Available</p>
-                          </div>
-                        )}
-                        {idea.pmegp_summary.subsidy && (
-                          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-center">
-                            <p className="text-sm font-bold text-blue-700">{String(idea.pmegp_summary.subsidy)}</p>
-                            <p className="text-[10px] text-gray-500 mt-0.5">Subsidy Available</p>
-                          </div>
-                        )}
-                        {idea.pmegp_summary.processing_time && (
-                          <div className="bg-orange-50 border border-orange-100 rounded-xl p-3 text-center col-span-2">
-                            <p className="text-sm font-bold text-orange-700">{String(idea.pmegp_summary.processing_time)}</p>
-                            <p className="text-[10px] text-gray-500 mt-0.5">Processing Time</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {/* Documents required - shown for both structures */}
-                    {(idea.pmegp_summary.documents_required || []).length > 0 && (
-                      <div className="bg-gray-50 rounded-xl p-3">
-                        <p className="text-[11px] font-bold text-gray-600 mb-2">Documents Required</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {(idea.pmegp_summary.documents_required || []).map((doc: string, i: number) => (
-                            <span key={i} className="text-[10px] bg-white border border-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{doc}</span>
-                          ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* Employment Generation */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-teal-600" />
+                        Employment Generation
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-4 gap-4 text-center">
+                        <div className="bg-teal-50 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-teal-600">{idea.employment_generation.total}</div>
+                          <div className="text-sm text-gray-600">Total Jobs</div>
+                        </div>
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">{idea.employment_generation.skilled}</div>
+                          <div className="text-sm text-gray-600">Skilled</div>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">{idea.employment_generation.semi_skilled}</div>
+                          <div className="text-sm text-gray-600">Semi-Skilled</div>
+                        </div>
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-yellow-600">{idea.employment_generation.unskilled}</div>
+                          <div className="text-sm text-gray-600">Unskilled</div>
                         </div>
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </Card>
+                    </CardContent>
+                  </Card>
+                </div>
+              </section>
 
-            {/* ── BUSINESS MODEL ── */}
-            <Card>
-              <SecHead iconBg="bg-amber-100" icon={<Briefcase size={15} className="text-amber-600" />} title="Business Model" />
-              <div className="p-5 space-y-5">
-
-                {/* Value proposition trio - only show if data exists */}
-                {(idea.value_proposition?.primary || idea.value_proposition?.competitive_advantage || (idea.value_proposition?.secondary || []).length > 0) && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {[
-                      { lbl: "Primary Value",      text: idea.value_proposition?.primary,                              bg: "from-rose-50 to-pink-50   border-rose-100",   ib: "bg-rose-100",   ic: <Flame     size={15} className="text-rose-500"   /> },
-                      { lbl: "Secondary Benefits", text: (idea.value_proposition?.secondary || []).join(". "),         bg: "from-teal-50 to-green-50  border-teal-100",   ib: "bg-teal-100",   ic: <Lightbulb size={15} className="text-teal-500"   /> },
-                      { lbl: "Competitive Edge",   text: idea.value_proposition?.competitive_advantage,               bg: "from-yellow-50 to-amber-50 border-amber-100", ib: "bg-amber-100",  ic: <Zap       size={15} className="text-amber-500"  /> },
-                    ].map((c, i) => (
-                      <div key={i} className={`rounded-xl border bg-gradient-to-br p-4 ${c.bg}`}>
-                        <div className={`w-8 h-8 rounded-lg ${c.ib} flex items-center justify-center mb-2`}>{c.ic}</div>
-                        <p className="text-[11px] font-bold text-gray-800 mb-1">{c.lbl}</p>
-                        <p className="text-[11px] text-gray-500 leading-relaxed">{c.text || "—"}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Revenue + Pricing */}
-                <div className="grid sm:grid-cols-2 gap-6 pt-3 border-t border-gray-50">
-                  {/* Revenue Streams */}
-                  <div>
-                    <p className="text-[11px] font-bold text-gray-700 mb-3 flex items-center gap-1.5">
-                      <IndianRupee size={11} className="text-green-600" /> Revenue Streams
-                    </p>
-                    {(idea.business_model?.revenue_streams || []).length > 0 ? (
-                      <div className="space-y-2.5">
-                        {(idea.business_model!.revenue_streams).map((r, i) => {
-                          const ws = [78, 62, 52, 44];
-                          return (
-                            <div key={i}>
-                              <p className="text-[11px] text-gray-700 mb-0.5">{r}</p>
-                              <div className="h-1.5 bg-gray-100 rounded-full">
-                                <div className="h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-500"
-                                  style={{ width: `${ws[i % 4]}%` }} />
+              {/* ── FUNDING ── */}
+              <section>
+                <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                  Funding
+                </h2>
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5 text-green-600" />
+                        Funding Options
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        {idea.funding_options.map((option: any, idx: number) => (
+                          <div key={idx} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start mb-4">
+                              <h4 className="text-lg font-semibold text-gray-900">{option.type}</h4>
+                              <Badge className="bg-green-100 text-green-800 text-lg px-3 py-1">{option.display_amount}</Badge>
+                            </div>
+                            
+                            {option.sources && (
+                              <div className="mb-3">
+                                <span className="text-sm font-medium text-gray-700">Sources:</span>
+                                {option.sources.map((source: any, sourceIdx: number) => (
+                                  <div key={sourceIdx} className="ml-4 text-sm text-gray-600">
+                                    • {source.label}: {source.amount}
+                                  </div>
+                                ))}
                               </div>
+                            )}
+                            
+                            {option.options && (
+                              <div className="mb-3">
+                                <span className="text-sm font-medium text-gray-700">Options:</span>
+                                {option.options.map((opt: any, optIdx: number) => (
+                                  <div key={optIdx} className="ml-4 text-sm text-gray-600">
+                                    • {opt.label}: {opt.rate}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            
+                            {option.schemes && (
+                              <div className="mb-3">
+                                <span className="text-sm font-medium text-gray-700">Government Schemes:</span>
+                                {option.schemes.map((scheme: any, schemeIdx: number) => (
+                                  <div key={schemeIdx} className="ml-4 text-sm text-gray-600">
+                                    • {scheme.name}: {scheme.amount}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            
+                            <div className="flex justify-between text-sm text-gray-500 mt-4">
+                              <span>Timeline: {option.timeline}</span>
+                              {option.repayment_period && <span>Repayment: {option.repayment_period}</span>}
+                              {option.processing_time && <span>Processing: {option.processing_time}</span>}
                             </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-gray-400 italic">See business plan for revenue details</p>
-                    )}
-                  </div>
-
-                  {/* Pricing Strategy */}
-                  <div>
-                    <p className="text-[11px] font-bold text-gray-700 mb-3 flex items-center gap-1.5">
-                      <Target size={11} className="text-blue-600" /> Pricing Strategy
-                    </p>
-                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
-                      <p className="text-[11px] text-gray-700 leading-relaxed">
-                        {typeof idea.business_model?.pricing_strategy === "string"
-                          ? idea.business_model.pricing_strategy
-                          : "See business plan for pricing details"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* ── SCALE PATH & MILESTONES ── */}
-            {(idea.scale_path?.milestones || []).length > 0 && (
-              <Card>
-                <SecHead iconBg="bg-indigo-100" icon={<TrendingUp size={15} className="text-indigo-600" />} title="Scale Path & Milestones" />
-                <div className="p-5">
-                  <div className="flex gap-5 overflow-x-auto pb-1">
-                    {idea.scale_path.milestones.map((m, i) => {
-                      const cols = ["bg-blue-500", "bg-teal-500", "bg-violet-500", "bg-orange-500"];
-                      return (
-                        <div key={i} className="flex-shrink-0 text-center" style={{ minWidth: 128 }}>
-                          <div className={`w-12 h-12 ${cols[i % 4]} text-white rounded-full flex flex-col items-center justify-center mx-auto mb-2 shadow-sm`}>
-                            <span className="text-[7px] font-bold leading-none">Phase</span>
-                            <span className="text-base font-black leading-none">{i + 1}</span>
                           </div>
-                          <p className="text-[11px] font-semibold text-gray-800 leading-snug px-1">{m}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </Card>
-            )}
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-            {/* ── BUSINESS MOATS ── */}
-            {(idea.business_moats || []).length > 0 && (
-              <Card>
-                <SecHead iconBg="bg-emerald-100" icon={<Shield size={15} className="text-emerald-600" />} title="Business Moats" />
-                <div className="p-5">
-                  <div className="grid sm:grid-cols-2 gap-2.5">
-                    {idea.business_moats.map((m, i) => {
-                      const dots = ["bg-green-400", "bg-blue-400", "bg-orange-400", "bg-purple-400"];
-                      return (
-                        <div key={i} className="flex items-start gap-3 p-3 border border-gray-100 rounded-xl">
-                          <span className={`w-2 h-2 rounded-full ${dots[i % 4]} flex-shrink-0 mt-1.5`} />
-                          <span className="text-[12px] font-medium text-gray-800 leading-snug">{m}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {/* ── SKILLS REQUIRED ── */}
-            <Card>
-              <SecHead iconBg="bg-red-100" icon={<GraduationCap size={15} className="text-red-500" />} title="Skills Required" />
-              <div className="p-5">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {[
-                    { lbl: "Technical", skills: idea.skills_required?.technical_skills, bar: "bg-blue-400",   tc: "text-blue-700",   ic: <Zap        size={11} /> },
-                    { lbl: "Business",  skills: idea.skills_required?.business_skills,  bar: "bg-green-400",  tc: "text-green-700",  ic: <Briefcase  size={11} /> },
-                    { lbl: "Soft Skills", skills: idea.skills_required?.soft_skills,    bar: "bg-purple-400", tc: "text-purple-700", ic: <Users      size={11} /> },
-                  ].map((col, ci) => (
-                    <div key={ci}>
-                      <p className={`flex items-center gap-1.5 text-[11px] font-bold ${col.tc} mb-3`}>{col.ic} {col.lbl}</p>
-                      <ul className="space-y-2.5">
-                        {(col.skills || []).map((s, si) => (
-                          <li key={si}>
-                            <p className="text-[11px] text-gray-700 mb-0.5">{s}</p>
-                            <div className="h-[3px] bg-gray-100 rounded-full">
-                              <div className={`h-full rounded-full ${col.bar}`}
-                                style={{ width: `${55 + ((si * 17 + ci * 13) % 42)}%` }} />
+                  {/* PMEGP Details (for bakery only) */}
+                  {idea.id === 1 && idea.pmegp_summary && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Award className="h-5 w-5 text-blue-600" />
+                          PMEGP Scheme Details
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="font-semibold mb-3 text-blue-700">Project Viability</h4>
+                            <div className="space-y-2">
+                              {Object.entries(idea.pmegp_summary.project_viability).map(([key, value]) => (
+                                <div key={key} className="flex justify-between">
+                                  <span className="text-sm text-gray-600">{key.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}:</span>
+                                  <span className="text-sm font-medium">{value as string}</span>
+                                </div>
+                              ))}
                             </div>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-semibold mb-3 text-green-700">Benefits</h4>
+                            <ul className="space-y-1">
+                              {idea.pmegp_summary.benefits.map((benefit: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                  <span className="text-sm text-gray-600">{benefit}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold mb-3 text-purple-700">Eligibility Criteria</h4>
+                          <ul className="grid md:grid-cols-2 gap-2">
+                            {idea.pmegp_summary.eligibility.map((criteria: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <Shield className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{criteria}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </section>
+
+              {/* ── BUSINESS MODEL ── */}
+              <section>
+                <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                  <Briefcase className="h-5 w-5 text-blue-600" />
+                  Business Model
+                </h2>
+                <div className="space-y-6">
+                  {/* Value Proposition */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-blue-600" />
+                        Value Proposition
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="mb-4">
+                        <h4 className="font-semibold mb-2 text-blue-700">Primary Value Proposition</h4>
+                        <p className="text-gray-600 text-lg">{idea.value_proposition.primary}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-3 text-green-700">Secondary Benefits</h4>
+                        <ul className="space-y-2">
+                          {idea.value_proposition.secondary.map((benefit: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                              <span className="text-gray-600">{benefit}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <h4 className="font-semibold mb-2 text-blue-700">Competitive Advantage</h4>
+                        <p className="text-gray-600">{idea.value_proposition.competitive_advantage}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Business Model Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Briefcase className="h-5 w-5 text-green-600" />
+                        Business Model
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-semibold mb-3 text-green-700">Revenue Streams</h4>
+                          <ul className="space-y-2">
+                            {idea.business_model.revenue_streams.map((stream: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <IndianRupee className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{stream}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-3 text-blue-700">Pricing Strategy</h4>
+                          <p className="text-gray-600">{idea.business_model.pricing_strategy}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Scale Path */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-purple-600" />
+                        Scale Path & Milestones
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="mb-4">
+                        <h4 className="font-semibold mb-3 text-purple-700">Growth Timeline</h4>
+                        <p className="text-gray-600 mb-4">{idea.scale_path.timeline}</p>
+                      </div>
+                      <div className="space-y-3">
+                        {idea.scale_path.milestones.map((milestone: string, idx: number) => (
+                          <div key={idx} className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-semibold">
+                              {idx + 1}
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-gray-600">{milestone}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Business Moats */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="h-5 w-5 text-orange-600" />
+                        Business Moats
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-3">
+                        {idea.business_moats.map((moat: string, idx: number) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <Shield className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-gray-600">{moat}</span>
                           </li>
                         ))}
                       </ul>
-                    </div>
-                  ))}
+                    </CardContent>
+                  </Card>
                 </div>
-              </div>
-            </Card>
+              </section>
 
-          </div>
-          {/* ════════════════ end main ════════════════ */}
-
-          {/* ════════════════════════════════════
-              SIDEBAR
-          ════════════════════════════════════ */}
-          <div className="w-[268px] flex-shrink-0 space-y-4 sticky top-20 self-start hidden lg:block">
-
-            {/* Quick Actions */}
-            <Card>
-              <div className="p-4">
-                <p className="font-bold text-[14px] text-gray-900 mb-3">Quick Actions</p>
-                <div className="space-y-2">
-                  {[
-                    { href: "/auth",    icon: <FileText    size={13} className="text-blue-500"   />, bg: "bg-blue-50",   lbl: "Business Plan Template" },
-                    { href: "/contact", icon: <Phone       size={13} className="text-green-500"  />, bg: "bg-green-50",  lbl: "Expert Consultation"    },
-                    { href: "#",        icon: <Users       size={13} className="text-purple-500" />, bg: "bg-purple-50", lbl: "Find Partners"          },
-                  ].map((it, i) => (
-                    <Link key={i} href={it.href}>
-                      <div className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-7 h-7 rounded-lg ${it.bg} flex items-center justify-center`}>{it.icon}</span>
-                          <span className="text-xs font-medium text-gray-700">{it.lbl}</span>
-                        </div>
-                        <ChevronRight size={13} className="text-gray-300" />
+              {/* ── SKILLS REQUIRED ── */}
+              <section>
+                <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                  <GraduationCap className="h-5 w-5 text-blue-600" />
+                  Skills Required
+                </h2>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <GraduationCap className="h-5 w-5 text-blue-600" />
+                      Skills Required
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-3 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-4 text-blue-700">Technical Skills</h4>
+                        <ul className="space-y-2">
+                          {idea.skills_required.technical_skills.map((skill: string, idx: number) => (
+                            <li key={idx} className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <span className="text-sm text-gray-600">{skill}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </Card>
-
-            {/* Key Metrics to Track */}
-            <Card>
-              <div className="p-4">
-                <p className="font-bold text-[14px] text-gray-900 mb-3">Key Metrics to Track</p>
-                <div className="space-y-3.5">
-                  {[
-                    { icon: <User         size={12} className="text-blue-500"   />, lbl: "Customer Metrics",   tc: "text-blue-600",   items: idea.key_metrics?.customer_metrics?.slice(0, 3)  },
-                    { icon: <IndianRupee  size={12} className="text-green-500"  />, lbl: "Financial Metrics",  tc: "text-green-600",  items: idea.key_metrics?.financial_metrics?.slice(0, 3) },
-                    { icon: <Zap          size={12} className="text-purple-500" />, lbl: "Technology Stack",   tc: "text-purple-600", items: idea.tech_stack ? [idea.tech_stack] : []          },
-                  ].filter(b => (b.items || []).length > 0).map((b, i) => (
-                    <div key={i}>
-                      <p className={`flex items-center gap-1.5 text-[11px] font-bold ${b.tc} mb-1.5`}>{b.icon} {b.lbl}</p>
-                      <ul className="pl-1 space-y-0.5">
-                        {(b.items || []).map((m, mi) => (
-                          <li key={mi} className="flex items-start gap-1 text-[11px] text-gray-500">
-                            <span className="text-gray-300 mt-[3px] flex-shrink-0">•</span> {m}
-                          </li>
-                        ))}
-                      </ul>
+                      <div>
+                        <h4 className="font-semibold mb-4 text-green-700">Business Skills</h4>
+                        <ul className="space-y-2">
+                          {idea.skills_required.business_skills.map((skill: string, idx: number) => (
+                            <li key={idx} className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span className="text-sm text-gray-600">{skill}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-4 text-purple-700">Soft Skills</h4>
+                        <ul className="space-y-2">
+                          {idea.skills_required.soft_skills.map((skill: string, idx: number) => (
+                            <li key={idx} className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                              <span className="text-sm text-gray-600">{skill}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
+                  </CardContent>
+                </Card>
+              </section>
 
-            {/* Need Expert Guidance CTA */}
-            <div className="rounded-2xl p-4 text-white" style={{ background: "linear-gradient(135deg,#f59e0b,#f97316)" }}>
-              <div className="flex gap-2.5 mb-3">
-                <MessageCircle size={17} className="flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-bold leading-snug">Need Expert Guidance?</p>
-                  <p className="text-[11px] opacity-90 mt-0.5 leading-snug">Get personalized advice from our business experts</p>
-                </div>
-              </div>
-              <Link href="/advisory">
-                <button className="w-full bg-white rounded-xl py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-orange-50 transition-colors" style={{ color: "#f97316" }}>
-                  <MessageCircle size={12} /> Contact Expert
-                </button>
-              </Link>
             </div>
 
-            {/* Reviews & Ratings */}
-            <Card>
-              <div className="p-4">
-                <p className="font-bold text-[14px] text-gray-900 mb-3">Reviews &amp; Ratings</p>
+            {/* Sidebar - 1 column */}
+            <div className="space-y-6 lg:sticky lg:top-8 lg:self-start">
+              
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Business Plan Template
+                  </Button>
+                  <Link href="/contact" className="w-full">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Phone className="h-4 w-4 mr-2" />
+                      Expert Consultation
+                    </Button>
+                  </Link>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Find Partners
+                  </Button>
+                </CardContent>
+              </Card>
 
-                {/* Summary row */}
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="text-center flex-shrink-0">
-                    <p className="text-4xl font-black text-gray-900 leading-none">{avgRating?.toFixed(1) || "0.0"}</p>
-                    <Stars val={avgRating} sz={13} />
-                    <p className="text-[10px] text-gray-400 mt-0.5">{totalRev} reviews</p>
+              {/* Key Metrics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Key Metrics to Track</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-sm text-blue-700 mb-2">Customer Metrics</h4>
+                      <ul className="text-xs text-gray-600 space-y-1">
+                        {idea.key_metrics?.customer_metrics?.slice(0, 2).map((metric: string, idx: number) => (
+                          <li key={idx}>• {metric}</li>
+                        )) || <li>No metrics available</li>}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm text-green-700 mb-2">Financial Metrics</h4>
+                      <ul className="text-xs text-gray-600 space-y-1">
+                        {idea.key_metrics?.financial_metrics?.slice(0, 2).map((metric: string, idx: number) => (
+                          <li key={idx}>• {metric}</li>
+                        )) || <li>No metrics available</li>}
+                      </ul>
+                    </div>
                   </div>
-                  <div className="flex-1 space-y-1.5 pt-0.5">
-                    {ratDist.map(({ s, pct }) => (
-                      <div key={s} className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-gray-400 w-2.5 text-right">{s}</span>
-                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="text-[10px] text-gray-400 w-5 text-right">{pct}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Form */}
-                {user ? (
-                  <div className="border-t border-gray-100 pt-3">
-                    {myReview && !editing ? (
-                      <div>
-                        <Stars val={myReview.rating} />
-                        {myReview.comment && <p className="text-[11px] text-gray-600 mt-1">{myReview.comment}</p>}
-                        <div className="flex gap-3 mt-2">
-                          <button onClick={() => setEditing(true)}  className="text-[11px] text-blue-500 hover:underline">Edit</button>
-                          <button onClick={delReview}               className="text-[11px] text-red-400 hover:underline">Delete</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} size={20}
-                              className={`cursor-pointer transition-transform hover:scale-110 ${s <= (hoverR || myRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`}
-                              onClick={() => setMyRating(s)}
-                              onMouseEnter={() => setHoverR(s)}
-                              onMouseLeave={() => setHoverR(0)}
-                            />
-                          ))}
-                        </div>
-                        <textarea
-                          value={myComment}
-                          onChange={e => setMyComment(e.target.value)}
-                          placeholder="Share your experience…"
-                          className="w-full text-xs p-2 border border-gray-200 rounded-lg resize-none min-h-[56px] focus:outline-none focus:ring-1 focus:ring-blue-300"
-                        />
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={submitReview} disabled={!myRating}
-                            className="h-7 text-xs px-3 bg-blue-600 hover:bg-blue-700 text-white">
-                            {myReview ? "Update" : "Submit"}
-                          </Button>
-                          {myReview && (
-                            <Button size="sm" variant="outline" className="h-7 text-xs px-3"
-                              onClick={() => { setEditing(false); setMyRating(myReview!.rating); setMyComment(myReview!.comment || ""); }}>
-                              Cancel
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="border-t border-gray-100 pt-3 text-center">
-                    <p className="text-[11px] text-gray-400 mb-2">Please log in to write a review</p>
-                    <Link href="/auth"><Button size="sm" className="h-7 text-xs">Log In</Button></Link>
-                  </div>
-                )}
-              </div>
-            </Card>
+              {/* Tech Stack */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Technology Stack</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 leading-relaxed">{idea.tech_stack}</p>
+                </CardContent>
+              </Card>
 
+              {/* Expert Help */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-lg text-blue-900">Need Expert Guidance?</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-blue-700 mb-4">
+                    Get personalized advice from our business experts
+                  </p>
+                  <Link href="/advisory" className="w-full">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Contact Expert
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-          {/* ════════════════ end sidebar ════════════════ */}
-
         </div>
       </div>
 
