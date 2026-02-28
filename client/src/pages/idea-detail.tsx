@@ -67,6 +67,41 @@ interface Review {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   SAFE JSON PARSER
+   DB returns some JSON columns as strings — parse them safely
+───────────────────────────────────────────────────────────── */
+function safeJson<T = any>(val: any, fallback: T): T {
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === "string") {
+    try { return JSON.parse(val) as T; } catch { return fallback; }
+  }
+  return val as T;
+}
+
+function normalizeIdea(raw: any): IdeaData {
+  return {
+    ...raw,
+    investment:           safeJson(raw.investment,           null),
+    market_analysis:      safeJson(raw.market_analysis,      {}),
+    industry_structure:   safeJson(raw.industry_structure,   {}),
+    user_personas:        safeJson(raw.user_personas,        {}),
+    value_proposition:    safeJson(raw.value_proposition,    {}),
+    business_model:       safeJson(raw.business_model,       {}),
+    scale_path:           safeJson(raw.scale_path,           {}),
+    business_moats:       safeJson(raw.business_moats,       []),
+    key_metrics:          safeJson(raw.key_metrics,          {}),
+    funding_options:      safeJson(raw.funding_options,      []),
+    investment_breakdown: safeJson(raw.investment_breakdown, {}),
+    pmegp_summary:        safeJson(raw.pmegp_summary,        null),
+    skills_required:      safeJson(raw.skills_required,      {}),
+    ratings_reviews:      safeJson(raw.ratings_reviews,      { average_rating: 0, total_reviews: 0 }),
+    tech_stack:           safeJson(raw.tech_stack,           raw.tech_stack || ""),
+    heroImage:            safeJson(raw.heroImage,            raw.heroImage || ""),
+    images:               safeJson(raw.images,               []),
+  };
+}
+
+/* ─────────────────────────────────────────────────────────────
    SMALL HELPERS
 ───────────────────────────────────────────────────────────── */
 function pctFromStr(s: string): number {
@@ -144,8 +179,9 @@ export default function IdeaDetail() {
     fetch("/api/platformideas")
       .then(r => r.json())
       .then(d => {
-        const found: IdeaData = d?.ideas?.find((x: IdeaData) => String(x.id) === String(ideaId));
-        setIdea(found || null);
+        const raw = d?.ideas?.find((x: any) => String(x.id) === String(ideaId));
+        const found: IdeaData | null = raw ? normalizeIdea(raw) : null;
+        setIdea(found);
         if (found?.ratings_reviews) {
           setAvgRating(found.ratings_reviews.average_rating || 0);
           setTotalRev(found.ratings_reviews.total_reviews || 0);
